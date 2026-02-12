@@ -1,0 +1,190 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Horarios UPB - Administración</title>
+    <link rel="stylesheet" href="admin-styles.css">
+</head>
+<body>
+    <!-- Header -->
+    <div class="header">
+        <div class="header-left">
+            <h1>HORARIOS UPB VERSION 3.0</h1>
+        </div>
+        <div class="header-right">
+            <!-- Botón Prueba -->
+            <button class="btn-prueba" onclick="toggleDropdownMenu()">Prueba</button>
+            
+            <!-- Menú Desplegable -->
+            <div class="dropdown-menu" id="dropdownMenu">
+                <div class="dropdown-header">
+                    <img src="../logo-upb.png" alt="Logo UPB" class="dropdown-logo">
+                    <span>Horarios</span>
+                    <span class="dropdown-subtitle">Menu</span>
+                </div>
+                
+                <div class="dropdown-content">
+                    <a href="#"><span class="icon">📅</span> Horarios Clases</a>
+                    <a href="#"><span class="icon">📋</span> Exámenes Parciales</a>
+                    <a href="#"><span class="icon">📋</span> Supletorios</a>
+                    <a href="#"><span class="icon">📋</span> Cursos Intersemestrales</a>
+                </div>
+                
+                <div class="dropdown-divider"></div>
+                
+                <div class="dropdown-admin">
+                    <a href="#"><span class="icon">🔍</span> Administración</a>
+                    <a href="#"><span class="icon">🔑</span> Cambiar contraseña</a>
+                    <a href="#"><span class="icon">🚪</span> Logout</a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Contenedor principal -->
+    <div class="main-container">
+        <!-- Menú lateral -->
+        <aside class="sidebar">
+            <!-- Título del sidebar -->
+            <div class="sidebar-title">HORARIOS UPB</div>
+
+            <!-- Menú usuarios -->
+            <div class="menu-section">
+                <div class="menu-header">MENU USUARIOS</div>
+                <ul class="menu-list">
+                    <li class="menu-toggle" onclick="toggleMenu(this)">
+                        <span class="menu-icon">☰</span>
+                        <span>MENU</span>
+                    </li>
+                    <div class="submenu" style="display: none;">
+                        <li><span class="submenu-icon">📋</span> Horarios Clases</li>
+                        <li><span class="submenu-icon">📋</span> Exámenes Parciales</li>
+                        <li><span class="submenu-icon">📋</span> Supletorios</li>
+                        <li><span class="submenu-icon">📋</span> Cursos Intersemestrales</li>
+                    </div>
+                </ul>
+            </div>
+
+            <!-- Menú administración -->
+            <div class="menu-section">
+                <div class="menu-header">MENU ADMINISTRACION</div>
+                <div class="menu-title">Administracion</div>
+                <ul class="menu-list">
+                    <li><span class="submenu-icon">🚪</span> Logout</li>
+                </ul>
+            </div>
+        </aside>
+
+        <!-- Contenido principal -->
+        <main class="content">
+            <!-- Encabezado de contenido -->
+            <div class="content-header">
+                <h2>Página de Ingreso</h2>
+                <p class="breadcrumb">Pagina/Administracion/Inicio</p>
+            </div>
+
+            <!-- Mensaje de bienvenida -->
+            <div class="welcome-box">
+                <div class="welcome-icon">🔔</div>
+                <div class="welcome-content">
+                    <strong>¡Bienvenido!</strong>
+                    <p>Bienvenido al menú de Administración.</p>
+                    <p>NOMBRES Y APELLIDOS</p>
+                </div>
+                <div class="welcome-date" id="currentDate"></div>
+            </div>
+
+            <!-- Sección de procesos -->
+            <div class="processes-section">
+                <h3>Procesos</h3>
+                <div class="processes-grid">
+                    <!-- Tarjeta 1 -->
+                    <a href="crear-publicaciones.html" class="process-card blue">
+                        <div class="card-icon">📄</div>
+                        <strong>Crear Publicacion</strong>
+                        <p>Hacer nueva publicacion de clases, examenes o supletorios.</p>
+                    </a>
+
+                    <!-- Tarjeta 2 -->
+                    <a href="ver-publicaciones.html" class="process-card teal">
+                        <div class="card-icon">👁</div>
+                        <strong>Ver Publicaciones</strong>
+                        <p>Reporte de publicaciones previamente creadas.</p>
+                    </a>
+
+                    <!-- Tarjeta 3 -->
+                    <a href="ver-facultades.html" class="process-card purple">
+                        <div class="card-icon">🏫</div>
+                        <strong>Ver facultades</strong>
+                        <p>Administracion de la tabla de facultades (solo edicion)</p>
+                    </a>
+
+                    <!-- Tarjeta 4 -->
+                    <div class="process-card maroon" onclick="descargarPlantilla()">
+                        <div class="card-icon">📋</div>
+                        <strong>Plantilla</strong>
+                        <p>Descarga la plantilla de excel sugerida para subir horarios.</p>
+                    </div>
+
+                    <!-- Tarjeta 5 -->
+                    <a href="ver-edicion-plantilla.html" class="process-card magenta">
+                        <div class="card-icon">✏</div>
+                        <strong>Edicion Plantilla Cargadas</strong>
+                        <p>Permite ver plantilla cargadas con anterioridad y editarlas</p>
+                    </a>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <!-- JavaScript para menú desplegable y fecha -->
+    <script>
+        /* Función para desplegar/contraer menú */
+        function toggleMenu(element) {
+            const submenu = element.nextElementSibling;
+            if (submenu && submenu.classList.contains('submenu')) {
+                if (submenu.style.display === 'none') {
+                    submenu.style.display = 'block';
+                } else {
+                    submenu.style.display = 'none';
+                }
+            }
+        }
+
+        /* Función para togglear el menú desplegable del header */
+        function toggleDropdownMenu() {
+            const menu = document.getElementById('dropdownMenu');
+            menu.classList.toggle('active');
+        }
+
+        /* Cerrar el menú si se hace clic fuera de él */
+        document.addEventListener('click', function(event) {
+            const menu = document.getElementById('dropdownMenu');
+            const btn = document.querySelector('.btn-prueba');
+            
+            if (!menu.contains(event.target) && !btn.contains(event.target)) {
+                menu.classList.remove('active');
+            }
+        });
+
+        /* Función para actualizar la fecha actual */
+        function updateDate() {
+            const today = new Date();
+            const options = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' };
+            const formattedDate = today.toLocaleDateString('es-ES', options);
+            document.getElementById('currentDate').textContent = formattedDate;
+        }
+
+        /* Actualizar la fecha cuando carga la página */
+        document.addEventListener('DOMContentLoaded', updateDate);
+
+        /* Función para descargar plantilla */
+        function descargarPlantilla() {
+            alert('Descargando plantilla de Excel para subir horarios.\n\nLa descarga comenzará en breve.\n\nPor favor, espere...');
+            // Aquí iría la lógica para descargar el archivo
+            // window.location.href = 'ruta/al/archivo/plantilla.xlsx';
+        }
+    </script>
+</body>
+</html>
