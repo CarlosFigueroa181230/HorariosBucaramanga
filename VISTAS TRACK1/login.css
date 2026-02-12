@@ -1,0 +1,166 @@
+/* Estilos generales - reinicia márgenes y padding */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+/* Fondo negro de toda la página */
+body {
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    background-color: #000000;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 100vh;
+    padding: 20px;
+}
+
+/* Contenedor del formulario con fondo blanco */
+.container {
+    background-color: #f0f0f0;
+    padding: 40px;
+    border-radius: 10px;
+    width: 100%;
+    max-width: 500px;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.3);
+}
+
+/* Encabezado del login */
+.login-header {
+    text-align: center;
+    margin-bottom: 30px;
+}
+
+/* Contenedor del logo */
+.logo-container {
+    margin-bottom: 20px;
+}
+
+/* Logo UPB */
+.logo {
+    max-width: 80px;
+    height: auto;
+    display: inline-block;
+}
+
+/* Título principal en rojo */
+.login-header h1 {
+    color: #a91414;
+    font-size: 22px;
+    margin-bottom: 10px;
+    font-weight: 700;
+}
+
+/* Subtítulo en negro */
+.login-header p {
+    color: #000000;
+    font-size: 13px;
+    font-weight: 500;
+}
+
+/* Grupos de formulario */
+.form-group {
+    margin-bottom: 18px;
+}
+
+/* Etiquetas en negro */
+label {
+    display: block;
+    color: #000000;
+    font-size: 13px;
+    margin-bottom: 6px;
+    font-weight: 600;
+}
+
+/* Campos de entrada */
+input[type="text"],
+input[type="password"] {
+    width: 100%;
+    padding: 10px;
+    border: 1px solid #cccccc;
+    border-radius: 4px;
+    background-color: #ffffff;
+    color: #000000;
+    font-size: 13px;
+}
+
+/* Focus en inputs */
+input[type="text"]:focus,
+input[type="password"]:focus {
+    outline: none;
+    border-color: #a91414;
+    box-shadow: 0 0 3px rgba(169, 20, 20, 0.3);
+}
+
+/* Checkbox remember */
+.remember-group {
+    margin: 15px 0;
+}
+
+.remember-group label {
+    display: inline-flex;
+    align-items: center;
+    margin: 0;
+    font-weight: 500;
+}
+
+input[type="checkbox"] {
+    margin-right: 8px;
+    cursor: pointer;
+}
+
+/* Botón de ingresar en rojo */
+.login-btn {
+    width: 100%;
+    padding: 12px;
+    background-color: #a91414;
+    color: #ffffff;
+    border: none;
+    border-radius: 4px;
+    font-size: 14px;
+    font-weight: 600;
+    cursor: pointer;
+    margin-top: 15px;
+}
+
+/* Efecto hover en botón */
+.login-btn:hover {
+    background-color: #8a0f0f;
+}
+
+/* Texto de autorización */
+.auth-text {
+    text-align: center;
+    font-size: 12px;
+    color: #000000;
+    margin-top: 15px;
+}
+
+/* Link rojo */
+.auth-text a {
+    color: #a91414;
+    text-decoration: none;
+    font-weight: 600;
+}
+
+.auth-text a:hover {
+    text-decoration: underline;
+}
+
+/* Link a página principal */
+.main-link {
+    text-align: center;
+    margin-top: 15px;
+}
+
+.main-link a {
+    color: #a91414;
+    text-decoration: none;
+    font-size: 12px;
+    font-weight: 600;
+}
+
+.main-link a:hover {
+    text-decoration: underline;
+}
