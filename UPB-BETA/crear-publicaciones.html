@@ -1,0 +1,333 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Horarios UPB V3</title>
+    <link rel="icon" type="image/png" href="../Assets/upb-logo.png">
+    <link rel="stylesheet" href="admin-styles.css">
+    <link rel="stylesheet" href="publicaciones-styles.css">
+    <script src="https://unpkg.com/lucide@0.469.0/dist/umd/lucide.min.js"></script>
+    <script src="lucide-icons.js"></script>
+    <script src="ux-dynamic.js"></script>
+    <script src="facultades-store.js"></script>
+    <script src="facultades-sync.js"></script>
+    <script src="admin-auth.js"></script>
+    <script src="admin-local-modals.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.min.js"></script>
+    <script src="https://unpkg.com/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
+    <script>
+        requireAdminSession();
+    </script>
+</head>
+<body>
+    <!-- Header -->
+    <div class="header">
+        <div class="header-left">
+            <h1>HORARIOS UPB VERSION 3.0</h1>
+        </div>
+        <div class="header-right">
+            <!-- Botón Admin -->
+            <img src="../Assets/ICONO-ADMIN.png" alt="Admin" class="btn-prueba" onclick="toggleDropdownMenu()">
+
+            <!-- Menú Desplegable -->
+            <div class="dropdown-menu" id="dropdownMenu">
+            <div class="dropdown-header">
+                <img src="../Assets/upb-logo.png" alt="Logo UPB" class="dropdown-logo">
+                <span>Horarios</span>
+                <span class="dropdown-subtitle">Menu</span>
+            </div>
+
+            <div class="dropdown-content">
+                <a href="consultas-horarios-clases.html"><span class="icon">📅</span> Horarios Clases</a>
+                <a href="consultas-examenes.html"><span class="icon">📋</span> Exámenes Parciales</a>
+                <a href="consultas-supletorios.html"><span class="icon">📋</span> Supletorios</a>
+                <a href="consultas-intersemestrales.html"><span class="icon">📋</span> Cursos Intersemestrales</a>
+            </div>
+
+            <div class="dropdown-divider"></div>
+
+            <div class="dropdown-admin">
+                <a href="#" onclick="abrirModalInfoAdmin(event)"><span class="icon">👤</span> Mi Información</a>
+                <a href="#" onclick="abrirModalCambiarContraseña(event)"><span class="icon">🔑</span> Cambiar contraseña</a>
+                <a href="admin.html"><span class="icon">🔍</span> Administración</a>
+                <a href="login.html" onclick="cerrarSesion()"><span class="icon">🚪</span> Logout</a>
+            </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Contenedor principal -->
+    <div class="main-container">
+        <!-- Menú lateral -->
+        <aside class="sidebar">
+            <!-- Título del sidebar -->
+            <div class="sidebar-title">HORARIOS UPB</div>
+
+            <!-- Menú usuarios -->
+            <div class="menu-section">
+                <div class="menu-header">MENU USUARIOS</div>
+                <ul class="menu-list">
+                    <li class="menu-toggle" onclick="toggleMenu(this)">
+                        <span class="menu-icon">☰</span>
+                        <span>MENU</span>
+                    </li>
+                    <div class="submenu" style="display: none;">
+                        <li onclick="irA('consultas-horarios-clases.html')"><span class="submenu-icon">📅</span> Horarios Clases</li>
+                        <li onclick="irA('consultas-examenes.html')"><span class="submenu-icon">📋</span> Exámenes Parciales</li>
+                        <li onclick="irA('consultas-supletorios.html')"><span class="submenu-icon">📋</span> Supletorios</li>
+                        <li onclick="irA('consultas-intersemestrales.html')"><span class="submenu-icon">📋</span> Cursos Intersemestrales</li>
+                    </div>
+                </ul>
+            </div>
+
+            <!-- Menú administración -->
+            <div class="menu-section">
+                <div class="menu-header">MENU ADMINISTRACION</div>
+                <div class="menu-title">Administracion</div>
+                <ul class="menu-list">
+                    <li onclick="cerrarSesion()"><span class="submenu-icon">🚪</span> Logout</li>
+                </ul>
+            </div>
+        </aside>
+
+        <!-- Contenido principal -->
+        <main class="content">
+            <!-- Botón volver -->
+            <div class="back-button-container">
+                <a href="admin.html" class="back-button">< VOLVER AL MENU DE ADMINISTRACION</a>
+            </div>
+
+            <!-- Encabezado de contenido -->
+            <div class="content-header">
+                <h2>Publicaciones</h2>
+                <p class="breadcrumb">Pagina/Publicaciones/Crear</p>
+            </div>
+
+            <!-- Formulario de crear publicación -->
+            <form class="publication-form">
+                <!-- Tipo de Publicacion -->
+                <div class="form-group">
+                    <label for="tipoPublicacion">Tipo de Publicacion</label>
+                    <select id="tipoPublicacion" class="form-control" required>
+                        <option value="">--Seleccionar tipo--</option>
+                        <option value="horarios">Horarios de Clases</option>
+                        <option value="examenes">Exámenes Parciales</option>
+                        <option value="supletorios">Supletorios</option>
+                        <option value="intersemestrales">Cursos Intersemestrales</option>
+                    </select>
+                </div>
+
+                <!-- Facultad -->
+                <div class="form-group">
+                    <label for="facultad">Facultad</label>
+                    <select id="facultad" class="form-control" required>
+                        <option value="">--Seleccionar facultad--</option>
+                        <option value="administracion-empresas">Administración De Empresas</option>
+                        <option value="centro-lenguas">Centro De Lenguas</option>
+                        <option value="ciencias-politicas">Ciencias Políticas Y Gobierno</option>
+                        <option value="comunicacion-social">Comunicación Social - Periodismo</option>
+                        <option value="ciencias-basicas">Departamento De Ciencias Básicas</option>
+                        <option value="formacion-humanistica">Departamento De Formación Humanística</option>
+                        <option value="derecho">Derecho</option>
+                        <option value="diseno-grafico">Diseño Gráfico</option>
+                        <option value="electivas">Electivas</option>
+                        <option value="ingenieria-industrial">Ingenieria Industrial</option>
+                        <option value="ingenieria-ambiental">Ingeniería Ambiental</option>
+                        <option value="ingenieria-civil">Ingeniería Civil</option>
+                        <option value="ingenieria-electronica">Ingeniería Electrónica</option>
+                        <option value="ingenieria-electrica">Ingeniería Eléctrica</option>
+                        <option value="ingenieria-mecanica">Ingeniería Mecánica</option>
+                        <option value="ingenieria-sistemas">Ingeniería De Sistemas E Informática</option>
+                        <option value="negocios-internacionales">Negocios Internacionales</option>
+                        <option value="psicologia">Psicología</option>
+                    </select>
+                </div>
+
+                <!-- Descripcion -->
+                <div class="form-group">
+                    <label for="descripcion">Descripcion</label>
+                    <textarea id="descripcion" class="form-control textarea" rows="5" placeholder="Ingrese la descripción de la publicación"></textarea>
+                </div>
+
+                <!-- Fecha de inicio -->
+                <div class="form-group">
+                    <label for="fechaInicio">Fecha de inicio</label>
+                    <div class="date-input-wrapper">
+                        <input type="date" id="fechaInicio" class="form-control" required>
+                        <span class="date-icon">📅</span>
+                    </div>
+                </div>
+
+                <!-- Fecha de Finalizacion -->
+                <div class="form-group">
+                    <label for="fechaFinalizacion">Fecha de Finalizacion</label>
+                    <div class="date-input-wrapper">
+                        <input type="date" id="fechaFinalizacion" class="form-control" required>
+                        <span class="date-icon">📅</span>
+                    </div>
+                </div>
+
+                <!-- Archivo excel -->
+                <div class="form-group">
+                    <label for="archivoExcel">Archivo excel</label>
+                    <div class="file-input-wrapper">
+                        <button type="button" class="btn-seleccionar" onclick="document.getElementById('archivoExcel').click()">Seleccionar</button>
+                        <input type="file" id="archivoExcel" accept=".xlsx,.xls,.csv" style="display: none;" onchange="updateFileName(this)">
+                        <span class="file-name" id="fileName">Ningun archivo seleccionado</span>
+                    </div>
+                </div>
+
+                <!-- Botón Guardar -->
+                <div class="form-group">
+                    <button type="submit" class="btn-guardar">Guardar</button>
+                </div>
+            </form>
+        </main>
+    </div>
+
+    <!-- JavaScript -->
+    <script>
+        /* Función para desplegar/contraer menú */
+        function toggleMenu(element) {
+            const submenu = element.nextElementSibling;
+            if (submenu && submenu.classList.contains('submenu')) {
+                if (submenu.style.display === 'none') {
+                    submenu.style.display = 'block';
+                } else {
+                    submenu.style.display = 'none';
+                }
+            }
+        }
+
+        function irA(pagina) {
+            window.location.href = pagina;
+        }
+
+        /* Función para togglear el menú desplegable del header */
+        function toggleDropdownMenu() {
+            const menu = document.getElementById('dropdownMenu');
+            menu.classList.toggle('active');
+        }
+
+        /* Cerrar el menú si se hace clic fuera de él */
+        document.addEventListener('click', function(event) {
+            const menu = document.getElementById('dropdownMenu');
+            const btn = document.querySelector('.btn-prueba');
+            
+            if (!menu.contains(event.target) && !btn.contains(event.target)) {
+                menu.classList.remove('active');
+            }
+        });
+
+        /* Función para actualizar el nombre del archivo */
+        function updateFileName(input) {
+            if (input.files && input.files[0]) {
+                document.getElementById('fileName').textContent = input.files[0].name;
+            }
+        }
+
+        /* Validación del formulario y Subida al Backend */
+        document.querySelector('.publication-form').addEventListener('submit', async function(e) {
+            e.preventDefault();
+            
+            const fileInput = document.getElementById('archivoExcel');
+            if (!fileInput.files.length) {
+                alert('Por favor selecciona un archivo Excel primero.');
+                return;
+            }
+
+            const file = fileInput.files[0];
+            const reader = new FileReader();
+
+            reader.onload = async function(event) {
+                try {
+                    const data = new Uint8Array(event.target.result);
+                    const workbook = XLSX.read(data, { type: 'array' });
+                    
+                    const jsonResult = { sheets: {} };
+                    workbook.SheetNames.forEach(sheetName => {
+                        const sheet = workbook.Sheets[sheetName];
+                        const sheetData = XLSX.utils.sheet_to_json(sheet, { defval: '' });
+                        jsonResult.sheets[sheetName] = { data: sheetData };
+                    });
+
+                    // Mostrar indicador de carga
+                    const btnGuardar = document.querySelector('.btn-guardar');
+                    const textoOriginal = btnGuardar.innerText;
+                    btnGuardar.innerText = 'Subiendo y procesando...';
+                    btnGuardar.disabled = true;
+
+                    // Capturar el Creador (Usuario loguado)
+                    let currentUserId = 1;
+                    try {
+                        const currentUser = JSON.parse(localStorage.getItem('currentUser'));
+                        if (currentUser && currentUser.id) currentUserId = currentUser.id;
+                    } catch(e) {}
+
+                    jsonResult.fileName = file.name;
+                    jsonResult.creadorId = currentUserId;
+                    
+                    // Extraer los metadatos del formulario para el reporte
+                    jsonResult.fechaInicio = document.getElementById('fechaInicio').value || null;
+                    jsonResult.fechaFin = document.getElementById('fechaFinalizacion').value || null;
+                    jsonResult.descripcion = document.getElementById('descripcion').value || '';
+                    const selectTipo = document.getElementById('tipoPublicacion');
+                    jsonResult.tipo = selectTipo ? selectTipo.options[selectTipo.selectedIndex].text : 'Horarios de Clases';
+                    
+                    // Intentar mapear la facultad seleccionada en el formulario (su texto real)
+                    const selectFacultad = document.getElementById('facultad');
+                    if (selectFacultad && selectFacultad.selectedIndex >= 0) {
+                        jsonResult.facultadFormulario = selectFacultad.options[selectFacultad.selectedIndex].text;
+                    }
+
+                    // Enviar al Backend
+                    const response = await fetch('http://localhost:3000/api/horarios/upload', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify(jsonResult)
+                    });
+
+                    const resData = await response.json();
+                    
+                    btnGuardar.innerText = textoOriginal;
+                    btnGuardar.disabled = false;
+
+                    if (response.ok && resData.success) {
+                        alert('¡Éxito! ' + resData.message);
+                        // Opcional: Redirigir a los listados de publicaciones una vez subido
+                        window.location.href = 'ver-publicaciones.html';
+                    } else {
+                        alert('Hubo un problema al guardar en la BD: ' + (resData.message || 'Error desconocido'));
+                    }
+
+                } catch (error) {
+                    console.error('Error procesando el archivo:', error);
+                    alert('Error local procesando el Excel: ' + error.message);
+                    
+                    // Restauramos el botón guardado en caso de crasheo
+                    const btnGuardar = document.querySelector('.btn-guardar');
+                    btnGuardar.innerText = 'Guardar';
+                    btnGuardar.disabled = false;
+                }
+            };
+            
+            reader.readAsArrayBuffer(file);
+        });
+
+        document.addEventListener('DOMContentLoaded', function () {
+            if (window.aplicarFacultadesEnSelect) {
+                window.aplicarFacultadesEnSelect('facultad', '--Seleccionar facultad--');
+            }
+        });
+
+        /* Función para cerrar sesión */
+        function cerrarSesion() {
+            if (window.clearAdminSession) {
+                window.clearAdminSession();
+            }
+            window.location.href = './login.html';
+        }
+    </script>
+</body>
+</html>

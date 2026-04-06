@@ -3,12 +3,36 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Mi Proyecto</title>
+    <title>Excel to JSON Converter</title>
     <link rel="stylesheet" href="css/style.css">
+    <!-- XLSX library for Excel parsing - with fallback CDN -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.min.js"></script>
+    <script src="https://unpkg.com/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
 </head>
 <body>
-    <h1>Bienvenido a mi proyecto</h1>
-    <p>Este es el contenido principal.</p>
+    <div class="container">
+        <h1>Excel to JSON Converter</h1>
+        <p>Convierte tus archivos Excel a formato JSON</p>
+        
+        <div class="converter-section">
+            <div class="file-input-wrapper">
+                <input type="file" id="excelFile" accept=".xlsx, .xls, .csv" />
+                <label for="excelFile">Selecciona un archivo Excel</label>
+            </div>
+            
+            <button id="convertBtn">Convertir a JSON</button>
+        </div>
+        
+        <div id="storedFilesList" style="display:none;" class="output-section">
+        </div>
+        
+        <div id="outputSection" style="display:none;" class="output-section">
+            <h2>Datos Convertidos:</h2>
+            <pre id="jsonOutput"></pre>
+        </div>
+        
+        <div id="errorMessage" class="error-message"></div>
+    </div>
     
     <script src="js/script.js"></script>
 </body>

@@ -9,14 +9,149 @@ body {
     font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
     line-height: 1.6;
     color: #333;
-    background-color: #f4f4f4;
+    background: linear-gradient(135deg, #a91414 0%, #8a0f0f 100%);
+    min-height: 100vh;
+    padding: 20px;
+}
+
+.container {
+    max-width: 900px;
+    margin: 0 auto;
+    background-color: white;
+    padding: 40px;
+    border-radius: 10px;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
 }
 
 h1 {
-    color: #0066cc;
-    margin-bottom: 20px;
+    color: #a91414;
+    margin-bottom: 10px;
+    font-size: 2.5em;
+    text-align: center;
+}
+
+h2 {
+    color: #a91414;
+    margin-top: 20px;
+    margin-bottom: 15px;
+    font-size: 1.5em;
 }
 
 p {
+    color: #666;
+    text-align: center;
+    margin-bottom: 30px;
+}
+
+.converter-section {
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+    margin-bottom: 30px;
+}
+
+.file-input-wrapper {
+    position: relative;
+    overflow: hidden;
+    display: inline-block;
+    width: 100%;
+}
+
+#excelFile {
+    position: absolute;
+    left: -9999px;
+}
+
+.file-input-wrapper label {
+    display: block;
+    padding: 15px 20px;
+    background-color: #f0f0f0;
+    border: 2px dashed #a91414;
+    border-radius: 5px;
+    cursor: pointer;
+    text-align: center;
+    transition: all 0.3s ease;
+    font-weight: 500;
+    color: #a91414;
+}
+
+.file-input-wrapper label:hover {
+    background-color: #ffe8e8;
+    border-color: #764ba2;
+}
+
+#excelFile:focus + label {
+    outline: 2px solid #a91414;
+    outline-offset: 2px;
+}
+
+button {
+    padding: 12px 20px;
+    font-size: 16px;
+    font-weight: 600;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    min-width: 150px;
+    align-self: center;
+}
+
+#convertBtn {
+    background-color: #a91414;
+    color: white;
+}
+
+#convertBtn:hover {
+    background-color: #8a0f0f;
+    transform: translateY(-2px);
+    box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
+}
+
+#downloadBtn {
+    background-color: #48bb78;
+    color: white;
+}
+
+#downloadBtn:hover {
+    background-color: #38a169;
+    transform: translateY(-2px);
+    box-shadow: 0 5px 15px rgba(72, 187, 120, 0.4);
+}
+
+button:active {
+    transform: translateY(0);
+}
+
+.output-section {
+    background-color: #fff5f5;
+    border: 1px solid #ddd;
+    border-radius: 5px;
+    padding: 20px;
+    margin-top: 20px;
+}
+
+#jsonOutput {
+    background-color: #000;
+    color: #d4d4d4;
+    padding: 15px;
+    border-radius: 5px;
+    overflow-x: auto;
+    max-height: 500px;
+    font-size: 13px;
+    font-family: 'Courier New', monospace;
+    line-height: 1.4;
+    display: block;
+}
+
+.error-message {
+    display: none;
+    background-color: #fee;
+    color: #c33;
+    padding: 15px;
+    border-radius: 5px;
+    margin-top: 20px;
+    border-left: 4px solid #c33;
+    font-weight: 500;
     margin-bottom: 15px;
 }

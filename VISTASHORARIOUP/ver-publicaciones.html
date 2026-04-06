@@ -1,0 +1,322 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Ver Publicaciones - Horarios UPB</title>
+    <link rel="stylesheet" href="admin-styles.css">
+    <link rel="stylesheet" href="reportes-styles.css">
+</head>
+<body>
+    <!-- Header -->
+    <div class="header">
+        <div class="header-left">
+            <h1>HORARIOS UPB VERSION 3.0</h1>
+        </div>
+        <div class="header-right">
+            <!-- Botón Prueba -->
+            <button class="btn-prueba" onclick="toggleDropdownMenu()">Prueba</button>
+            
+            <!-- Menú Desplegable -->
+            <div class="dropdown-menu" id="dropdownMenu">
+                <div class="dropdown-header">
+                    <img src="../logo-upb.png" alt="Logo UPB" class="dropdown-logo">
+                    <span>Horarios</span>
+                    <span class="dropdown-subtitle">Menu</span>
+                </div>
+                
+                <div class="dropdown-content">
+                    <a href="#"><span class="icon">📅</span> Horarios Clases</a>
+                    <a href="#"><span class="icon">📋</span> Exámenes Parciales</a>
+                    <a href="#"><span class="icon">📋</span> Supletorios</a>
+                    <a href="#"><span class="icon">📋</span> Cursos Intersemestrales</a>
+                </div>
+                
+                <div class="dropdown-divider"></div>
+                
+                <div class="dropdown-admin">
+                    <a href="#"><span class="icon">🔍</span> Administración</a>
+                    <a href="#"><span class="icon">🔑</span> Cambiar contraseña</a>
+                    <a href="#"><span class="icon">🚪</span> Logout</a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Contenedor principal -->
+    <div class="main-container">
+        <!-- Menú lateral -->
+        <aside class="sidebar">
+            <!-- Título del sidebar -->
+            <div class="sidebar-title">HORARIOS UPB</div>
+
+            <!-- Menú usuarios -->
+            <div class="menu-section">
+                <div class="menu-header">MENU USUARIOS</div>
+                <ul class="menu-list">
+                    <li class="menu-toggle" onclick="toggleMenu(this)">
+                        <span class="menu-icon">☰</span>
+                        <span>MENU</span>
+                    </li>
+                    <div class="submenu" style="display: none;">
+                        <li><span class="submenu-icon">📋</span> Horarios Clases</li>
+                        <li><span class="submenu-icon">📋</span> Exámenes Parciales</li>
+                        <li><span class="submenu-icon">📋</span> Supletorios</li>
+                        <li><span class="submenu-icon">📋</span> Cursos Intersemestrales</li>
+                    </div>
+                </ul>
+            </div>
+
+            <!-- Menú administración -->
+            <div class="menu-section">
+                <div class="menu-header">MENU ADMINISTRACION</div>
+                <div class="menu-title">Administracion</div>
+                <ul class="menu-list">
+                    <li><span class="submenu-icon">🚪</span> Logout</li>
+                </ul>
+            </div>
+        </aside>
+
+        <!-- Contenido principal -->
+        <main class="content">
+            <!-- Botón volver -->
+            <div class="back-button-container">
+                <a href="admin.html" class="back-button">< VOLVER AL MENU DE ADMINISTRACION</a>
+            </div>
+
+            <!-- Encabezado de contenido -->
+            <div class="content-header">
+                <h2>Reporte de Publicaciones</h2>
+                <p class="breadcrumb">Pagina/Publicaciones/Reporte</p>
+            </div>
+
+            <!-- Controles de la tabla -->
+            <div class="table-controls">
+                <div class="controls-left">
+                    <label>Mostrar 
+                        <select id="registrosPorPagina" onchange="cambiarRegistrosPorPagina()">
+                            <option value="10">10</option>
+                            <option value="25">25</option>
+                            <option value="50">50</option>
+                        </select>
+                        registros por página
+                    </label>
+                </div>
+
+                <div class="controls-right">
+                    <label>Buscar: 
+                        <input type="text" id="searchInput" placeholder="" onkeyup="filtrarTabla()">
+                    </label>
+                </div>
+            </div>
+
+            <!-- Botones de acción -->
+            <div class="action-buttons">
+                <button class="btn-action" onclick="copiarTabla()">COPY</button>
+                <button class="btn-action" onclick="imprimirTabla()">PRINT</button>
+                <button class="btn-action" onclick="exportarExcel()">EXCEL</button>
+                <button class="btn-action" onclick="exportarPDF()">PDF</button>
+            </div>
+
+            <!-- Tabla de publicaciones -->
+            <div class="table-wrapper">
+                <table class="publications-table" id="publicationsTable">
+                    <thead>
+                        <tr>
+                            <th>ID</th>
+                            <th>TIPO</th>
+                            <th>FACULTAD</th>
+                            <th>DISPONIBLE</th>
+                            <th>ARCHIVO</th>
+                            <th>CREADOR</th>
+                            <th>FECHA INICIO</th>
+                            <th>FECHA FIN</th>
+                            <th>DESCRIPCION</th>
+                            <th>FECHA DE CREACION</th>
+                        </tr>
+                    </thead>
+                    <tbody id="publicationsBody">
+                        <!-- dinámico -->
+                    </tbody>
+                </table>
+            </div>
+
+            <div id="selectedTableContainer" style="display:none; margin-top:20px;">
+                <h3>Tabla de la publicación seleccionada:</h3>
+                <div id="selectedTable"></div>
+            </div>
+
+            <!-- Paginación -->
+            <div class="pagination">
+                <button class="page-btn" onclick="cambiarPagina(-2)">«</button>
+                <button class="page-btn" onclick="cambiarPagina(-1)">‹</button>
+                <button class="page-btn active">1</button>
+                <button class="page-btn">2</button>
+                <button class="page-btn">3</button>
+                <button class="page-btn" onclick="cambiarPagina(1)">›</button>
+                <button class="page-btn" onclick="cambiarPagina(2)">»</button>
+            </div>
+        </main>
+    </div>
+
+    <!-- JavaScript -->
+    <script>
+        /* Función para desplegar/contraer menú */
+        function toggleMenu(element) {
+            const submenu = element.nextElementSibling;
+            if (submenu && submenu.classList.contains('submenu')) {
+                if (submenu.style.display === 'none') {
+                    submenu.style.display = 'block';
+                } else {
+                    submenu.style.display = 'none';
+                }
+            }
+        }
+
+        /* Función para togglear el menú desplegable del header */
+        function toggleDropdownMenu() {
+            const menu = document.getElementById('dropdownMenu');
+            menu.classList.toggle('active');
+        }
+
+        /* Cerrar el menú si se hace clic fuera de él */
+        document.addEventListener('click', function(event) {
+            const menu = document.getElementById('dropdownMenu');
+            const btn = document.querySelector('.btn-prueba');
+            
+            if (!menu.contains(event.target) && !btn.contains(event.target)) {
+                menu.classList.remove('active');
+            }
+        });
+
+        /* Función para cambiar registros por página */
+        function cambiarRegistrosPorPagina() {
+            const valor = document.getElementById('registrosPorPagina').value;
+            console.log('Registros por página: ' + valor);
+        }
+
+        /* Función para filtrar tabla */
+        function filtrarTabla() {
+            const input = document.getElementById('searchInput');
+            const filter = input.value.toUpperCase();
+            const table = document.getElementById('publicationsTable');
+            const rows = table.getElementsByTagName('tr');
+
+            for (let i = 1; i < rows.length; i++) {
+                const text = rows[i].textContent || rows[i].innerText;
+                if (text.toUpperCase().indexOf(filter) > -1) {
+                    rows[i].style.display = '';
+                } else {
+                    rows[i].style.display = 'none';
+                }
+            }
+        }
+
+        /* Función para copiar tabla */
+        function copiarTabla() {
+            alert('Tabla copiada al portapapeles');
+        }
+
+        /* Función para imprimir */
+        function imprimirTabla() {
+            window.print();
+        }
+
+        /* Función para exportar a Excel */
+        function exportarExcel() {
+            alert('Exportando a Excel...');
+        }
+
+        /* Función para exportar a PDF */
+        function exportarPDF() {
+            alert('Exportando a PDF...');
+        }
+
+        /* Función para cambiar página */
+        function cambiarPagina(direccion) {
+            console.log('Cambiar página: ' + direccion);
+        }
+
+        /* Publicaciones almacenadas en localStorage */
+        function getPublications() {
+            return JSON.parse(localStorage.getItem('publications') || '[]');
+        }
+
+        function generatePreviewHTML(tableData) {
+            let html = '';
+            Object.keys(tableData.sheets).forEach(sheetName => {
+                const sheet = tableData.sheets[sheetName];
+                html += `<h4>${sheetName} (${sheet.rows}x${sheet.columns.length})</h4>`;
+                if (sheet.data.length > 0) {
+                    html += '<table class="data-table"><thead><tr>';
+                    sheet.columns.forEach(col => html += `<th>${col}</th>`);
+                    html += '</tr></thead><tbody>';
+                    sheet.data.forEach(row => {
+                        html += '<tr>';
+                        sheet.columns.forEach(col => {
+                            html += `<td>${row[col] || ''}</td>`;
+                        });
+                        html += '</tr>';
+                    });
+                    html += '</tbody></table>';
+                } else {
+                    html += '<p>Hoja vacía</p>';
+                }
+            });
+            return html;
+        }
+
+        function loadPublicationsTable() {
+            const pubs = getPublications();
+            const body = document.getElementById('publicationsBody');
+            body.innerHTML = '';
+            pubs.forEach(pub => {
+                const tr = document.createElement('tr');
+                const linkUrl = '?id=' + pub.id;
+                tr.innerHTML = `
+                    <td><a href="${linkUrl}" class="table-link">${pub.id}</a></td>
+                    <td>${pub.tipo}</td>
+                    <td>${pub.facultad}</td>
+                    <td>${pub.disponible ? 'Sí' : 'No'}</td>
+                    <td>${pub.archivo}</td>
+                    <td>${pub.creador || 'Admin'}</td>
+                    <td>${pub.fechaInicio}</td>
+                    <td>${pub.fechaFinalizacion}</td>
+                    <td>${pub.descripcion}</td>
+                    <td>${pub.creado.split('T')[0]}</td>
+                `;
+                body.appendChild(tr);
+
+                // preview row
+                const pr = document.createElement('tr');
+                const pd = document.createElement('td');
+                pd.colSpan = 10;
+                pd.innerHTML = generatePreviewHTML(pub.tableData || {sheets:{}});
+                pr.appendChild(pd);
+                body.appendChild(pr);
+            });
+        }
+
+        function displayTableData(tableData) {
+            const container = document.getElementById('selectedTable');
+            if (!tableData) return;
+            container.innerHTML = generatePreviewHTML(tableData);
+            document.getElementById('selectedTableContainer').style.display = 'block';
+        }
+
+        // on load populate table and show selected if id param given
+        window.addEventListener('load', function() {
+            loadPublicationsTable();
+            const params = new URLSearchParams(window.location.search);
+            const id = params.get('id');
+            if (id) {
+                const pubs = getPublications();
+                const pub = pubs.find(p => String(p.id) === id);
+                if (pub) {
+                    displayTableData(pub.tableData);
+                }
+            }
+        });
+    </script>
+</body>
+</html>

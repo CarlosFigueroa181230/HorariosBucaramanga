@@ -1,0 +1,532 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Horarios UPB V3</title>
+    <link rel="icon" type="image/png" href="../Assets/upb-logo.png">
+    <link rel="stylesheet" href="admin-styles.css">
+    <script src="admin-auth.js"></script>
+    <script>
+        requireAdminSession();
+    </script>
+</head>
+<body>
+    <!-- Header -->
+    <div class="header">
+        <div class="header-left">
+            <h1>HORARIOS UPB VERSION 3.0</h1>
+        </div>
+        <div class="header-right">
+            <!-- Botón Admin -->
+            <img src="../Assets/ICONO-ADMIN.png" alt="Admin" class="btn-prueba" onclick="toggleDropdownMenu()">
+            
+            <!-- Menú Desplegable -->
+            <div class="dropdown-menu" id="dropdownMenu">
+                <div class="dropdown-header">
+                    <img src="../Assets/upb-logo.png" alt="Logo UPB" class="dropdown-logo">
+                    <span>Horarios</span>
+                    <span class="dropdown-subtitle">Menu</span>
+                </div>
+                
+                <div class="dropdown-content">
+                    <a href="consultas-horarios-clases.html"><span class="icon">📅</span> Horarios Clases</a>
+                    <a href="consultas-examenes.html"><span class="icon">📋</span> Exámenes Parciales</a>
+                    <a href="consultas-supletorios.html"><span class="icon">📋</span> Supletorios</a>
+                    <a href="consultas-intersemestrales.html"><span class="icon">📋</span> Cursos Intersemestrales</a>
+                </div>
+                
+                <div class="dropdown-divider"></div>
+                
+                <div class="dropdown-admin">
+                    <a href="#" onclick="abrirModalInfoAdmin(event)"><span class="icon">👤</span> Mi Información</a>
+                    <a href="#" onclick="abrirModalCambiarContraseña(event)"><span class="icon">🔑</span> Cambiar contraseña</a>
+                    <a href="login.html" onclick="cerrarSesion()"><span class="icon">🚪</span> Logout</a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal Cambiar Contraseña -->
+    <div id="modalCambiarContraseña" class="modal" style="display: none;">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>Cambiar Contraseña</h2>
+                <button class="modal-close" onclick="cerrarModalCambiarContraseña()">&times;</button>
+            </div>
+            <div class="modal-body">
+                <form id="formCambiarContraseña" onsubmit="cambiarContraseña(event)">
+                    <div class="form-group">
+                        <label for="contraseñaActual">Contraseña Actual:</label>
+                        <input type="password" id="contraseñaActual" name="contraseñaActual" required placeholder="Ingrese su contraseña actual">
+                    </div>
+                    <div class="form-group">
+                        <label for="contraseñaNueva">Contraseña Nueva:</label>
+                        <input type="password" id="contraseñaNueva" name="contraseñaNueva" required placeholder="Ingrese su nueva contraseña">
+                    </div>
+                    <div class="form-group">
+                        <label for="confirmarContraseña">Confirmar Contraseña:</label>
+                        <input type="password" id="confirmarContraseña" name="confirmarContraseña" required placeholder="Confirme su nueva contraseña">
+                    </div>
+                    <div id="mensajeError" class="mensaje-error" style="display: none;"></div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn-cancelar" onclick="cerrarModalCambiarContraseña()">Cancelar</button>
+                        <button type="submit" class="btn-guardar">Guardar</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal Información del Administrador -->
+    <div id="modalInfoAdmin" class="modal" style="display: none;">
+        <div class="modal-content modal-info">
+            <div class="modal-header">
+                <h2>Mi Información</h2>
+                <button class="modal-close" onclick="cerrarModalInfoAdmin()">&times;</button>
+            </div>
+            <div class="modal-body">
+                <div class="info-container">
+                    <div class="info-avatar">
+                        <div class="avatar-placeholder">👤</div>
+                    </div>
+                    
+                    <div class="info-details">
+                        <div class="info-group">
+                            <label>Nombre Completo:</label>
+                            <p id="infoNombre">Dr. Juan Carlos García Rodríguez</p>
+                        </div>
+                        
+                        <div class="info-group">
+                            <label>Email:</label>
+                            <p id="infoEmail">juan.garcia@upb.edu.bo</p>
+                        </div>
+                        
+                        <div class="info-group">
+                            <label>Rol:</label>
+                            <p id="infoRol">Administrador del Sistema</p>
+                        </div>
+                        
+                        <div class="info-group">
+                            <label>Departamento:</label>
+                            <p id="infoDepartamento">Tecnología de Información</p>
+                        </div>
+                        
+                        <div class="info-group">
+                            <label>Teléfono:</label>
+                            <p id="infoTelefono">+591 2 2700123 ext. 456</p>
+                        </div>
+                        
+                        <div class="info-group">
+                            <label>Última conexión:</label>
+                            <p id="infoUltimaConexion">Hoy, 14:32</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn-cancelar" onclick="cerrarModalInfoAdmin()">Cerrar</button>
+                <button type="button" class="btn-editar" onclick="abrirEdicionAdmin()">Editar</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal Editar Información del Administrador -->
+    <div id="modalEditarAdmin" class="modal" style="display: none;">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>Editar Mi Información</h2>
+                <button class="modal-close" onclick="cerrarModalEditarAdmin()">&times;</button>
+            </div>
+            <div class="modal-body">
+                <form id="formEditarAdmin" onsubmit="guardarEdicionAdmin(event)">
+                    <div class="form-group">
+                        <label for="editNombre">Nombre Completo:</label>
+                        <input type="text" id="editNombre" name="nombre" required placeholder="Nombre completo">
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="editEmail">Email:</label>
+                        <input type="email" id="editEmail" name="email" required placeholder="Correo electrónico">
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="editRol">Rol:</label>
+                        <input type="text" id="editRol" name="rol" required placeholder="Rol en el sistema" readonly>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="editDepartamento">Departamento:</label>
+                        <input type="text" id="editDepartamento" name="departamento" required placeholder="Departamento">
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="editTelefono">Teléfono:</label>
+                        <input type="tel" id="editTelefono" name="telefono" required placeholder="Teléfono">
+                    </div>
+                    
+                    <div id="mensajeEditarError" class="mensaje-error" style="display: none;"></div>
+                    <div id="mensajeEditarExito" class="mensaje-exito" style="display: none;"></div>
+                    
+                    <div class="modal-footer">
+                        <button type="button" class="btn-cancelar" onclick="cerrarModalEditarAdmin()">Cancelar</button>
+                        <button type="submit" class="btn-guardar">Guardar Cambios</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Contenedor principal -->
+    <div class="main-container">
+        <!-- Menú lateral -->
+        <aside class="sidebar">
+            <!-- Título del sidebar -->
+            <div class="sidebar-title">HORARIOS UPB</div>
+
+            <!-- Menú usuarios -->
+            <div class="menu-section">
+                <div class="menu-header">MENU USUARIOS</div>
+                <ul class="menu-list">
+                    <li class="menu-toggle" onclick="toggleMenu(this)">
+                        <span class="menu-icon">☰</span>
+                        <span>MENU</span>
+                    </li>
+                    <div class="submenu" style="display: none;">
+                        <li onclick="irA('consultas-horarios-clases.html')"><span class="submenu-icon">📅</span> Horarios Clases</li>
+                        <li onclick="irA('consultas-examenes.html')"><span class="submenu-icon">📋</span> Exámenes Parciales</li>
+                        <li onclick="irA('consultas-supletorios.html')"><span class="submenu-icon">📋</span> Supletorios</li>
+                        <li onclick="irA('consultas-intersemestrales.html')"><span class="submenu-icon">📋</span> Cursos Intersemestrales</li>
+                    </div>
+                </ul>
+            </div>
+
+            <!-- Menú administración -->
+            <div class="menu-section">
+                <div class="menu-header">MENU ADMINISTRACION</div>
+                <ul class="menu-list">
+                    <li onclick="cerrarSesion()"><span class="submenu-icon">🚪</span> Logout</li>
+                </ul>
+            </div>
+        </aside>
+
+        <!-- Contenido principal -->
+        <main class="content">
+            <!-- Encabezado de contenido -->
+            <div class="content-header">
+                <h2>Página de Ingreso</h2>
+                <p class="breadcrumb">Pagina/Administracion/Inicio</p>
+            </div>
+
+            <!-- Mensaje de bienvenida -->
+            <div class="welcome-box">
+                <div class="welcome-icon">🔔</div>
+                <div class="welcome-content">
+                    <strong>¡Bienvenido!</strong>
+                    <p>Bienvenido al menú de Administración.</p>
+                    <p id="adminNombreBienvenida">NOMBRES Y APELLIDOS</p>
+                </div>
+                <div class="welcome-date" id="currentDate"></div>
+            </div>
+
+            <!-- Sección de procesos -->
+            <div class="processes-section">
+                <h3>Procesos</h3>
+                <div class="processes-grid">
+                    <!-- Tarjeta 1 -->
+                    <a href="crear-publicaciones.html" class="process-card blue">
+                        <div class="card-icon">📄</div>
+                        <strong>Crear Publicacion</strong>
+                        <p>Hacer nueva publicacion de clases, examenes o supletorios.</p>
+                    </a>
+
+                    <!-- Tarjeta 2 -->
+                    <a href="ver-publicaciones.html" class="process-card teal">
+                        <div class="card-icon">👁</div>
+                        <strong>Ver Publicaciones</strong>
+                        <p>Reporte de publicaciones previamente creadas.</p>
+                    </a>
+
+                    <!-- Tarjeta 3 -->
+                    <a href="ver-facultades.html" class="process-card purple">
+                        <div class="card-icon">🏫</div>
+                        <strong>Ver facultades</strong>
+                        <p>Administracion de la tabla de facultades (solo edicion)</p>
+                    </a>
+
+                    <!-- Tarjeta 4 -->
+                    <div class="process-card maroon" onclick="descargarPlantilla()">
+                        <div class="card-icon">📋</div>
+                        <strong>Plantilla</strong>
+                        <p>Descarga la plantilla de excel sugerida para subir horarios.</p>
+                    </div>
+
+                    <!-- Tarjeta 5 -->
+                    <a href="ver-edicion-plantilla.html" class="process-card magenta">
+                        <div class="card-icon">✏</div>
+                        <strong>Edicion Plantilla Cargadas</strong>
+                        <p>Permite ver plantilla cargadas con anterioridad y editarlas</p>
+                    </a>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <!-- JavaScript para menú desplegable y fecha -->
+    <script>
+        /* Función para desplegar/contraer menú */
+        function toggleMenu(element) {
+            const submenu = element.nextElementSibling;
+            if (submenu && submenu.classList.contains('submenu')) {
+                if (submenu.style.display === 'none') {
+                    submenu.style.display = 'block';
+                } else {
+                    submenu.style.display = 'none';
+                }
+            }
+        }
+
+        /* Función para navegación */
+        function irA(pagina) {
+            window.location.href = pagina;
+        }
+
+        /* Función para togglear el menú desplegable del header */
+        function toggleDropdownMenu() {
+            const menu = document.getElementById('dropdownMenu');
+            menu.classList.toggle('active');
+        }
+
+        /* Cerrar el menú si se hace clic fuera de él */
+        document.addEventListener('click', function(event) {
+            const menu = document.getElementById('dropdownMenu');
+            const btn = document.querySelector('.btn-prueba');
+            
+            if (!menu.contains(event.target) && !btn.contains(event.target)) {
+                menu.classList.remove('active');
+            }
+        });
+
+        /* Función para actualizar la fecha actual */
+        function updateDate() {
+            const today = new Date();
+            const options = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' };
+            const formattedDate = today.toLocaleDateString('es-ES', options);
+            document.getElementById('currentDate').textContent = formattedDate;
+        }
+
+        function abrirAccionDesdeUrl() {
+            const params = new URLSearchParams(window.location.search);
+            const action = params.get('action');
+
+            if (action === 'info') {
+                document.getElementById('modalInfoAdmin').style.display = 'flex';
+            }
+
+            if (action === 'password') {
+                document.getElementById('modalCambiarContraseña').style.display = 'flex';
+            }
+        }
+
+        function actualizarNombreAdmin() {
+            const session = window.getAdminSession ? window.getAdminSession() : null;
+            if (!session || !session.username) {
+                return;
+            }
+
+            const nombreBienvenida = document.getElementById('adminNombreBienvenida');
+            if (nombreBienvenida) {
+                nombreBienvenida.textContent = session.username;
+            }
+        }
+
+        /* Actualizar la fecha cuando carga la página */
+        document.addEventListener('DOMContentLoaded', function() {
+            updateDate();
+            actualizarNombreAdmin();
+            abrirAccionDesdeUrl();
+        });
+
+        /* Función para descargar plantilla */
+        function descargarPlantilla() {
+            alert('Descargando plantilla de Excel para subir horarios.\n\nLa descarga comenzará en breve.\n\nPor favor, espere...');
+            // Aquí iría la lógica para descargar el archivo
+            // window.location.href = 'ruta/al/archivo/plantilla.xlsx';
+        }
+        /* Función para cerrar sesión */
+        function cerrarSesion() {
+            if (window.clearAdminSession) {
+                window.clearAdminSession();
+            }
+            window.location.href = './login.html';
+        }
+
+        /* Funciones para Modal Cambiar Contraseña */
+        function abrirModalCambiarContraseña(event) {
+            event.preventDefault();
+            document.getElementById('modalCambiarContraseña').style.display = 'flex';
+            document.getElementById('dropdownMenu').classList.remove('active');
+        }
+
+        function cerrarModalCambiarContraseña() {
+            document.getElementById('modalCambiarContraseña').style.display = 'none';
+            document.getElementById('formCambiarContraseña').reset();
+            document.getElementById('mensajeError').style.display = 'none';
+        }
+
+        function cambiarContraseña(event) {
+            event.preventDefault();
+            
+            const contraseñaActual = document.getElementById('contraseñaActual').value;
+            const contraseñaNueva = document.getElementById('contraseñaNueva').value;
+            const confirmarContraseña = document.getElementById('confirmarContraseña').value;
+            const mensajeError = document.getElementById('mensajeError');
+
+            // Validación: Las contraseñas nuevas deben coincidir
+            if (contraseñaNueva !== confirmarContraseña) {
+                mensajeError.textContent = '❌ Las contraseñas no coinciden.';
+                mensajeError.style.display = 'block';
+                return;
+            }
+
+            // Validación: La nueva contraseña no puede ser igual a la actual
+            if (contraseñaActual === contraseñaNueva) {
+                mensajeError.textContent = '❌ La nueva contraseña no puede ser igual a la actual.';
+                mensajeError.style.display = 'block';
+                return;
+            }
+
+            // Validación: Longitud mínima de contraseña
+            if (contraseñaNueva.length < 6) {
+                mensajeError.textContent = '❌ La contraseña debe tener al menos 6 caracteres.';
+                mensajeError.style.display = 'block';
+                return;
+            }
+
+            // Aquí iría la lógica para enviar la petición al servidor
+            // Por ahora, mostrar un mensaje de éxito simulado
+            mensajeError.textContent = '✓ Contraseña cambiada exitosamente.';
+            mensajeError.style.display = 'block';
+            mensajeError.style.color = '#27ae60';
+            
+            setTimeout(() => {
+                cerrarModalCambiarContraseña();
+                mensajeError.style.color = '#e74c3c';
+            }, 2000);
+        }
+
+        /* Cerrar modal al hacer clic fuera de él */
+        window.addEventListener('click', function(event) {
+            const modal = document.getElementById('modalCambiarContraseña');
+            if (event.target === modal) {
+                cerrarModalCambiarContraseña();
+            }
+        });
+
+        /* Funciones para Modal Información del Administrador */
+        function abrirModalInfoAdmin(event) {
+            event.preventDefault();
+            document.getElementById('modalInfoAdmin').style.display = 'flex';
+            document.getElementById('dropdownMenu').classList.remove('active');
+        }
+
+        function cerrarModalInfoAdmin() {
+            document.getElementById('modalInfoAdmin').style.display = 'none';
+        }
+
+        function abrirEdicionAdmin() {
+            // Pre-llenar los campos con los datos actuales
+            document.getElementById('editNombre').value = document.getElementById('infoNombre').textContent;
+            document.getElementById('editEmail').value = document.getElementById('infoEmail').textContent;
+            document.getElementById('editRol').value = document.getElementById('infoRol').textContent;
+            document.getElementById('editDepartamento').value = document.getElementById('infoDepartamento').textContent;
+            document.getElementById('editTelefono').value = document.getElementById('infoTelefono').textContent;
+            
+            // Limpiar mensajes previos
+            document.getElementById('mensajeEditarError').style.display = 'none';
+            document.getElementById('mensajeEditarExito').style.display = 'none';
+            
+            // Abrir modal de edición y cerrar el de información
+            document.getElementById('modalInfoAdmin').style.display = 'none';
+            document.getElementById('modalEditarAdmin').style.display = 'flex';
+        }
+
+        function cerrarModalEditarAdmin() {
+            document.getElementById('modalEditarAdmin').style.display = 'none';
+            document.getElementById('formEditarAdmin').reset();
+            document.getElementById('mensajeEditarError').style.display = 'none';
+            document.getElementById('mensajeEditarExito').style.display = 'none';
+        }
+
+        function guardarEdicionAdmin(event) {
+            event.preventDefault();
+            
+            const nombre = document.getElementById('editNombre').value.trim();
+            const email = document.getElementById('editEmail').value.trim();
+            const departamento = document.getElementById('editDepartamento').value.trim();
+            const telefono = document.getElementById('editTelefono').value.trim();
+            const mensajeError = document.getElementById('mensajeEditarError');
+            const mensajeExito = document.getElementById('mensajeEditarExito');
+            
+            // Validaciones
+            if (!nombre || nombre.length < 3) {
+                mensajeError.textContent = '❌ El nombre debe tener al menos 3 caracteres.';
+                mensajeError.style.display = 'block';
+                return;
+            }
+            
+            if (!email.includes('@')) {
+                mensajeError.textContent = '❌ Por favor ingrese un email válido.';
+                mensajeError.style.display = 'block';
+                return;
+            }
+            
+            if (!departamento || departamento.length < 3) {
+                mensajeError.textContent = '❌ El departamento debe tener al menos 3 caracteres.';
+                mensajeError.style.display = 'block';
+                return;
+            }
+            
+            if (!telefono || telefono.length < 7) {
+                mensajeError.textContent = '❌ El teléfono debe ser válido.';
+                mensajeError.style.display = 'block';
+                return;
+            }
+            
+            // Actualizar la información en la vista principal
+            document.getElementById('infoNombre').textContent = nombre;
+            document.getElementById('infoEmail').textContent = email;
+            document.getElementById('infoDepartamento').textContent = departamento;
+            document.getElementById('infoTelefono').textContent = telefono;
+            
+            // Mostrar mensaje de éxito
+            mensajeError.style.display = 'none';
+            mensajeExito.textContent = '✓ Información actualizada exitosamente.';
+            mensajeExito.style.display = 'block';
+            
+            // Cerrar modal después de 2 segundos
+            setTimeout(() => {
+                cerrarModalEditarAdmin();
+                // Abrir nuevamente el modal de información para mostrar cambios
+                document.getElementById('modalInfoAdmin').style.display = 'flex';
+            }, 1500);
+        }
+
+        /* Cerrar modal de información al hacer clic fuera de él */
+        window.addEventListener('click', function(event) {
+            const modal = document.getElementById('modalInfoAdmin');
+            if (event.target === modal) {
+                cerrarModalInfoAdmin();
+            }
+        });
+
+        /* Cerrar modal de edición al hacer clic fuera de él */
+        window.addEventListener('click', function(event) {
+            const modal = document.getElementById('modalEditarAdmin');
+            if (event.target === modal) {
+                cerrarModalEditarAdmin();
+            }
+        });
+    </script>
+</body>
+</html>

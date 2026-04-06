@@ -1,0 +1,434 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Horarios UPB V3</title>
+    <link rel="icon" type="image/png" href="../Assets/upb-logo.png">
+    <link rel="stylesheet" href="admin-styles.css">
+    <link rel="stylesheet" href="reportes-styles.css">
+    <script src="https://unpkg.com/lucide@0.469.0/dist/umd/lucide.min.js"></script>
+    <script src="lucide-icons.js"></script>
+    <script src="ux-dynamic.js"></script>
+    <script src="admin-auth.js"></script>
+    <script src="admin-local-modals.js"></script>
+    <script src="facultades-store.js"></script>
+    <script>
+        requireAdminSession();
+    </script>
+</head>
+<body>
+    <!-- Header -->
+    <div class="header">
+        <div class="header-left">
+            <h1>HORARIOS UPB VERSION 3.0</h1>
+        </div>
+        <div class="header-right">
+            <!-- Botón Admin -->
+            <img src="../Assets/ICONO-ADMIN.png" alt="Admin" class="btn-prueba" onclick="toggleDropdownMenu()">
+
+            <!-- Menú Desplegable -->
+            <div class="dropdown-menu" id="dropdownMenu">
+            <div class="dropdown-header">
+                <img src="../Assets/upb-logo.png" alt="Logo UPB" class="dropdown-logo">
+                <span>Horarios</span>
+                <span class="dropdown-subtitle">Menu</span>
+            </div>
+
+            <div class="dropdown-content">
+                <a href="consultas-horarios-clases.html"><span class="icon">📅</span> Horarios Clases</a>
+                <a href="consultas-examenes.html"><span class="icon">📋</span> Exámenes Parciales</a>
+                <a href="consultas-supletorios.html"><span class="icon">📋</span> Supletorios</a>
+                <a href="consultas-intersemestrales.html"><span class="icon">📋</span> Cursos Intersemestrales</a>
+            </div>
+
+            <div class="dropdown-divider"></div>
+
+            <div class="dropdown-admin">
+                <a href="#" onclick="abrirModalInfoAdmin(event)"><span class="icon">👤</span> Mi Información</a>
+                <a href="#" onclick="abrirModalCambiarContraseña(event)"><span class="icon">🔑</span> Cambiar contraseña</a>
+                <a href="admin.html"><span class="icon">🔍</span> Administración</a>
+                <a href="login.html" onclick="cerrarSesion()"><span class="icon">🚪</span> Logout</a>
+            </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Contenedor principal -->
+    <div class="main-container">
+        <!-- Menú lateral -->
+        <aside class="sidebar">
+            <!-- Título del sidebar -->
+            <div class="sidebar-title">HORARIOS UPB</div>
+
+            <!-- Menú usuarios -->
+            <div class="menu-section">
+                <div class="menu-header">MENU USUARIOS</div>
+                <ul class="menu-list">
+                    <li class="menu-toggle" onclick="toggleMenu(this)">
+                        <span class="menu-icon">☰</span>
+                        <span>MENU</span>
+                    </li>
+                    <div class="submenu" style="display: none;">
+                        <li onclick="irA('consultas-horarios-clases.html')"><span class="submenu-icon">📅</span> Horarios Clases</li>
+                        <li onclick="irA('consultas-examenes.html')"><span class="submenu-icon">📋</span> Exámenes Parciales</li>
+                        <li onclick="irA('consultas-supletorios.html')"><span class="submenu-icon">📋</span> Supletorios</li>
+                        <li onclick="irA('consultas-intersemestrales.html')"><span class="submenu-icon">📋</span> Cursos Intersemestrales</li>
+                    </div>
+                </ul>
+            </div>
+
+            <!-- Menú administración -->
+            <div class="menu-section">
+                <div class="menu-header">MENU ADMINISTRACION</div>
+                <div class="menu-title">Administracion</div>
+                <ul class="menu-list">
+                    <li onclick="cerrarSesion()"><span class="submenu-icon">🚪</span> Logout</li>
+                </ul>
+            </div>
+        </aside>
+
+        <!-- Contenido principal -->
+        <main class="content">
+            <!-- Botón volver -->
+            <div class="back-button-container">
+                <a href="admin.html" class="back-button">< VOLVER AL MENU DE ADMINISTRACION</a>
+            </div>
+
+            <!-- Encabezado de contenido -->
+            <div class="content-header">
+                <h2>Reporte de Facultades</h2>
+                <p class="breadcrumb">Pagina/Facultades/Reporte</p>
+            </div>
+
+            <!-- Controles de la tabla -->
+            <div class="table-controls">
+                <div class="controls-left">
+                    <label>Mostrar 
+                        <select id="registrosPorPagina" onchange="cambiarRegistrosPorPagina()">
+                            <option value="10">10</option>
+                            <option value="25">25</option>
+                            <option value="50">50</option>
+                        </select>
+                        registros por página
+                    </label>
+                </div>
+
+                <div class="controls-right">
+                    <label>Buscar: 
+                        <input type="text" id="searchInput" placeholder="" onkeyup="filtrarTabla()">
+                    </label>
+                </div>
+            </div>
+
+            <!-- Botones de acción -->
+            <div class="action-buttons">
+                <button class="btn-action btn-primary" onclick="abrirModalNuevaFacultad()">NUEVA FACULTAD Y ESCUELA</button>
+                <button class="btn-action" onclick="copiarTabla()">COPY</button>
+                <button class="btn-action" onclick="imprimirTabla()">PRINT</button>
+                <button class="btn-action" onclick="exportarExcel()">EXCEL</button>
+                <button class="btn-action" onclick="exportarPDF()">PDF</button>
+            </div>
+
+            <!-- Tabla de facultades -->
+            <div class="table-wrapper">
+                <table class="publications-table" id="facultiesTable">
+                    <thead>
+                        <tr>
+                            <th>ID</th>
+                            <th>FACULTAD</th>
+                            <th>ESCUELA</th>
+                            <th>FECHA DE ACTUALIZACION</th>
+                            <th>ACCIONES</th>
+                        </tr>
+                    </thead>
+                    <tbody id="facultiesTableBody"></tbody>
+                </table>
+            </div>
+
+            <!-- Paginación -->
+            <div class="pagination" id="pagination"></div>
+        </main>
+    </div>
+
+    <!-- Modal Nueva Facultad -->
+    <div id="modalNuevaFacultad" class="modal" style="display: none;">
+        <div class="modal-content modal-facultad">
+            <div class="modal-header">
+                <h2>Nueva Facultad y Escuela</h2>
+                <button class="modal-close" onclick="cerrarModalNuevaFacultad()">&times;</button>
+            </div>
+            <div class="modal-body">
+                <form id="formNuevaFacultad" onsubmit="guardarNuevaFacultad(event)">
+                    <div class="form-group">
+                        <label for="nuevaFacultad">Facultad</label>
+                        <input type="text" id="nuevaFacultad" class="form-control" placeholder="Ingrese la facultad" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="nuevaEscuela">Escuela</label>
+                        <input type="text" id="nuevaEscuela" class="form-control" placeholder="Ingrese la escuela" required>
+                    </div>
+                    <div id="mensajeNuevaFacultad" class="facultad-message" style="display: none;"></div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn-cancelar" onclick="cerrarModalNuevaFacultad()">Cancelar</button>
+                        <button type="submit" class="btn-guardar">Guardar</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- JavaScript -->
+    <script>
+        const estadoFacultades = {
+            datos: [],
+            filtrados: [],
+            paginaActual: 1,
+            registrosPorPagina: 10
+        };
+
+        /* Función para desplegar/contraer menú */
+        function toggleMenu(element) {
+            const submenu = element.nextElementSibling;
+            if (submenu && submenu.classList.contains('submenu')) {
+                if (submenu.style.display === 'none') {
+                    submenu.style.display = 'block';
+                } else {
+                    submenu.style.display = 'none';
+                }
+            }
+        }
+
+        function irA(pagina) {
+            window.location.href = pagina;
+        }
+
+        /* Función para togglear el menú desplegable del header */
+        function toggleDropdownMenu() {
+            const menu = document.getElementById('dropdownMenu');
+            menu.classList.toggle('active');
+        }
+
+        /* Cerrar el menú si se hace clic fuera de él */
+        document.addEventListener('click', function(event) {
+            const menu = document.getElementById('dropdownMenu');
+            const btn = document.querySelector('.btn-prueba');
+            
+            if (!menu.contains(event.target) && !btn.contains(event.target)) {
+                menu.classList.remove('active');
+            }
+        });
+
+        /* Función para cambiar registros por página */
+        function cambiarRegistrosPorPagina() {
+            const valor = Number(document.getElementById('registrosPorPagina').value);
+            estadoFacultades.registrosPorPagina = valor;
+            estadoFacultades.paginaActual = 1;
+            renderizarTabla();
+        }
+
+        /* Función para filtrar tabla */
+        function filtrarTabla() {
+            const filtro = document.getElementById('searchInput').value.trim().toLowerCase();
+            estadoFacultades.filtrados = estadoFacultades.datos.filter(item => {
+                const texto = `${item.id} ${item.facultad} ${item.escuela} ${item.fechaActualizacion}`.toLowerCase();
+                return texto.includes(filtro);
+            });
+            estadoFacultades.paginaActual = 1;
+            renderizarTabla();
+        }
+
+        /* Función para copiar tabla */
+        function copiarTabla() {
+            const contenido = estadoFacultades.filtrados
+                .map(item => `${item.id}\t${item.facultad}\t${item.escuela}\t${item.fechaActualizacion}`)
+                .join('\n');
+
+            if (!contenido) {
+                alert('No hay datos para copiar.');
+                return;
+            }
+
+            navigator.clipboard.writeText(contenido)
+                .then(() => alert('Tabla copiada al portapapeles'))
+                .catch(() => alert('No se pudo copiar automáticamente.'));
+        }
+
+        /* Función para imprimir */
+        function imprimirTabla() {
+            window.print();
+        }
+
+        /* Función para exportar a Excel */
+        function exportarExcel() {
+            alert('Exportando a Excel...');
+        }
+
+        /* Función para exportar a PDF */
+        function exportarPDF() {
+            alert('Exportando a PDF...');
+        }
+
+        function abrirModalNuevaFacultad() {
+            document.getElementById('modalNuevaFacultad').style.display = 'flex';
+            limpiarMensajeNuevaFacultad();
+        }
+
+        function cerrarModalNuevaFacultad() {
+            document.getElementById('modalNuevaFacultad').style.display = 'none';
+            document.getElementById('formNuevaFacultad').reset();
+            limpiarMensajeNuevaFacultad();
+        }
+
+        function limpiarMensajeNuevaFacultad() {
+            const mensaje = document.getElementById('mensajeNuevaFacultad');
+            mensaje.style.display = 'none';
+            mensaje.className = 'facultad-message';
+            mensaje.textContent = '';
+        }
+
+        function mostrarMensajeNuevaFacultad(texto, exito) {
+            const mensaje = document.getElementById('mensajeNuevaFacultad');
+            mensaje.textContent = texto;
+            mensaje.style.display = 'block';
+            mensaje.className = exito ? 'facultad-message success' : 'facultad-message error';
+        }
+
+        function guardarNuevaFacultad(event) {
+            event.preventDefault();
+
+            const facultad = document.getElementById('nuevaFacultad').value;
+            const escuela = document.getElementById('nuevaEscuela').value;
+            const resultado = window.FacultadesStore.create({ facultad, escuela });
+
+            if (!resultado.ok) {
+                mostrarMensajeNuevaFacultad(`❌ ${resultado.message}`, false);
+                return;
+            }
+
+            mostrarMensajeNuevaFacultad('✓ Facultad y escuela registradas.', true);
+            recargarFacultades();
+
+            setTimeout(() => {
+                cerrarModalNuevaFacultad();
+            }, 900);
+        }
+
+        function editarFacultad(id) {
+            window.location.href = `ver-facultades-edicion.html?id=${id}`;
+        }
+
+        async function recargarFacultades() {
+            try {
+                const response = await fetch('http://localhost:3000/api/facultades');
+                const data = await response.json();
+                if (data.success && data.facultades) {
+                    estadoFacultades.datos = data.facultades.map(f => ({
+                        id: f.id,
+                        facultad: f.facultad,
+                        escuela: f.escuela,
+                        fechaActualizacion: new Date().toISOString().split('T')[0] // O fecha de DB real
+                    }));
+                    estadoFacultades.filtrados = [...estadoFacultades.datos];
+                    renderizarTabla();
+                }
+            } catch (error) {
+                console.error('Error cargando facultades:', error);
+            }
+        }
+
+        function renderizarTabla() {
+            const tbody = document.getElementById('facultiesTableBody');
+            const inicio = (estadoFacultades.paginaActual - 1) * estadoFacultades.registrosPorPagina;
+            const fin = inicio + estadoFacultades.registrosPorPagina;
+            const pagina = estadoFacultades.filtrados.slice(inicio, fin);
+
+            tbody.innerHTML = '';
+
+            if (!pagina.length) {
+                tbody.innerHTML = `
+                    <tr>
+                        <td colspan="5" class="table-empty">No hay registros disponibles.</td>
+                    </tr>
+                `;
+                renderizarPaginacion();
+                return;
+            }
+
+            pagina.forEach(item => {
+                const fila = document.createElement('tr');
+                fila.innerHTML = `
+                    <td><a href="ver-facultades-edicion.html?id=${item.id}" class="table-link">${item.id}</a></td>
+                    <td>${item.facultad}</td>
+                    <td>${item.escuela}</td>
+                    <td>${item.fechaActualizacion}</td>
+                    <td><button class="btn-action btn-small" onclick="editarFacultad(${item.id})">EDITAR</button></td>
+                `;
+                tbody.appendChild(fila);
+            });
+
+            renderizarPaginacion();
+        }
+
+        function renderizarPaginacion() {
+            const totalPaginas = Math.max(1, Math.ceil(estadoFacultades.filtrados.length / estadoFacultades.registrosPorPagina));
+            if (estadoFacultades.paginaActual > totalPaginas) {
+                estadoFacultades.paginaActual = totalPaginas;
+            }
+
+            const pagination = document.getElementById('pagination');
+            pagination.innerHTML = '';
+
+            const crearBoton = (texto, onClick, activo) => {
+                const btn = document.createElement('button');
+                btn.className = `page-btn ${activo ? 'active' : ''}`.trim();
+                btn.textContent = texto;
+                btn.onclick = onClick;
+                return btn;
+            };
+
+            pagination.appendChild(crearBoton('«', () => cambiarPagina(1), false));
+            pagination.appendChild(crearBoton('‹', () => cambiarPagina(estadoFacultades.paginaActual - 1), false));
+
+            for (let i = 1; i <= totalPaginas; i++) {
+                pagination.appendChild(crearBoton(String(i), () => cambiarPagina(i), i === estadoFacultades.paginaActual));
+            }
+
+            pagination.appendChild(crearBoton('›', () => cambiarPagina(estadoFacultades.paginaActual + 1), false));
+            pagination.appendChild(crearBoton('»', () => cambiarPagina(totalPaginas), false));
+        }
+
+        function cambiarPagina(nuevaPagina) {
+            const totalPaginas = Math.max(1, Math.ceil(estadoFacultades.filtrados.length / estadoFacultades.registrosPorPagina));
+            if (nuevaPagina < 1) {
+                estadoFacultades.paginaActual = 1;
+            } else if (nuevaPagina > totalPaginas) {
+                estadoFacultades.paginaActual = totalPaginas;
+            } else {
+                estadoFacultades.paginaActual = nuevaPagina;
+            }
+
+            renderizarTabla();
+        }
+
+        /* Función para cerrar sesión */
+        function cerrarSesion() {
+            if (window.clearAdminSession) {
+                window.clearAdminSession();
+            }
+            window.location.href = './login.html';
+        }
+
+        document.addEventListener('DOMContentLoaded', function() {
+            recargarFacultades();
+        });
+
+        window.addEventListener('click', function(event) {
+            const modal = document.getElementById('modalNuevaFacultad');
+            if (event.target === modal) {
+                cerrarModalNuevaFacultad();
+            }
+        });
+    </script>
+</body>
+</html>

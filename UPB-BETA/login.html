@@ -1,0 +1,115 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Horarios UPB V3</title>
+    <link rel="icon" type="image/png" href="../Assets/upb-logo.png">
+    <!-- Link al archivo CSS externo -->
+    <link rel="stylesheet" href="login.css">
+    <script src="admin-auth.js"></script>
+</head>
+<body>
+    <!-- Contenedor principal -->
+    <div class="container">
+        
+        <!-- Encabezado del login -->
+        <div class="login-header">
+            <!-- Logo UPB -->
+            <div class="logo-container">
+                <img src="../Assets/upb-logo.png" alt="Logo UPB" class="logo">
+            </div>
+            <h1>Bienvenido a la página de<br>Horarios Versión 2.0</h1>
+            <p>Por favor ingrese para administrar los horarios</p>
+        </div>
+
+        <!-- Formulario -->
+        <form onsubmit="irAAdmin(event)">
+            <!-- Campo de usuario -->
+            <div class="form-group">
+                <label for="username">Usuario</label>
+                <input type="text" id="username" placeholder="Ingrese con su nombre de usuario" required>
+            </div>
+
+            <!-- Campo de contraseña -->
+            <div class="form-group">
+                <label for="password">Contraseña</label>
+                <input type="password" id="password" placeholder="" required>
+            </div>
+
+            <!-- Checkbox Recuérdame -->
+            <div class="remember-group">
+                <label for="remember">
+                    <input type="checkbox" id="remember">
+                    Recuérdame
+                </label>
+            </div>
+
+            <!-- Botón de ingresar -->
+            <button type="submit" class="login-btn">Ingresar</button>
+
+            <!-- Texto de autorización -->
+            <div class="auth-text">
+                Si no es un usuario Autorizado <a href="#">Comuníquese con el CTIC</a>
+            </div>
+
+            <!-- Link a página principal -->
+            <div class="main-link">
+                <a href="menu-horarios.html">O vaya a la página principal</a>
+            </div>
+        </form>
+    </div>
+
+    <!-- JavaScript -->
+    <script>
+        if (window.isAdminAuthenticated && window.isAdminAuthenticated()) {
+            window.location.href = './admin.html';
+        }
+
+        /* Función para ir a la página de administración via API */
+        async function irAAdmin(event) {
+            event.preventDefault();
+            
+            // Validar que los campos no estén vacíos
+            const username = document.getElementById('username').value;
+            const password = document.getElementById('password').value;
+            const btn = document.querySelector('.login-btn');
+            
+            if (username.trim() === '' || password.trim() === '') {
+                alert('Por favor ingrese usuario y contraseña');
+                return;
+            }
+
+            try {
+                btn.textContent = 'Verificando...';
+                btn.disabled = true;
+
+                const response = await fetch('http://localhost:3000/api/login', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ username: username.trim(), password: password.trim() })
+                });
+
+                const data = await response.json();
+
+                if (data.success) {
+                    // Iniciar sesion con datos provenientes de base de datos
+                    window.setAdminSession(data.user);
+                    
+                    // Redirigir a la página de administración
+                    window.location.href = './admin.html';
+                } else {
+                    alert(data.message || 'Usuario o contraseña incorrectos');
+                }
+            } catch (error) {
+                console.error('Error de login:', error);
+                alert('No se pudo conectar con el servidor backend (MySQL). Verifica que npm start esté corriendo en /backend.');
+            } finally {
+                btn.textContent = 'Ingresar';
+                btn.disabled = false;
+            }
+        }
+    </script>
+
+</body>
+</html>

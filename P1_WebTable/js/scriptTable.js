@@ -1,30 +1,15 @@
-// Excel to JSON Converter - Prototype
-console.log('Excel to JSON Converter initialized');
+// Excel to Table Converter - Display as HTML Table
+console.log('Excel to Table Converter initialized');
 
 // Global variable to store converted data
 let convertedData = null;
 
-// DOM elements - will be initialized when DOM is ready
-let excelFileInput;
-let convertBtn;
-let outputSection;
-let jsonOutput;
-let errorMessage;
-
-// Initialize DOM elements
-function initializeDOMElements() {
-    excelFileInput = document.getElementById('excelFile');
-    convertBtn = document.getElementById('convertBtn');
-    outputSection = document.getElementById('outputSection');
-    jsonOutput = document.getElementById('jsonOutput');
-    errorMessage = document.getElementById('errorMessage');
-    
-    if (!excelFileInput || !convertBtn || !outputSection || !jsonOutput || !errorMessage) {
-        console.error('Missing required DOM elements');
-        return false;
-    }
-    return true;
-}
+// Get DOM elements
+const excelFileInput = document.getElementById('excelFile');
+const convertBtn = document.getElementById('convertBtn');
+const outputSection = document.getElementById('outputSection');
+const tableOutput = document.getElementById('tableOutput');
+const errorMessage = document.getElementById('errorMessage');
 
 // Check if XLSX library is loaded
 function waitForXLSX(callback, attempts = 0) {
@@ -40,10 +25,9 @@ function waitForXLSX(callback, attempts = 0) {
 }
 
 /**
- * Main function to convert Excel file to JSON
+ * Main function to convert Excel file to Table
  */
-function convertExcelToJSON() {
-    console.log('convertExcelToJSON called');
+function convertExcelToTable() {
     errorMessage.textContent = '';
     
     // Check if file is selected
@@ -53,7 +37,6 @@ function convertExcelToJSON() {
     }
     
     const file = excelFileInput.files[0];
-    console.log('Selected file:', file.name, 'Type:', file.type);
     
     // Validate file type
     const validTypes = ['application/vnd.openxmlformats-officedocument.spreadsheetml.sheet', 
@@ -68,32 +51,24 @@ function convertExcelToJSON() {
     
     reader.onload = function(event) {
         try {
-            console.log('File loaded, parsing with XLSX');
             const data = new Uint8Array(event.target.result);
-            
-            if (typeof XLSX === 'undefined') {
-                throw new Error('XLSX library is not loaded');
-            }
-            
             const workbook = XLSX.read(data, { type: 'array' });
-            console.log('Workbook parsed, sheets:', workbook.SheetNames);
             
-            // Convert all sheets to JSON
-            const jsonResult = parseWorkbookToJSON(workbook);
+            // Convert all sheets to table display
+            const tableResult = parseWorkbookToTable(workbook);
             
-            convertedData = jsonResult;
-            saveToLocalStorage(jsonResult);
-            displayJSON(jsonResult);
+            convertedData = tableResult;
+            saveToLocalStorage(tableResult);
+            displayTable(tableResult);
             
-            console.log('Conversión completada exitosamente');
+            console.log('Conversión a tabla completada exitosamente');
         } catch (error) {
-            console.error('Error details:', error);
             showError('Error al procesar el archivo: ' + error.message);
+            console.error('Error details:', error);
         }
     };
     
-    reader.onerror = function(error) {
-        console.error('FileReader error:', error);
+    reader.onerror = function() {
         showError('Error al leer el archivo');
     };
     
@@ -101,11 +76,11 @@ function convertExcelToJSON() {
 }
 
 /**
- * Parse Excel workbook to JSON structure
+ * Parse Excel workbook to table data structure
  * @param {Object} workbook - XLSX workbook object
- * @returns {Object} JSON object with table data organized by sheet names
+ * @returns {Object} Object with table data organized by sheet names
  */
-function parseWorkbookToJSON(workbook) {
+function parseWorkbookToTable(workbook) {
     const result = {
         fileName: excelFileInput.files[0].name,
         convertedAt: new Date().toISOString(),
@@ -129,20 +104,82 @@ function parseWorkbookToJSON(workbook) {
 }
 
 /**
- * Display JSON output in the UI
- * @param {Object} data - JSON data to display
+ * Display data as HTML tables in the UI
+ * @param {Object} data - Data to display as tables
  */
-function displayJSON(data) {
+function displayTable(data) {
     outputSection.style.display = 'block';
-    jsonOutput.textContent = JSON.stringify(data, null, 2);
+    let tableHTML = '';
+    
+    // Add file information
+    tableHTML += `<div class="file-info">
+        <p><strong>Archivo:</strong> ${data.fileName}</p>
+        <p><strong>Convertido:</strong> ${new Date(data.convertedAt).toLocaleString('es-ES')}</p>
+    </div>`;
+    
+    // Create a table for each sheet
+    Object.keys(data.sheets).forEach((sheetName) => {
+        const sheetInfo = data.sheets[sheetName];
+        
+        tableHTML += `<div class="sheet-container">
+            <h3>${sheetName}</h3>
+            <p class="sheet-info">Filas: ${sheetInfo.rows} | Columnas: ${sheetInfo.columns.length}</p>`;
+        
+        if (sheetInfo.data.length > 0) {
+            tableHTML += '<table class="data-table"><thead><tr>';
+            
+            // Create header row
+            sheetInfo.columns.forEach(column => {
+                tableHTML += `<th>${escapeHtml(column)}</th>`;
+            });
+            
+            tableHTML += '</tr></thead><tbody>';
+            
+            // Create data rows
+            sheetInfo.data.forEach(row => {
+                tableHTML += '<tr>';
+                sheetInfo.columns.forEach(column => {
+                    const cellValue = row[column] || '';
+                    tableHTML += `<td>${escapeHtml(cellValue)}</td>`;
+                });
+                tableHTML += '</tr>';
+            });
+            
+            tableHTML += '</tbody></table>';
+        } else {
+            tableHTML += '<p class="empty-sheet">La hoja está vacía</p>';
+        }
+        
+        tableHTML += '</div>';
+    });
+    
+    if (tableOutput) {
+        tableOutput.innerHTML = tableHTML;
+    }
 }
 
 /**
- * Save converted JSON to localStorage
+ * Escape HTML special characters to prevent XSS
+ * @param {string} text - Text to escape
+ * @returns {string} Escaped text
+ */
+function escapeHtml(text) {
+    const map = {
+        '&': '&amp;',
+        '<': '&lt;',
+        '>': '&gt;',
+        '"': '&quot;',
+        "'": '&#039;'
+    };
+    return String(text).replace(/[&<>"']/g, m => map[m]);
+}
+
+/**
+ * Save converted data to localStorage
  */
 function saveToLocalStorage(data) {
-    const fileName = excelFileInput.files[0].name.replace(/\.[^/.]+$/, '') + '.json';
-    const storageKey = 'json_' + Date.now();
+    const fileName = excelFileInput.files[0].name.replace(/\.[^/.]+$/, '');
+    const storageKey = 'table_' + Date.now();
     
     try {
         // Store data with filename and timestamp
@@ -158,7 +195,7 @@ function saveToLocalStorage(data) {
         updateStoredFilesList();
         
         console.log('Datos guardados en navegador: ' + fileName);
-        showSuccess('Datos guardados como: ' + fileName);
+        showSuccess('Tabla guardada como: ' + fileName);
     } catch (error) {
         console.error('Error saving to localStorage:', error);
         showError('Error al guardar los datos: ' + error.message);
@@ -166,14 +203,14 @@ function saveToLocalStorage(data) {
 }
 
 /**
- * Update and display the list of stored JSON files
+ * Update and display the list of stored table files
  */
 function updateStoredFilesList() {
     const storedFiles = [];
     
     for (let i = 0; i < localStorage.length; i++) {
         const key = localStorage.key(i);
-        if (key.startsWith('json_')) {
+        if (key.startsWith('table_')) {
             try {
                 const item = JSON.parse(localStorage.getItem(key));
                 storedFiles.push({
@@ -216,13 +253,13 @@ function showSuccess(message) {
 }
 
 /**
- * Display list of stored JSON files
+ * Display list of stored table files
  * @param {Array} files - Array of stored files
  */
 function displayStoredFiles(files) {
     if (files.length === 0) return;
     
-    let html = '<h3>Archivos guardados en el navegador:</h3><ul style="margin-top: 10px;">';
+    let html = '<h3>Tablas guardadas en el navegador:</h3><ul style="margin-top: 10px;">';
     
     files.forEach(file => {
         const date = new Date(file.savedAt).toLocaleDateString('es-ES');
@@ -246,35 +283,15 @@ function clearError() {
     errorMessage.style.display = 'none';
 }
 
-// Initialize when DOM is ready
-document.addEventListener('DOMContentLoaded', function() {
-    console.log('DOM Content Loaded - Initializing script');
-    
-    if (!initializeDOMElements()) {
-        console.error('Failed to initialize DOM elements');
-        return;
-    }
-    
-    // Event listeners
-    convertBtn.addEventListener('click', function() {
-        console.log('Convert button clicked');
-        waitForXLSX(convertExcelToJSON);
-    });
-    
-    excelFileInput.addEventListener('change', clearError);
-    
-    // Load stored files on page load
+// Event listeners
+convertBtn.addEventListener('click', function() {
+    waitForXLSX(convertExcelToTable);
+});
+excelFileInput.addEventListener('change', clearError);
+
+// Load stored files on page load
+window.addEventListener('load', function() {
     waitForXLSX(updateStoredFilesList);
-    
-    console.log('Event listeners attached successfully');
 });
 
-// Also keep window.load as backup
-window.addEventListener('load', function() {
-    if (!excelFileInput) {
-        console.log('Reinitializing on window load');
-        if (initializeDOMElements()) {
-            waitForXLSX(updateStoredFilesList);
-        }
-    }
-});
+console.log('Event listeners attached successfully');

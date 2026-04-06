@@ -1,0 +1,275 @@
+/* Estilos específicos para Reportes/Ver Publicaciones */
+
+/* Botón Prueba */
+.btn-prueba {
+    background-color: #a91414;
+    color: #ffffff;
+    border: none;
+    padding: 10px 20px;
+    border-radius: 5px;
+    font-size: 14px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background-color 0.3s;
+    white-space: nowrap;
+}
+
+.btn-prueba:hover {
+    background-color: #8a0f0f;
+}
+
+/* Menú Desplegable */
+.dropdown-menu {
+    display: none;
+    position: absolute;
+    top: 60px;
+    right: 0;
+    background-color: #ffffff;
+    border: 1px solid #ddd;
+    border-radius: 5px;
+    width: 250px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+    z-index: 1000;
+}
+
+.dropdown-menu.active {
+    display: block;
+}
+
+.dropdown-header {
+    padding: 15px;
+    text-align: center;
+    border-bottom: 2px solid #e0e0e0;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    flex-direction: column;
+}
+
+.dropdown-logo {
+    max-width: 40px;
+    height: auto;
+}
+
+.dropdown-header span {
+    font-weight: 600;
+    color: #a91414;
+}
+
+.dropdown-subtitle {
+    font-size: 12px;
+    color: #666;
+    font-weight: 400;
+}
+
+.dropdown-content {
+    padding: 10px 0;
+}
+
+.dropdown-content a {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 12px 15px;
+    color: #333;
+    text-decoration: none;
+    font-size: 13px;
+    transition: background-color 0.3s;
+}
+
+.dropdown-content a:hover {
+    background-color: #f5f5f5;
+}
+
+.dropdown-divider {
+    height: 1px;
+    background-color: #e0e0e0;
+    margin: 10px 0;
+}
+
+.dropdown-admin {
+    padding: 10px 0;
+}
+
+.dropdown-admin a {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 12px 15px;
+    color: #333;
+    text-decoration: none;
+    font-size: 13px;
+    transition: background-color 0.3s;
+}
+
+.dropdown-admin a:hover {
+    background-color: #f5f5f5;
+}
+
+.icon {
+    font-size: 14px;
+}
+
+/* Botón volver */
+.back-button-container {
+    margin-bottom: 20px;
+}
+
+.back-button {
+    display: inline-block;
+    background-color: #0066cc;
+    color: #ffffff;
+    padding: 10px 20px;
+    border-radius: 5px;
+    text-decoration: none;
+    font-size: 13px;
+    font-weight: 600;
+    transition: background-color 0.3s;
+}
+
+.back-button:hover {
+    background-color: #005cb8;
+}
+
+/* Controles de la tabla */
+.table-controls {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 20px;
+    background-color: #ffffff;
+    padding: 15px;
+    border-radius: 5px;
+}
+
+.controls-left, .controls-right {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 13px;
+}
+
+.controls-left select {
+    padding: 5px 8px;
+    border: 1px solid #ccc;
+    border-radius: 3px;
+    font-size: 13px;
+    min-width: 60px;
+}
+
+.controls-right input {
+    padding: 8px;
+    border: 1px solid #ccc;
+    border-radius: 3px;
+    font-size: 13px;
+    min-width: 150px;
+}
+
+/* Botones de acción */
+.action-buttons {
+    display: flex;
+    gap: 10px;
+    margin-bottom: 20px;
+}
+
+.btn-action {
+    background-color: #ffffff;
+    border: 1px solid #999;
+    padding: 8px 15px;
+    border-radius: 3px;
+    font-size: 12px;
+    font-weight: 600;
+    color: #333;
+    cursor: pointer;
+    transition: background-color 0.3s;
+}
+
+.btn-action:hover {
+    background-color: #f5f5f5;
+}
+
+/* Tabla */
+.table-wrapper {
+    background-color: #ffffff;
+    border-radius: 5px;
+    overflow: hidden;
+    margin-bottom: 20px;
+}
+
+.publications-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 12px;
+}
+
+.publications-table thead {
+    background-color: #f0f0f0;
+    border-bottom: 2px solid #ddd;
+}
+
+.publications-table th {
+    padding: 12px;
+    text-align: left;
+    font-weight: 600;
+    color: #333;
+    border-right: 1px solid #ddd;
+}
+
+.publications-table th:last-child {
+    border-right: none;
+}
+
+.publications-table td {
+    padding: 12px;
+    border-bottom: 1px solid #eee;
+    border-right: 1px solid #eee;
+    color: #333;
+}
+
+.publications-table td:last-child {
+    border-right: none;
+}
+
+.publications-table tbody tr:hover {
+    background-color: #f9f9f9;
+}
+
+/* Links en la tabla */
+.table-link {
+    color: #0066cc;
+    text-decoration: none;
+    font-weight: 600;
+    cursor: pointer;
+}
+
+.table-link:hover {
+    text-decoration: underline;
+}
+
+/* Paginación */
+.pagination {
+    display: flex;
+    justify-content: center;
+    gap: 5px;
+    margin-top: 20px;
+}
+
+.page-btn {
+    background-color: #ffffff;
+    border: 1px solid #ccc;
+    padding: 8px 12px;
+    border-radius: 3px;
+    font-size: 12px;
+    cursor: pointer;
+    transition: all 0.3s;
+}
+
+.page-btn:hover {
+    background-color: #f0f0f0;
+}
+
+.page-btn.active {
+    background-color: #0066cc;
+    color: #ffffff;
+    border-color: #0066cc;
+}

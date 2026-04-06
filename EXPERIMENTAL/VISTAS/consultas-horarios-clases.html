@@ -1,0 +1,726 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Horarios UPB V3</title>
+    <link rel="icon" type="image/png" href="../Assets/upb-logo.png">
+    <link rel="stylesheet" href="consultas-styles.css">
+    <script src="admin-auth.js"></script>
+    <script src="admin-local-modals.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/xlsx/dist/xlsx.full.min.js"></script>
+</head>
+<body>
+    <!-- Contenedor principal -->
+    <div class="main-container">
+        <!-- Menú lateral -->
+        <aside class="sidebar">
+            <!-- Título del sidebar -->
+            <div class="sidebar-title">HORARIOS UPB</div>
+
+            <!-- Menú usuarios -->
+            <div class="menu-section">
+                <div class="menu-header">MENU USUARIOS</div>
+                <ul class="menu-list">
+                    <li class="menu-toggle" onclick="toggleMenu(this)">
+                        <span class="menu-icon">☰</span>
+                        <span>MENU</span>
+                    </li>
+                    <div class="submenu" style="display: none;">
+                        <li onclick="irA('consultas-horarios-clases.html')"><span class="submenu-icon">📅</span> Horarios Clases</li>
+                        <li onclick="irA('consultas-examenes.html')"><span class="submenu-icon">📋</span> Exámenes Parciales</li>
+                        <li onclick="irA('consultas-supletorios.html')"><span class="submenu-icon">📋</span> Supletorios</li>
+                        <li onclick="irA('consultas-intersemestrales.html')"><span class="submenu-icon">📋</span> Cursos Intersemestrales</li>
+                    </div>
+                </ul>
+            </div>
+
+            <!-- Menú administración -->
+            <div class="menu-section">
+                <div class="menu-header">MENU ADMINISTRACION</div>
+                <div class="menu-title" id="adminSectionTitle" style="display: none;"></div>
+                <ul class="menu-list">
+                    <li id="adminAccessItem" onclick="abrirAccesoAdmin()" class="login-link"><span class="submenu-icon">🚪</span> <span id="adminAccessText">Login</span></li>
+                    <li id="adminLogoutItem" onclick="cerrarSesion()" style="display: none;"><span class="submenu-icon">🚪</span> Logout</li>
+                </ul>
+            </div>
+        </aside>
+
+        <!-- Contenido principal -->
+        <main class="content">
+            <!-- Header -->
+            <div class="header">
+                <h1>HORARIOS UPB VERSION 3.0</h1>
+                <img id="adminIcon" src="../Assets/ICONO-ADMIN.png" alt="Admin" class="btn-prueba" style="display: none;" onclick="toggleDropdownMenu()">
+                <div class="dropdown-menu" id="dropdownMenu">
+                    <div class="dropdown-header">
+                        <img src="../Assets/upb-logo.png" alt="Logo UPB" class="dropdown-logo">
+                        <span>Horarios</span>
+                        <span class="dropdown-subtitle">Menu</span>
+                    </div>
+                    <div class="dropdown-content">
+                        <a href="consultas-horarios-clases.html"><span class="icon">📅</span> Horarios Clases</a>
+                        <a href="consultas-examenes.html"><span class="icon">📋</span> Exámenes Parciales</a>
+                        <a href="consultas-supletorios.html"><span class="icon">📋</span> Supletorios</a>
+                        <a href="consultas-intersemestrales.html"><span class="icon">📋</span> Cursos Intersemestrales</a>
+                    </div>
+                    <div class="dropdown-divider"></div>
+                    <div class="dropdown-admin">
+                        <a href="#" onclick="abrirModalInfoAdmin(event)"><span class="icon">👤</span> Mi Información</a>
+                        <a href="#" onclick="abrirModalCambiarContraseña(event)"><span class="icon">🔑</span> Cambiar contraseña</a>
+                        <a href="admin.html"><span class="icon">🔍</span> Administración</a>
+                        <a href="login.html" onclick="cerrarSesion()"><span class="icon">🚪</span> Logout</a>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Contenido interno -->
+            <div class="inner-content">
+                <!-- Botón volver -->
+                <div class="back-button-container">
+                    <a href="menu-horarios.html" class="back-button" id="backButton">◄ Volver al Menu</a>
+                </div>
+
+                <!-- Tarjeta principal -->
+                <div class="consulta-card">
+                    <!-- Encabezado -->
+                    <div class="consulta-header">
+                        <h2>Consultas</h2>
+                        <p>Paginas/Horarios clase/buscar</p>
+                    </div>
+
+                    <!-- Filtros de búsqueda -->
+                    <div class="filters-section">
+                        <div class="filter-group">
+                            <label for="facultad">Facultad</label>
+                            <select id="facultad" class="facultad-select" onchange="actualizarConsulta()">
+                                <option value="">---Seleccionar facultad---</option>
+                                <option value="administracion-empresas">Administración De Empresas</option>
+                                <option value="centro-lenguas">Centro De Lenguas</option>
+                                <option value="ciencias-politicas">Ciencias Políticas Y Gobierno</option>
+                                <option value="comunicacion-social">Comunicación Social - Periodismo</option>
+                                <option value="ciencias-basicas">Departamento De Ciencias Básicas</option>
+                                <option value="formacion-humanistica">Departamento De Formación Humanística</option>
+                                <option value="derecho">Derecho</option>
+                                <option value="diseno-grafico">Diseño Gráfico</option>
+                                <option value="electivas">Electivas</option>
+                                <option value="ingenieria-industrial">Ingeniería Industrial</option>
+                                <option value="ingenieria-ambiental">Ingeniería Ambiental</option>
+                                <option value="ingenieria-civil">Ingeniería Civil</option>
+                                <option value="ingenieria-electronica">Ingeniería Electrónica</option>
+                                <option value="ingenieria-electrica">Ingeniería Eléctrica</option>
+                                <option value="ingenieria-mecanica">Ingeniería Mecánica</option>
+                                <option value="ingenieria-sistemas">Ingeniería De Sistemas E Informática</option>
+                                <option value="negocios-internacionales">Negocios Internacionales</option>
+                                <option value="psicologia">Psicología</option>
+                            </select>
+                        </div>
+
+                        <!-- Botones de acción -->
+                        <div class="action-buttons">
+                            <button class="btn-buscar" onclick="buscarDatos()">Buscar</button>
+                            <button class="btn-limpiar" onclick="limpiarFiltros()">Limpiar</button>
+                            <button class="btn-beta" onclick="abrirModalBeta()">Horarios Beta</button>
+                        </div>
+                    </div>
+
+                    <!-- Resultados -->
+                    <div class="results-section">
+                        <div class="results-info">
+                            Seleccione la facultad y Pulse el botón Buscar - Horarios de Clase
+                        </div>
+
+                        <div id="table-filters" class="table-filters" style="display: none;">
+                            <div>
+                                <label>Asignatura</label>
+                                <input type="text" data-col="0" list="asignatura-list" oninput="aplicarFiltros()" placeholder="Buscar asignatura">
+                                <datalist id="asignatura-list"></datalist>
+                            </div>
+                            <div>
+                                <label>Materia</label>
+                                <input type="text" data-col="1" list="materia-list" oninput="aplicarFiltros()" placeholder="Buscar materia">
+                                <datalist id="materia-list"></datalist>
+                            </div>
+                            <div>
+                                <label>NRC</label>
+                                <input type="text" data-col="2" list="nrc-list" oninput="aplicarFiltros()" placeholder="Buscar NRC">
+                                <datalist id="nrc-list"></datalist>
+                            </div>
+                            <div>
+                                <label>Creditos</label>
+                                <input type="text" data-col="3" list="creditos-list" oninput="aplicarFiltros()" placeholder="Buscar creditos">
+                                <datalist id="creditos-list"></datalist>
+                            </div>
+                            <div>
+                                <label>Profesor</label>
+                                <input type="text" data-col="4" list="profesor-list" oninput="aplicarFiltros()" placeholder="Buscar profesor">
+                                <datalist id="profesor-list"></datalist>
+                            </div>
+                            <div>
+                                <label>Aula</label>
+                                <input type="text" data-col="5" list="aula-list" oninput="aplicarFiltros()" placeholder="Buscar aula">
+                                <datalist id="aula-list"></datalist>
+                            </div>
+                            <div>
+                                <label>Cupos</label>
+                                <input type="text" data-col="6" list="cupos-list" oninput="aplicarFiltros()" placeholder="Buscar cupos">
+                                <datalist id="cupos-list"></datalist>
+                            </div>
+                        </div>
+
+                        <div id="filters-actions" class="filters-actions" style="display: none;">
+                            <button class="btn-limpiar-filtros" onclick="limpiarFiltrosTabla()">Limpiar filtros</button>
+                        </div>
+
+                        <div id="results-header" class="results-header" style="display: none;">
+                            <div class="results-line results-name"><span id="carrera-nombre">-</span></div>
+                            <div class="results-line results-title">HORARIOS DE CLASE PRIMER SEMESTRE (Año)</div>
+                            <div class="results-line results-availability">Disponible: 2024/01/15 -> 2024/06/15</div>
+                        </div>
+                        
+                        <div id="resultados" class="no-data">
+                            No hay datos para la facultad seleccionada!
+                        </div>
+
+                        <!-- Tabla de resultados (oculta inicialmente) -->
+                        <div class="table-scroll">
+                            <table id="tabla-resultados" class="results-table" style="display: none;">
+                                <thead>
+                                    <tr>
+                                        <th>Asignatura</th>
+                                        <th>Materia</th>
+                                        <th>NRC</th>
+                                        <th>Creditos</th>
+                                        <th>Profesor</th>
+                                        <th>Aula</th>
+                                        <th>Cupos</th>
+                                        <th>Lunes</th>
+                                        <th>Martes</th>
+                                        <th>Miercoles</th>
+                                        <th>Jueves</th>
+                                        <th>Viernes</th>
+                                        <th>Sabado</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="tabla-body">
+                                </tbody>
+                            </table>
+                        </div>
+                        <!-- Horarios Beta modal and table -->
+                        <div id="betaModal" class="beta-modal" style="display:none; position:fixed; left:0; top:0; right:0; bottom:0; background:rgba(0,0,0,0.5); align-items:center; justify-content:center; z-index:9999;">
+                            <div style="background:#fff; padding:18px; width:720px; max-width:95%; border-radius:6px; box-shadow:0 6px 18px rgba(0,0,0,0.2);">
+                                <h3>Horarios Beta — Buscar por NRC</h3>
+                                <p>Ingrese uno o varios NRC separados por comas o saltos de línea:</p>
+                                <textarea id="betaNrcInput" style="width:100%;height:80px;margin-bottom:8px;" placeholder="Ej: 10001,10002\n20001" oninput="handleBetaInput()"></textarea>
+                                <div style="display:flex; gap:8px; justify-content:flex-end; align-items:center;">
+                                    <label for="betaFilenameInput" style="font-size:0.9em; color:#333;">Nombre:</label>
+                                    <input id="betaFilenameInput" type="text" value="horarios_beta" placeholder="horarios_beta" style="padding:6px 8px; border:1px solid #ccc; border-radius:4px; width:160px;" />
+                                    <button onclick="cerrarModalBeta()">Cerrar</button>
+                                    <button onclick="generarHorariosBeta()">Generar</button>
+                                    <button id="betaDownloadBtn" style="display:none;" onclick="descargarExcelBeta()">Descargar Excel</button>
+                                </div>
+                                <div id="betaResults" style="margin-top:12px; display:none;">
+                                    <div style="max-height:240px; overflow:auto; margin-top:8px;">
+                                        <table id="tabla-beta" style="width:100%; border-collapse:collapse;">
+                                            <thead>
+                                                <tr>
+                                                    <th style="border:1px solid #ccc; padding:6px;">Asignatura</th>
+                                                    <th style="border:1px solid #ccc; padding:6px;">Materia</th>
+                                                    <th style="border:1px solid #ccc; padding:6px;">NRC</th>
+                                                    <th style="border:1px solid #ccc; padding:6px;">Creditos</th>
+                                                    <th style="border:1px solid #ccc; padding:6px;">Profesor</th>
+                                                    <th style="border:1px solid #ccc; padding:6px;">Aula</th>
+                                                    <th style="border:1px solid #ccc; padding:6px;">Cupos</th>
+                                                    <th style="border:1px solid #ccc; padding:6px;">Lunes</th>
+                                                    <th style="border:1px solid #ccc; padding:6px;">Martes</th>
+                                                    <th style="border:1px solid #ccc; padding:6px;">Miércoles</th>
+                                                    <th style="border:1px solid #ccc; padding:6px;">Jueves</th>
+                                                    <th style="border:1px solid #ccc; padding:6px;">Viernes</th>
+                                                    <th style="border:1px solid #ccc; padding:6px;">Sabado</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody id="tabla-beta-body"></tbody>
+                                        </table>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <!-- JavaScript -->
+    <script>
+        /* Función para desplegar/contraer menú */
+        function toggleMenu(element) {
+            const submenu = element.nextElementSibling;
+            if (submenu && submenu.classList.contains('submenu')) {
+                if (submenu.style.display === 'none') {
+                    submenu.style.display = 'block';
+                } else {
+                    submenu.style.display = 'none';
+                }
+            }
+        }
+
+        /* Función para navegación */
+        function irA(pagina) {
+            window.location.href = pagina;
+        }
+
+        /* Función para buscar datos */
+        function buscarDatos() {
+            const facultad = document.getElementById('facultad').value;
+            const resultados = document.getElementById('resultados');
+            const tabla = document.getElementById('tabla-resultados');
+            const header = document.getElementById('results-header');
+            const carreraNombre = document.getElementById('carrera-nombre');
+
+            if (!facultad) {
+                alert('Por favor seleccione una facultad');
+                header.style.display = 'none';
+                resultados.style.display = 'block';
+                tabla.style.display = 'none';
+                carreraNombre.textContent = '-';
+                mostrarFiltros(false);
+                limpiarFiltrosTabla();
+                return;
+            }
+
+            // Aquí iría la lógica para buscar datos del servidor
+            resultados.style.display = 'none';
+            tabla.style.display = 'table';
+
+            const facultadTexto = document.getElementById('facultad').options[document.getElementById('facultad').selectedIndex].text;
+            carreraNombre.textContent = facultadTexto;
+            
+            
+
+            const tbody = document.getElementById('tabla-body');
+            tbody.innerHTML = '';
+
+            const datos = datosSimulados[facultad] || [];
+            if (datos.length === 0) {
+                resultados.style.display = 'block';
+                tabla.style.display = 'none';
+                header.style.display = 'none';
+                carreraNombre.textContent = '-';
+                mostrarFiltros(false);
+            } else {
+                header.style.display = 'block';
+                datos.forEach(dato => {
+                    const fila = `
+                        <tr>
+                            <td>${dato.asignatura}</td>
+                            <td>${dato.materia}</td>
+                            <td>${dato.nrc}</td>
+                            <td>${dato.creditos}</td>
+                            <td>${dato.profesor}</td>
+                            <td>${dato.aula}</td>
+                            <td>${dato.cupos}</td>
+                            <td>${dato.lunes}</td>
+                            <td>${dato.martes}</td>
+                            <td>${dato.miercoles}</td>
+                            <td>${dato.jueves}</td>
+                            <td>${dato.viernes}</td>
+                            <td>${dato.sabado}</td>
+                        </tr>
+                    `;
+                    tbody.innerHTML += fila;
+                });
+                mostrarFiltros(true);
+                poblarListasFiltros();
+                limpiarFiltrosTabla();
+            }
+        }
+
+        /* Función para limpiar filtros */
+        function limpiarFiltros() {
+            document.getElementById('facultad').value = '';
+            document.getElementById('resultados').style.display = 'block';
+            document.getElementById('tabla-resultados').style.display = 'none';
+            document.getElementById('results-header').style.display = 'none';
+            document.getElementById('carrera-nombre').textContent = '-';
+            mostrarFiltros(false);
+            limpiarFiltrosTabla();
+        }
+
+        function mostrarFiltros(mostrar) {
+            const filtros = document.getElementById('table-filters');
+            const acciones = document.getElementById('filters-actions');
+            if (filtros) {
+                filtros.style.display = mostrar ? 'grid' : 'none';
+            }
+            if (acciones) {
+                acciones.style.display = mostrar ? 'flex' : 'none';
+            }
+        }
+
+        function poblarListasFiltros() {
+            const filtros = document.querySelectorAll('#table-filters input');
+            const filas = document.querySelectorAll('#tabla-body tr');
+
+            filtros.forEach(input => {
+                const col = parseInt(input.getAttribute('data-col'), 10);
+                const listId = input.getAttribute('list');
+                const dataList = document.getElementById(listId);
+                if (!dataList) {
+                    return;
+                }
+                const valores = new Set();
+                filas.forEach(fila => {
+                    const celda = fila.cells[col];
+                    if (!celda) {
+                        return;
+                    }
+                    const texto = celda.textContent.trim();
+                    if (texto) {
+                        valores.add(texto);
+                    }
+                });
+                dataList.innerHTML = '';
+                Array.from(valores).sort().forEach(valor => {
+                    const option = document.createElement('option');
+                    option.value = valor;
+                    dataList.appendChild(option);
+                });
+            });
+        }
+
+        /* Datos simulados con materias reales de cada facultad (usado por búsquedas y Horarios Beta) */
+        const datosSimulados = {
+            "administracion-empresas": [
+                { asignatura: "Contabilidad General", materia: "Contabilidad", nrc: "10001", creditos: 3, profesor: "Msc. López", aula: "B201", cupos: 35, lunes: "08:00-10:00", martes: "08:00-10:00", miercoles: "--", jueves: "08:00-10:00", viernes: "08:00-10:00", sabado: "--" },
+                { asignatura: "Administración Financiera", materia: "Finanzas", nrc: "10002", creditos: 3, profesor: "Dra. Martínez", aula: "B202", cupos: 30, lunes: "10:00-12:00", martes: "--", miercoles: "10:00-12:00", jueves: "--", viernes: "10:00-12:00", sabado: "--" },
+                { asignatura: "Recursos Humanos", materia: "RH", nrc: "10003", creditos: 3, profesor: "Ing. Torres", aula: "B203", cupos: 32, lunes: "14:00-16:00", martes: "14:00-16:00", miercoles: "14:00-16:00", jueves: "--", viernes: "--", sabado: "--" }
+            ],
+            "centro-lenguas": [
+                { asignatura: "Inglés I", materia: "Idiomas", nrc: "20001", creditos: 2, profesor: "Prof. Anderson", aula: "C101", cupos: 25, lunes: "09:00-10:30", martes: "--", miercoles: "09:00-10:30", jueves: "--", viernes: "09:00-10:30", sabado: "--" },
+                { asignatura: "Francés Intermedio", materia: "Idiomas", nrc: "20002", creditos: 2, profesor: "Prof. Dupont", aula: "C102", cupos: 20, lunes: "--", martes: "10:00-11:30", miercoles: "--", jueves: "10:00-11:30", viernes: "--", sabado: "10:00-12:00" }
+            ],
+            "ciencias-politicas": [
+                { asignatura: "Teoría Política", materia: "Política", nrc: "30001", creditos: 3, profesor: "Dr. Hernández", aula: "D101", cupos: 40, lunes: "07:00-09:00", martes: "--", miercoles: "07:00-09:00", jueves: "--", viernes: "07:00-09:00", sabado: "--" },
+                { asignatura: "Derecho Constitucional", materia: "Derecho", nrc: "30002", creditos: 3, profesor: "Dra. González", aula: "D102", cupos: 38, lunes: "--", martes: "09:00-11:00", miercoles: "--", jueves: "09:00-11:00", viernes: "--", sabado: "09:00-11:00" }
+            ],
+            "comunicacion-social": [
+                { asignatura: "Redacción Periodística", materia: "Journalism", nrc: "40001", creditos: 3, profesor: "Msc. Rodríguez", aula: "E101", cupos: 30, lunes: "10:00-12:00", martes: "10:00-12:00", miercoles: "--", jueves: "10:00-12:00", viernes: "--", sabado: "--" },
+                { asignatura: "Producción Audiovisual", materia: "Media", nrc: "40002", creditos: 3, profesor: "Dra. Silva", aula: "E102", cupos: 25, lunes: "--", martes: "14:00-16:00", miercoles: "14:00-16:00", jueves: "--", viernes: "14:00-16:00", sabado: "--" }
+            ],
+            "ciencias-basicas": [
+                { asignatura: "Cálculo I", materia: "Matemáticas", nrc: "50001", creditos: 4, profesor: "Dr. García", aula: "F101", cupos: 45, lunes: "07:00-09:00", martes: "07:00-09:00", miercoles: "--", jueves: "07:00-09:00", viernes: "--", sabado: "08:00-10:00" },
+                { asignatura: "Física General", materia: "Física", nrc: "50002", creditos: 4, profesor: "Dr. Pérez", aula: "F102", cupos: 40, lunes: "--", martes: "09:00-11:00", miercoles: "09:00-11:00", jueves: "--", viernes: "09:00-11:00", sabado: "--" }
+            ],
+            "formacion-humanistica": [
+                { asignatura: "Filosofía Moderna", materia: "Filosofía", nrc: "60001", creditos: 2, profesor: "Dr. Domínguez", aula: "G101", cupos: 35, lunes: "15:00-17:00", martes: "--", miercoles: "15:00-17:00", jueves: "--", viernes: "15:00-17:00", sabado: "--" },
+                { asignatura: "Historia de América Latina", materia: "Historia", nrc: "60002", creditos: 2, profesor: "Dra. Moreno", aula: "G102", cupos: 38, lunes: "--", martes: "16:00-18:00", miercoles: "--", jueves: "16:00-18:00", viernes: "--", sabado: "16:00-18:00" }
+            ],
+            "derecho": [
+                { asignatura: "Derecho Penal I", materia: "Penal", nrc: "70001", creditos: 4, profesor: "Dr. Reyes", aula: "H101", cupos: 40, lunes: "08:00-10:00", martes: "--", miercoles: "08:00-10:00", jueves: "--", viernes: "08:00-10:00", sabado: "09:00-11:00" },
+                { asignatura: "Derecho Civil I", materia: "Civil", nrc: "70002", creditos: 4, profesor: "Dra. Vargas", aula: "H102", cupos: 38, lunes: "--", martes: "10:00-12:00", miercoles: "--", jueves: "10:00-12:00", viernes: "--", sabado: "11:00-13:00" }
+            ],
+            "diseno-grafico": [
+                { asignatura: "Teoría del Color", materia: "Diseño", nrc: "80001", creditos: 2, profesor: "Dra. López", aula: "I101", cupos: 25, lunes: "09:00-11:00", martes: "09:00-11:00", miercoles: "--", jueves: "09:00-11:00", viernes: "--", sabado: "--" },
+                { asignatura: "Diseño Gráfico Digital", materia: "Diseño", nrc: "80002", creditos: 3, profesor: "Prof. Martínez", aula: "I102", cupos: 20, lunes: "--", martes: "14:00-17:00", miercoles: "14:00-17:00", jueves: "--", viernes: "14:00-17:00", sabado: "--" }
+            ],
+            "electivas": [
+                { asignatura: "Emprendimiento", materia: "Negocios", nrc: "90001", creditos: 2, profesor: "Msc. Sánchez", aula: "J101", cupos: 30, lunes: "17:00-19:00", martes: "--", miercoles: "17:00-19:00", jueves: "--", viernes: "17:00-19:00", sabado: "--" }
+            ],
+            "ingenieria-industrial": [
+                { asignatura: "Ingeniería de Procesos", materia: "Procesos", nrc: "100001", creditos: 3, profesor: "Ing. Ortiz", aula: "K101", cupos: 35, lunes: "07:00-09:00", martes: "07:00-09:00", miercoles: "--", jueves: "07:00-09:00", viernes: "--", sabado: "08:00-10:00" },
+                { asignatura: "Producción", materia: "Producción", nrc: "100002", creditos: 3, profesor: "Ing. Ruiz", aula: "K102", cupos: 32, lunes: "--", martes: "10:00-12:00", miercoles: "10:00-12:00", jueves: "--", viernes: "10:00-12:00", sabado: "--" }
+            ],
+            "ingenieria-ambiental": [
+                { asignatura: "Evaluación de Impacto Ambiental", materia: "Gestión Ambiental", nrc: "110001", creditos: 3, profesor: "Dra. Arias", aula: "L101", cupos: 30, lunes: "09:00-11:00", martes: "--", miercoles: "09:00-11:00", jueves: "--", viernes: "09:00-11:00", sabado: "--" },
+                { asignatura: "Tratamiento de Aguas", materia: "Agua", nrc: "110002", creditos: 3, profesor: "Ing. Castro", aula: "L102", cupos: 28, lunes: "--", martes: "14:00-16:00", miercoles: "--", jueves: "14:00-16:00", viernes: "14:00-16:00", sabado: "--" }
+            ],
+            "ingenieria-civil": [
+                { asignatura: "Resistencia de Materiales", materia: "Estructuras", nrc: "120001", creditos: 4, profesor: "Dr. Huerta", aula: "M101", cupos: 38, lunes: "08:00-10:00", martes: "08:00-10:00", miercoles: "--", jueves: "08:00-10:00", viernes: "--", sabado: "09:00-11:00" },
+                { asignatura: "Diseño de Estructuras", materia: "Estructuras", nrc: "120002", creditos: 4, profesor: "Ing. Fuentes", aula: "M102", cupos: 35, lunes: "--", martes: "10:00-12:00", miercoles: "10:00-12:00", jueves: "--", viernes: "10:00-12:00", sabado: "11:00-13:00" }
+            ],
+            "ingenieria-electronica": [
+                { asignatura: "Circuitos Digitales", materia: "Electrónica", nrc: "130001", creditos: 3, profesor: "Dr. Quiroga", aula: "N101", cupos: 32, lunes: "09:00-11:00", martes: "--", miercoles: "09:00-11:00", jueves: "--", viernes: "09:00-11:00", sabado: "10:00-12:00" },
+                { asignatura: "Microcontroladores", materia: "Electrónica", nrc: "130002", creditos: 3, profesor: "Ing. Navarro", aula: "N102", cupos: 30, lunes: "--", martes: "14:00-16:00", miercoles: "--", jueves: "14:00-16:00", viernes: "14:00-16:00", sabado: "--" }
+            ],
+            "ingenieria-electrica": [
+                { asignatura: "Máquinas Eléctricas", materia: "Máquinas", nrc: "140001", creditos: 3, profesor: "Dr. Montes", aula: "O101", cupos: 35, lunes: "07:00-09:00", martes: "07:00-09:00", miercoles: "--", jueves: "07:00-09:00", viernes: "--", sabado: "08:00-10:00" },
+                { asignatura: "Sistemas de Potencia", materia: "Potencia", nrc: "140002", creditos: 3, profesor: "Ing. Vera", aula: "O102", cupos: 33, lunes: "--", martes: "10:00-12:00", miercoles: "10:00-12:00", jueves: "--", viernes: "10:00-12:00", sabado: "--" }
+            ],
+            "ingenieria-mecanica": [
+                { asignatura: "Termodinámica", materia: "Térmica", nrc: "150001", creditos: 4, profesor: "Dr. Espinoza", aula: "P101", cupos: 37, lunes: "08:00-10:00", martes: "--", miercoles: "08:00-10:00", jueves: "--", viernes: "08:00-10:00", sabado: "09:00-11:00" },
+                { asignatura: "Mecánica de Fluidos", materia: "Fluidos", nrc: "150002", creditos: 4, profesor: "Ing. Botero", aula: "P102", cupos: 35, lunes: "--", martes: "10:00-12:00", miercoles: "--", jueves: "10:00-12:00", viernes: "10:00-12:00", sabado: "11:00-13:00" }
+            ],
+            "ingenieria-sistemas": [
+                { asignatura: "Programación Avanzada", materia: "Programación", nrc: "160001", creditos: 3, profesor: "Msc. Gómez", aula: "Q101", cupos: 40, lunes: "07:00-09:00", martes: "07:00-09:00", miercoles: "--", jueves: "07:00-09:00", viernes: "--", sabado: "08:00-10:00" },
+                { asignatura: "Bases de Datos", materia: "Bases de Datos", nrc: "160002", creditos: 3, profesor: "Dr. Puentes", aula: "Q102", cupos: 38, lunes: "--", martes: "10:00-12:00", miercoles: "10:00-12:00", jueves: "--", viernes: "10:00-12:00", sabado: "--" },
+                { asignatura: "Análisis de Sistemas", materia: "Sistemas", nrc: "160003", creditos: 3, profesor: "Ing. Giraldo", aula: "Q103", cupos: 36, lunes: "14:00-16:00", martes: "--", miercoles: "14:00-16:00", jueves: "14:00-16:00", viernes: "--", sabado: "--" }
+            ],
+            "negocios-internacionales": [
+                { asignatura: "Comercio Internacional", materia: "Comercio", nrc: "170001", creditos: 3, profesor: "Dra. Cardona", aula: "R101", cupos: 35, lunes: "09:00-11:00", martes: "09:00-11:00", miercoles: "--", jueves: "09:00-11:00", viernes: "--", sabado: "--" },
+                { asignatura: "Negociación Internacional", materia: "Negociación", nrc: "170002", creditos: 3, profesor: "Prof. Rivera", aula: "R102", cupos: 32, lunes: "--", martes: "14:00-16:00", miercoles: "14:00-16:00", jueves: "--", viernes: "14:00-16:00", sabado: "14:00-16:00" }
+            ],
+            "psicologia": [
+                { asignatura: "Psicología General", materia: "Psicología Fundamental", nrc: "180001", creditos: 3, profesor: "Dra. Flores", aula: "S101", cupos: 40, lunes: "08:00-10:00", martes: "--", miercoles: "08:00-10:00", jueves: "--", viernes: "08:00-10:00", sabado: "--" },
+                { asignatura: "Psicopatología", materia: "Clínica", nrc: "180002", creditos: 3, profesor: "Dr. Campos", aula: "S102", cupos: 35, lunes: "--", martes: "10:00-12:00", miercoles: "--", jueves: "10:00-12:00", viernes: "10:00-12:00", sabado: "10:00-12:00" }
+            ]
+        };
+
+        function aplicarFiltros() {
+            const filtros = document.querySelectorAll('#table-filters input');
+            const filas = document.querySelectorAll('#tabla-body tr');
+
+            filas.forEach(fila => {
+                let visible = true;
+                filtros.forEach(input => {
+                    const valor = input.value.trim().toLowerCase();
+                    if (!valor) {
+                        return;
+                    }
+                    const col = parseInt(input.getAttribute('data-col'), 10);
+                    const celda = fila.cells[col];
+                    const texto = celda ? celda.textContent.toLowerCase() : '';
+                    if (!texto.includes(valor)) {
+                        visible = false;
+                    }
+                });
+                fila.style.display = visible ? '' : 'none';
+            });
+        }
+
+        function limpiarFiltrosTabla() {
+            document.querySelectorAll('#table-filters input').forEach(input => {
+                input.value = '';
+            });
+            aplicarFiltros();
+        }
+
+        /* Función para actualización automática */
+        function actualizarConsulta() {
+            // Opcional: actualizar cuando cambia la selección
+        }
+
+        function toggleDropdownMenu() {
+            const menu = document.getElementById('dropdownMenu');
+            menu.classList.toggle('active');
+        }
+
+        document.addEventListener('click', function(event) {
+            const menu = document.getElementById('dropdownMenu');
+            const btn = document.getElementById('adminIcon');
+
+            if (!menu || !btn || btn.style.display === 'none') {
+                return;
+            }
+
+            if (!menu.contains(event.target) && !btn.contains(event.target)) {
+                menu.classList.remove('active');
+            }
+        });
+
+        function aplicarVistaSesionAdmin() {
+            const estaLogeado = window.isAdminAuthenticated && window.isAdminAuthenticated();
+            const adminAccessItem = document.getElementById('adminAccessItem');
+            const adminAccessText = document.getElementById('adminAccessText');
+            const adminLogoutItem = document.getElementById('adminLogoutItem');
+            const adminIcon = document.getElementById('adminIcon');
+            const backButton = document.getElementById('backButton');
+
+            if (estaLogeado) {
+                if (adminAccessItem) {
+                    adminAccessItem.style.display = 'none';
+                    adminAccessItem.classList.remove('login-link');
+                }
+                if (adminLogoutItem) {
+                    adminLogoutItem.style.display = 'block';
+                }
+                if (adminIcon) {
+                    adminIcon.style.display = 'block';
+                }
+                if (backButton) {
+                    backButton.href = 'admin.html';
+                    backButton.textContent = '◄ Volver a Administración';
+                }
+            } else {
+                if (adminAccessText) {
+                    adminAccessText.textContent = 'Login';
+                }
+                if (adminAccessItem) {
+                    adminAccessItem.style.display = 'list-item';
+                    adminAccessItem.classList.add('login-link');
+                }
+                if (adminLogoutItem) {
+                    adminLogoutItem.style.display = 'none';
+                }
+                if (adminIcon) {
+                    adminIcon.style.display = 'none';
+                }
+                if (backButton) {
+                    backButton.href = 'menu-horarios.html';
+                    backButton.textContent = '◄ Volver al Menu';
+                }
+            }
+        }
+
+        function abrirAccesoAdmin() {
+            if (window.isAdminAuthenticated && window.isAdminAuthenticated()) {
+                window.location.href = './admin.html';
+                return;
+            }
+            abrirLogin();
+        }
+
+        /* Función para abrir login */
+        function abrirLogin() {
+            window.location.href = './login.html';
+        }
+
+        function cerrarSesion() {
+            if (window.clearAdminSession) {
+                window.clearAdminSession();
+            }
+            window.location.href = './login.html';
+        }
+
+        // Horarios Beta feature
+        let latestBetaData = [];
+        let previewTimeout = null;
+
+        function abrirModalBeta() {
+            const modal = document.getElementById('betaModal');
+            if (modal) {
+                modal.style.display = 'flex';
+                document.getElementById('betaResults').style.display = 'none';
+                document.getElementById('betaDownloadBtn').style.display = 'none';
+                document.getElementById('betaNrcInput').value = '';
+                // Reset filename input to default so previous names aren't reused
+                const fn = document.getElementById('betaFilenameInput');
+                if (fn) fn.value = 'horarios_beta';
+            }
+        }
+
+        function cerrarModalBeta() {
+            const modal = document.getElementById('betaModal');
+            if (modal) modal.style.display = 'none';
+        }
+
+        function generarHorariosBeta() {
+            const raw = document.getElementById('betaNrcInput').value || '';
+            if (!raw.trim()) {
+                alert('Ingrese al menos un NRC');
+                return;
+            }
+            const codes = raw.split(/[,\n\s]+/).map(s => s.trim()).filter(s => s);
+            const results = [];
+            Object.values(datosSimulados).forEach(arr => {
+                arr.forEach(item => {
+                    if (codes.includes(String(item.nrc))) {
+                        results.push(item);
+                    }
+                });
+            });
+
+            if (results.length === 0) {
+                alert('No se encontraron registros para los NRC proporcionados');
+                document.getElementById('betaResults').style.display = 'none';
+                document.getElementById('betaDownloadBtn').style.display = 'none';
+                return;
+            }
+
+            latestBetaData = results;
+            mostrarTablaBeta(results);
+            document.getElementById('betaDownloadBtn').style.display = 'inline-block';
+        }
+
+        // Live preview while user types (debounced)
+        function handleBetaInput() {
+            clearTimeout(previewTimeout);
+            previewTimeout = setTimeout(() => performPreview(), 300);
+        }
+
+        function performPreview() {
+            const raw = document.getElementById('betaNrcInput').value || '';
+            if (!raw.trim()) {
+                document.getElementById('betaResults').style.display = 'none';
+                document.getElementById('betaDownloadBtn').style.display = 'none';
+                return;
+            }
+            const codes = raw.split(/[,\n\s]+/).map(s => s.trim()).filter(s => s);
+            const results = [];
+            Object.values(datosSimulados).forEach(arr => {
+                arr.forEach(item => {
+                    if (codes.includes(String(item.nrc))) {
+                        results.push(item);
+                    }
+                });
+            });
+            if (results.length === 0) {
+                document.getElementById('betaResults').style.display = 'none';
+                document.getElementById('betaDownloadBtn').style.display = 'none';
+                return;
+            }
+            // Show preview but do not enable download until user clicks Generar
+            mostrarTablaBeta(results);
+            document.getElementById('betaDownloadBtn').style.display = 'none';
+        }
+
+        function mostrarTablaBeta(datos) {
+            const tbody = document.getElementById('tabla-beta-body');
+            tbody.innerHTML = '';
+            datos.forEach(d => {
+                const tr = document.createElement('tr');
+                ['asignatura','materia','nrc','creditos','profesor','aula','cupos','lunes','martes','miercoles','jueves','viernes','sabado'].forEach(k => {
+                    const td = document.createElement('td');
+                    td.style.border = '1px solid #ddd';
+                    td.style.padding = '6px';
+                    td.textContent = d[k] || '';
+                    tr.appendChild(td);
+                });
+                tbody.appendChild(tr);
+            });
+            document.getElementById('betaResults').style.display = 'block';
+        }
+
+        function descargarExcelBeta() {
+            if (typeof XLSX === 'undefined') {
+                alert('Librería XLSX no cargada');
+                return;
+            }
+            if (!latestBetaData || !latestBetaData.length) {
+                alert('No hay datos para descargar');
+                return;
+            }
+            const ordered = latestBetaData.map(r => ({
+                Asignatura: r.asignatura,
+                Materia: r.materia,
+                NRC: r.nrc,
+                Creditos: r.creditos,
+                Profesor: r.profesor,
+                Aula: r.aula,
+                Cupos: r.cupos,
+                Lunes: r.lunes,
+                Martes: r.martes,
+                Miercoles: r.miercoles,
+                Jueves: r.jueves,
+                Viernes: r.viernes,
+                Sabado: r.sabado
+            }));
+            const ws = XLSX.utils.json_to_sheet(ordered);
+            const wb = XLSX.utils.book_new();
+            XLSX.utils.book_append_sheet(wb, ws, 'Horarios');
+            // Read filename from inline input with default 'horarios_beta'
+            let filename = 'horarios_beta';
+            const inputEl = document.getElementById('betaFilenameInput');
+            if (inputEl && inputEl.value && inputEl.value.trim()) {
+                filename = inputEl.value.trim();
+            }
+            // Remove any extension user may have typed
+            filename = filename.replace(/\.xlsx?$/i, '');
+            if (!filename) filename = 'horarios_beta';
+            XLSX.writeFile(wb, filename + '.xlsx');
+        }
+
+        document.addEventListener('DOMContentLoaded', aplicarVistaSesionAdmin);
+    </script>
+</body>
+</html>

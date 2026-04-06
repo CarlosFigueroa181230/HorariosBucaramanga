@@ -4,27 +4,12 @@ console.log('Excel to JSON Converter initialized');
 // Global variable to store converted data
 let convertedData = null;
 
-// DOM elements - will be initialized when DOM is ready
-let excelFileInput;
-let convertBtn;
-let outputSection;
-let jsonOutput;
-let errorMessage;
-
-// Initialize DOM elements
-function initializeDOMElements() {
-    excelFileInput = document.getElementById('excelFile');
-    convertBtn = document.getElementById('convertBtn');
-    outputSection = document.getElementById('outputSection');
-    jsonOutput = document.getElementById('jsonOutput');
-    errorMessage = document.getElementById('errorMessage');
-    
-    if (!excelFileInput || !convertBtn || !outputSection || !jsonOutput || !errorMessage) {
-        console.error('Missing required DOM elements');
-        return false;
-    }
-    return true;
-}
+// Get DOM elements
+const excelFileInput = document.getElementById('excelFile');
+const convertBtn = document.getElementById('convertBtn');
+const outputSection = document.getElementById('outputSection');
+const jsonOutput = document.getElementById('jsonOutput');
+const errorMessage = document.getElementById('errorMessage');
 
 // Check if XLSX library is loaded
 function waitForXLSX(callback, attempts = 0) {
@@ -43,7 +28,6 @@ function waitForXLSX(callback, attempts = 0) {
  * Main function to convert Excel file to JSON
  */
 function convertExcelToJSON() {
-    console.log('convertExcelToJSON called');
     errorMessage.textContent = '';
     
     // Check if file is selected
@@ -53,7 +37,6 @@ function convertExcelToJSON() {
     }
     
     const file = excelFileInput.files[0];
-    console.log('Selected file:', file.name, 'Type:', file.type);
     
     // Validate file type
     const validTypes = ['application/vnd.openxmlformats-officedocument.spreadsheetml.sheet', 
@@ -68,15 +51,8 @@ function convertExcelToJSON() {
     
     reader.onload = function(event) {
         try {
-            console.log('File loaded, parsing with XLSX');
             const data = new Uint8Array(event.target.result);
-            
-            if (typeof XLSX === 'undefined') {
-                throw new Error('XLSX library is not loaded');
-            }
-            
             const workbook = XLSX.read(data, { type: 'array' });
-            console.log('Workbook parsed, sheets:', workbook.SheetNames);
             
             // Convert all sheets to JSON
             const jsonResult = parseWorkbookToJSON(workbook);
@@ -87,13 +63,12 @@ function convertExcelToJSON() {
             
             console.log('Conversión completada exitosamente');
         } catch (error) {
-            console.error('Error details:', error);
             showError('Error al procesar el archivo: ' + error.message);
+            console.error('Error details:', error);
         }
     };
     
-    reader.onerror = function(error) {
-        console.error('FileReader error:', error);
+    reader.onerror = function() {
         showError('Error al leer el archivo');
     };
     
@@ -246,35 +221,15 @@ function clearError() {
     errorMessage.style.display = 'none';
 }
 
-// Initialize when DOM is ready
-document.addEventListener('DOMContentLoaded', function() {
-    console.log('DOM Content Loaded - Initializing script');
-    
-    if (!initializeDOMElements()) {
-        console.error('Failed to initialize DOM elements');
-        return;
-    }
-    
-    // Event listeners
-    convertBtn.addEventListener('click', function() {
-        console.log('Convert button clicked');
-        waitForXLSX(convertExcelToJSON);
-    });
-    
-    excelFileInput.addEventListener('change', clearError);
-    
-    // Load stored files on page load
+// Event listeners
+convertBtn.addEventListener('click', function() {
+    waitForXLSX(convertExcelToJSON);
+});
+excelFileInput.addEventListener('change', clearError);
+
+// Load stored files on page load
+window.addEventListener('load', function() {
     waitForXLSX(updateStoredFilesList);
-    
-    console.log('Event listeners attached successfully');
 });
 
-// Also keep window.load as backup
-window.addEventListener('load', function() {
-    if (!excelFileInput) {
-        console.log('Reinitializing on window load');
-        if (initializeDOMElements()) {
-            waitForXLSX(updateStoredFilesList);
-        }
-    }
-});
+console.log('Event listeners attached successfully');
