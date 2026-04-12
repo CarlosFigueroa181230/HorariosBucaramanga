@@ -1,0 +1,593 @@
+﻿<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Horarios UPB V3</title>
+    <link rel="icon" type="image/png" href="../Assets/upb-logo.png">
+    <link rel="stylesheet" href="consultas-styles.css">
+    <script src="https://unpkg.com/lucide@0.469.0/dist/umd/lucide.min.js"></script>
+    <script src="lucide-icons.js"></script>
+    <script src="ux-dynamic.js"></script>
+    <script src="facultades-store.js"></script>
+    <script src="plantillas-store.js"></script>
+    <script src="facultades-sync.js"></script>
+    <script src="admin-auth.js"></script>
+    <script src="admin-local-modals.js"></script>
+</head>
+<body>
+    <!-- Contenedor principal -->
+    <div class="main-container">
+        <!-- Menú lateral -->
+        <aside class="sidebar">
+            <button class="mobile-close-btn" type="button" onclick="toggleMobileSidebar(false)" aria-label="Cerrar menu">&lt;</button>
+            <!-- Título del sidebar -->
+            <div class="sidebar-title">HORARIOS UPB</div>
+
+            <!-- Menú usuarios -->
+            <div class="menu-section">
+                <div class="menu-header">MENU USUARIOS</div>
+                <ul class="menu-list">
+                    <li class="menu-toggle" onclick="toggleMenu(this)">
+                        <span class="menu-icon">☰</span>
+                        <span>MENU</span>
+                    </li>
+                    <div class="submenu" style="display: none;">
+                        <li onclick="irA('consultas-horarios-clases.html')"><span class="submenu-icon">📅</span> Horarios Clases</li>
+                        <li onclick="irA('consultas-examenes.html')"><span class="submenu-icon">📋</span> Exámenes Parciales</li>
+                        <li onclick="irA('consultas-supletorios.html')"><span class="submenu-icon">📋</span> Supletorios</li>
+                        <li onclick="irA('consultas-intersemestrales.html')"><span class="submenu-icon">📋</span> Cursos Intersemestrales</li>
+                        <li onclick="irA('consultas-cursos-extracurriculares.html')"><span class="submenu-icon">📋</span> Cursos Extracurriculares</li>
+                    </div>
+                </ul>
+            </div>
+
+            <!-- Menú administración -->
+            <div class="menu-section">
+                <div class="menu-header">MENU ADMINISTRACION</div>
+                <div class="menu-title" id="adminSectionTitle" style="display: none;"></div>
+                <ul class="menu-list">
+                    <li id="adminAccessItem" onclick="abrirAccesoAdmin()" class="login-link"><span class="submenu-icon">🚪</span> <span id="adminAccessText">Login</span></li>
+                    <li id="adminLogoutItem" onclick="cerrarSesion()" style="display: none;"><span class="submenu-icon">🚪</span> Logout</li>
+                </ul>
+            </div>
+        </aside>
+
+        <div class="mobile-overlay" onclick="toggleMobileSidebar(false)"></div>
+
+        <!-- Contenido principal -->
+        <main class="content">
+            <!-- Header -->
+            <div class="header">
+            <button class="mobile-menu-btn" type="button" onclick="toggleMobileSidebar()" aria-label="Abrir o cerrar menu">☰</button>
+                <h1>HORARIOS UPB V.3</h1>
+                <img id="adminIcon" src="../Assets/ICONO-ADMIN.png" alt="Admin" class="btn-prueba" style="display: none;" onclick="toggleDropdownMenu()">
+                <div class="dropdown-menu" id="dropdownMenu">
+                    <div class="dropdown-header">
+                        <img src="../Assets/upb-logo.png" alt="Logo UPB" class="dropdown-logo">
+                        <span>Horarios</span>
+                        <span class="dropdown-subtitle">Menu</span>
+                    </div>
+                    <div class="dropdown-content">
+                        <a href="consultas-horarios-clases.html"><span class="icon">📅</span> Horarios Clases</a>
+                        <a href="consultas-examenes.html"><span class="icon">📋</span> Exámenes Parciales</a>
+                        <a href="consultas-supletorios.html"><span class="icon">📋</span> Supletorios</a>
+                        <a href="consultas-intersemestrales.html"><span class="icon">📋</span> Cursos Intersemestrales</a>
+                <a href="consultas-cursos-extracurriculares.html"><span class="icon">📋</span> Cursos Extracurriculares</a>
+                    </div>
+                    <div class="dropdown-divider"></div>
+                    <div class="dropdown-admin">
+                        <a href="#" onclick="abrirModalInfoAdmin(event)"><span class="icon">👤</span> Mi Información</a>
+                        <a href="#" onclick="abrirModalCambiarContraseña(event)"><span class="icon">🔑</span> Cambiar contraseña</a>
+                        <a href="admin.html"><span class="icon">🔍</span> Administración</a>
+                        <a href="login.html" onclick="cerrarSesion()"><span class="icon">🚪</span> Logout</a>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Contenido interno -->
+            <div class="inner-content">
+                <!-- Botón volver -->
+                <div class="back-button-container">
+                    <a href="menu-horarios.html" class="back-button" id="backButton">◄ Volver al Menu</a>
+                </div>
+
+                <!-- Tarjeta principal -->
+                <div class="consulta-card">
+                    <!-- Encabezado -->
+                    <div class="consulta-header">
+                        <h2>Consultas</h2>
+                        <p>Paginas/Intersemestrales/buscar</p>
+                    </div>
+
+                    <!-- Filtros de búsqueda -->
+                    <div class="filters-section">
+                        <div class="filter-group">
+                            <label for="facultad">Facultad</label>
+                            <select id="facultad" class="facultad-select" onchange="actualizarConsulta()">
+                                <option value="">---Seleccionar facultad---</option>
+                                <option value="administracion-empresas">Administración De Empresas</option>
+                                <option value="centro-lenguas">Centro De Lenguas</option>
+                                <option value="ciencias-politicas">Ciencias Políticas Y Gobierno</option>
+                                <option value="comunicacion-social">Comunicación Social - Periodismo</option>
+                                <option value="ciencias-basicas">Departamento De Ciencias Básicas</option>
+                                <option value="formacion-humanistica">Departamento De Formación Humanística</option>
+                                <option value="derecho">Derecho</option>
+                                <option value="diseno-grafico">Diseño Gráfico</option>
+                                <option value="electivas">Electivas</option>
+                                <option value="ingenieria-industrial">Ingeniería Industrial</option>
+                                <option value="ingenieria-ambiental">Ingeniería Ambiental</option>
+                                <option value="ingenieria-civil">Ingeniería Civil</option>
+                                <option value="ingenieria-electronica">Ingeniería Electrónica</option>
+                                <option value="ingenieria-electrica">Ingeniería Eléctrica</option>
+                                <option value="ingenieria-mecanica">Ingeniería Mecánica</option>
+                                <option value="ingenieria-sistemas">Ingeniería De Sistemas E Informática</option>
+                                <option value="negocios-internacionales">Negocios Internacionales</option>
+                                <option value="psicologia">Psicología</option>
+                            </select>
+                        </div>
+
+                        <!-- Botones de acción -->
+                        <div class="action-buttons">
+                            <button class="btn-buscar" onclick="buscarDatos()">Buscar</button>
+                            <button class="btn-limpiar" onclick="limpiarFiltros()">Limpiar</button>
+                        </div>
+                    </div>
+
+                    <!-- Resultados -->
+                    <div class="results-section">
+                        <div class="results-info">
+                            Seleccione la facultad y Pulse el botón Buscar - Intersemestrales
+                        </div>
+
+                        <div id="results-header" class="results-header" style="display: none;">
+                            <div class="results-line results-name"><span id="carrera-nombre">-</span></div>
+                            <div class="results-line results-title">CURSOS INTERSEMESTRALES (Año)</div>
+                            <div class="results-line results-availability">Disponible: 2024/06/01 -> 2024/07/31</div>
+                        </div>
+
+                        <div id="table-filters" class="table-filters" style="display: none;">
+                            <div>
+                                <label>Curso</label>
+                                <input type="text" data-col="0" list="curso-list" oninput="aplicarFiltros()" placeholder="Buscar curso">
+                                <datalist id="curso-list"></datalist>
+                            </div>
+                            <div>
+                                <label>Fechas</label>
+                                <input type="text" data-col="1" list="fechas-list" oninput="aplicarFiltros()" placeholder="Buscar fechas">
+                                <datalist id="fechas-list"></datalist>
+                            </div>
+                            <div>
+                                <label>Horario</label>
+                                <input type="text" data-col="2" list="horario-list" oninput="aplicarFiltros()" placeholder="Buscar horario">
+                                <datalist id="horario-list"></datalist>
+                            </div>
+                            <div>
+                                <label>Salon</label>
+                                <input type="text" data-col="3" list="salon-list" oninput="aplicarFiltros()" placeholder="Buscar salon">
+                                <datalist id="salon-list"></datalist>
+                            </div>
+                            <div>
+                                <label>Docente</label>
+                                <input type="text" data-col="4" list="docente-list" oninput="aplicarFiltros()" placeholder="Buscar docente">
+                                <datalist id="docente-list"></datalist>
+                            </div>
+                            <div>
+                                <label>Cupos</label>
+                                <input type="text" data-col="5" list="cupos-list" oninput="aplicarFiltros()" placeholder="Buscar cupos">
+                                <datalist id="cupos-list"></datalist>
+                            </div>
+                        </div>
+
+                        <div id="filters-actions" class="filters-actions" style="display: none;">
+                            <button class="btn-limpiar-filtros" onclick="limpiarFiltrosTabla()">Limpiar filtros</button>
+                        </div>
+                        
+                        <div id="resultados" class="no-data">
+                            No hay datos para la facultad seleccionada!
+                        </div>
+
+                        <!-- Tabla de resultados (oculta inicialmente) -->
+                        <div class="table-scroll">
+                            <table id="tabla-resultados" class="results-table" style="display: none;">
+                                <thead>
+                                    <tr>
+                                        <th>Curso</th>
+                                        <th>Fechas</th>
+                                        <th>Horario</th>
+                                        <th>Salon</th>
+                                        <th>Docente</th>
+                                        <th>Cupos</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="tabla-body">
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <!-- JavaScript -->
+    <script>
+        /* Función para desplegar/contraer menú */
+        function toggleMenu(element) {
+            const submenu = element.nextElementSibling;
+            if (submenu && submenu.classList.contains('submenu')) {
+                if (submenu.style.display === 'none') {
+                    submenu.style.display = 'block';
+                } else {
+                    submenu.style.display = 'none';
+                }
+            }
+        }
+
+        /* Función para navegación */
+        function irA(pagina) {
+            toggleMobileSidebar(false);
+            window.location.href = pagina;
+        }
+
+        function toggleMobileSidebar(forceOpen) {
+            if (window.innerWidth > 768) {
+                document.body.classList.remove('mobile-sidebar-open');
+                return;
+            }
+
+            const shouldOpen = typeof forceOpen === 'boolean'
+                ? forceOpen
+                : !document.body.classList.contains('mobile-sidebar-open');
+
+            document.body.classList.toggle('mobile-sidebar-open', shouldOpen);
+        }
+
+        window.addEventListener('resize', function() {
+            if (window.innerWidth > 768) {
+                document.body.classList.remove('mobile-sidebar-open');
+            }
+        });
+
+        function obtenerDatosPlantillaIntersemestral(nombreFacultad) {
+            if (!window.PlantillasStore || typeof window.PlantillasStore.getAll !== 'function') {
+                return [];
+            }
+
+            const clave = (nombreFacultad || '').trim().toLowerCase();
+            return window.PlantillasStore.getAll()
+                .filter(item => (item.facultad || '').trim().toLowerCase() === clave)
+                .map(item => ({
+                    curso: item.asignatura,
+                    fechas: '2026-06-01 a 2026-06-30',
+                    horario: '09:00 - 12:00',
+                    salon: item.aula,
+                    docente: item.profesor,
+                    cupos: item.cupos
+                }));
+        }
+
+        /* Función para buscar datos */
+        function buscarDatos() {
+            const facultad = document.getElementById('facultad').value;
+            const resultados = document.getElementById('resultados');
+            const tabla = document.getElementById('tabla-resultados');
+            const header = document.getElementById('results-header');
+            const carreraNombre = document.getElementById('carrera-nombre');
+
+            if (!facultad) {
+                alert('Por favor seleccione una facultad');
+                header.style.display = 'none';
+                resultados.style.display = 'block';
+                tabla.style.display = 'none';
+                carreraNombre.textContent = '-';
+                mostrarFiltros(false);
+                limpiarFiltrosTabla();
+                return;
+            }
+
+            resultados.style.display = 'none';
+            tabla.style.display = 'table';
+
+            const facultadTexto = document.getElementById('facultad').options[document.getElementById('facultad').selectedIndex].text;
+            carreraNombre.textContent = facultadTexto;
+            
+            // Datos simulados - Cursos intersemestrales para todas las facultades
+            const datosSimulados = {
+                "administracion-empresas": [
+                    { curso: "Contabilidad Avanzada", fechas: "2024-06-01 a 2024-06-30", horario: "09:00 - 12:00", salon: "B401", docente: "Msc. López", cupos: 25 },
+                    { curso: "Finanzas Corporativas", fechas: "2024-07-01 a 2024-07-31", horario: "14:00 - 17:00", salon: "B402", docente: "Dra. Martínez", cupos: 22 }
+                ],
+                "centro-lenguas": [
+                    { curso: "Conversación en Inglés", fechas: "2024-06-05 a 2024-07-05", horario: "10:00 - 12:00", salon: "C201", docente: "Prof. Anderson", cupos: 20 },
+                    { curso: "Francés Avanzado", fechas: "2024-07-10 a 2024-08-10", horario: "14:00 - 16:00", salon: "C202", docente: "Prof. Dupont", cupos: 18 }
+                ],
+                "ciencias-politicas": [
+                    { curso: "Sistemas Políticos Comparados", fechas: "2024-06-01 a 2024-06-30", horario: "08:00 - 11:00", salon: "D301", docente: "Dr. Hernández", cupos: 30 },
+                    { curso: "Teoría del Estado", fechas: "2024-07-01 a 2024-07-31", horario: "09:00 - 12:00", salon: "D302", docente: "Dra. González", cupos: 28 }
+                ],
+                "comunicacion-social": [
+                    { curso: "Periodismo Digital", fechas: "2024-06-01 a 2024-06-30", horario: "10:00 - 13:00", salon: "E301", docente: "Msc. Rodríguez", cupos: 25 },
+                    { curso: "Realización Audiovisual", fechas: "2024-07-01 a 2024-07-31", horario: "14:00 - 17:00", salon: "E302", docente: "Dra. Silva", cupos: 20 }
+                ],
+                "ciencias-basicas": [
+                    { curso: "Cálculo Multivariable", fechas: "2024-06-01 a 2024-06-30", horario: "07:00 - 10:00", salon: "F301", docente: "Dr. García", cupos: 35 },
+                    { curso: "Física Computacional", fechas: "2024-07-01 a 2024-07-31", horario: "09:00 - 12:00", salon: "F302", docente: "Dr. Pérez", cupos: 30 }
+                ],
+                "formacion-humanistica": [
+                    { curso: "Digital Humanities", fechas: "2024-06-01 a 2024-06-30", horario: "15:00 - 18:00", salon: "G301", docente: "Dr. Domínguez", cupos: 25 },
+                    { curso: "Historia Contemporánea", fechas: "2024-07-01 a 2024-07-31", horario: "16:00 - 19:00", salon: "G302", docente: "Dra. Moreno", cupos: 28 }
+                ],
+                "derecho": [
+                    { curso: "Derecho Penal Avanzado", fechas: "2024-06-01 a 2024-06-30", horario: "08:00 - 11:00", salon: "H301", docente: "Dr. Reyes", cupos: 30 },
+                    { curso: "Derecho Comercial", fechas: "2024-07-01 a 2024-07-31", horario: "10:00 - 13:00", salon: "H302", docente: "Dra. Vargas", cupos: 28 }
+                ],
+                "diseno-grafico": [
+                    { curso: "Motion Graphics", fechas: "2024-06-01 a 2024-06-30", horario: "09:00 - 12:00", salon: "I301", docente: "Dra. López", cupos: 20 },
+                    { curso: "UI/UX Avanzado", fechas: "2024-07-01 a 2024-07-31", horario: "14:00 - 17:00", salon: "I302", docente: "Prof. Martínez", cupos: 18 }
+                ],
+                "electivas": [
+                    { curso: "Innovación Empresarial", fechas: "2024-06-01 a 2024-07-01", horario: "17:00 - 20:00", salon: "J301", docente: "Msc. Sánchez", cupos: 25 }
+                ],
+                "ingenieria-industrial": [
+                    { curso: "Lean Manufacturing", fechas: "2024-06-01 a 2024-06-30", horario: "07:00 - 10:00", salon: "K301", docente: "Ing. Ortiz", cupos: 28 },
+                    { curso: "Optimización de Procesos", fechas: "2024-07-01 a 2024-07-31", horario: "10:00 - 13:00", salon: "K302", docente: "Ing. Ruiz", cupos: 26 }
+                ],
+                "ingenieria-ambiental": [
+                    { curso: "Gestión de Residuos", fechas: "2024-06-01 a 2024-06-30", horario: "09:00 - 12:00", salon: "L301", docente: "Dra. Arias", cupos: 25 },
+                    { curso: "Energías Renovables", fechas: "2024-07-01 a 2024-07-31", horario: "14:00 - 17:00", salon: "L302", docente: "Ing. Castro", cupos: 24 }
+                ],
+                "ingenieria-civil": [
+                    { curso: "BIM en Proyectos", fechas: "2024-06-01 a 2024-06-30", horario: "08:00 - 11:00", salon: "M301", docente: "Dr. Huerta", cupos: 30 },
+                    { curso: "Estructuras Modernas", fechas: "2024-07-01 a 2024-07-31", horario: "10:00 - 13:00", salon: "M302", docente: "Ing. Fuentes", cupos: 28 }
+                ],
+                "ingenieria-electronica": [
+                    { curso: "IoT y Sistemas Embebidos", fechas: "2024-06-01 a 2024-06-30", horario: "09:00 - 12:00", salon: "N301", docente: "Dr. Quiroga", cupos: 26 },
+                    { curso: "Procesamiento de Señales", fechas: "2024-07-01 a 2024-07-31", horario: "14:00 - 17:00", salon: "N302", docente: "Ing. Navarro", cupos: 24 }
+                ],
+                "ingenieria-electrica": [
+                    { curso: "Energía Solar Fotovoltaica", fechas: "2024-06-01 a 2024-06-30", horario: "07:00 - 10:00", salon: "O301", docente: "Dr. Montes", cupos: 28 },
+                    { curso: "Smart Grid", fechas: "2024-07-01 a 2024-07-31", horario: "10:00 - 13:00", salon: "O302", docente: "Ing. Vera", cupos: 26 }
+                ],
+                "ingenieria-mecanica": [
+                    { curso: "CAD 3D Avanzado", fechas: "2024-06-01 a 2024-06-30", horario: "08:00 - 11:00", salon: "P301", docente: "Dr. Espinoza", cupos: 30 },
+                    { curso: "Manufactura Aditiva", fechas: "2024-07-01 a 2024-07-31", horario: "10:00 - 13:00", salon: "P302", docente: "Ing. Botero", cupos: 25 }
+                ],
+                "ingenieria-sistemas": [
+                    { curso: "Cloud Computing", fechas: "2024-06-01 a 2024-06-30", horario: "07:00 - 10:00", salon: "Q301", docente: "Msc. Gómez", cupos: 32 },
+                    { curso: "Seguridad en Redes", fechas: "2024-06-15 a 2024-07-15", horario: "10:00 - 13:00", salon: "Q302", docente: "Dr. Puentes", cupos: 30 },
+                    { curso: "Data Science con Python", fechas: "2024-07-01 a 2024-07-31", horario: "14:00 - 17:00", salon: "Q303", docente: "Ing. Giraldo", cupos: 28 }
+                ],
+                "negocios-internacionales": [
+                    { curso: "Logística Internacional", fechas: "2024-06-01 a 2024-06-30", horario: "09:00 - 12:00", salon: "R301", docente: "Dra. Cardona", cupos: 28 },
+                    { curso: "Marketing Global", fechas: "2024-07-01 a 2024-07-31", horario: "14:00 - 17:00", salon: "R302", docente: "Prof. Rivera", cupos: 26 }
+                ],
+                "psicologia": [
+                    { curso: "Psicología Organizacional", fechas: "2024-06-01 a 2024-06-30", horario: "08:00 - 11:00", salon: "S301", docente: "Dra. Flores", cupos: 32 },
+                    { curso: "Evaluación Psicológica", fechas: "2024-07-01 a 2024-07-31", horario: "10:00 - 13:00", salon: "S302", docente: "Dr. Campos", cupos: 30 }
+                ]
+            };
+
+            const tbody = document.getElementById('tabla-body');
+            tbody.innerHTML = '';
+
+            const datosPlantilla = obtenerDatosPlantillaIntersemestral(facultadTexto);
+            const datos = datosPlantilla.length ? datosPlantilla : (datosSimulados[facultad] || []);
+            if (datos.length === 0) {
+                resultados.style.display = 'block';
+                tabla.style.display = 'none';
+                header.style.display = 'none';
+                carreraNombre.textContent = '-';
+                mostrarFiltros(false);
+            } else {
+                header.style.display = 'block';
+                resultados.style.display = 'none';
+                datos.forEach(dato => {
+                    const fila = `
+                        <tr>
+                            <td>${dato.curso}</td>
+                            <td>${dato.fechas}</td>
+                            <td>${dato.horario}</td>
+                            <td>${dato.salon}</td>
+                            <td>${dato.docente}</td>
+                            <td>${dato.cupos}</td>
+                        </tr>
+                    `;
+                    tbody.innerHTML += fila;
+                });
+                mostrarFiltros(true);
+                poblarListasFiltros();
+                limpiarFiltrosTabla();
+            }
+        }
+
+        /* Función para limpiar filtros */
+        function limpiarFiltros() {
+            document.getElementById('facultad').value = '';
+            document.getElementById('resultados').style.display = 'block';
+            document.getElementById('tabla-resultados').style.display = 'none';
+            document.getElementById('results-header').style.display = 'none';
+            document.getElementById('carrera-nombre').textContent = '-';
+            mostrarFiltros(false);
+            limpiarFiltrosTabla();
+        }
+
+        function mostrarFiltros(mostrar) {
+            const filtros = document.getElementById('table-filters');
+            const acciones = document.getElementById('filters-actions');
+            if (filtros) {
+                filtros.style.display = mostrar ? 'grid' : 'none';
+            }
+            if (acciones) {
+                acciones.style.display = mostrar ? 'flex' : 'none';
+            }
+        }
+
+        function poblarListasFiltros() {
+            const filtros = document.querySelectorAll('#table-filters input');
+            const filas = document.querySelectorAll('#tabla-body tr');
+
+            filtros.forEach(input => {
+                const col = parseInt(input.getAttribute('data-col'), 10);
+                const listId = input.getAttribute('list');
+                const dataList = document.getElementById(listId);
+                if (!dataList) {
+                    return;
+                }
+                const valores = new Set();
+                filas.forEach(fila => {
+                    const celda = fila.cells[col];
+                    if (!celda) {
+                        return;
+                    }
+                    const texto = celda.textContent.trim();
+                    if (texto) {
+                        valores.add(texto);
+                    }
+                });
+                dataList.innerHTML = '';
+                Array.from(valores).sort().forEach(valor => {
+                    const option = document.createElement('option');
+                    option.value = valor;
+                    dataList.appendChild(option);
+                });
+            });
+        }
+
+        function aplicarFiltros() {
+            const filtros = document.querySelectorAll('#table-filters input');
+            const filas = document.querySelectorAll('#tabla-body tr');
+
+            filas.forEach(fila => {
+                let visible = true;
+                filtros.forEach(input => {
+                    const valor = input.value.trim().toLowerCase();
+                    if (!valor) {
+                        return;
+                    }
+                    const col = parseInt(input.getAttribute('data-col'), 10);
+                    const celda = fila.cells[col];
+                    const texto = celda ? celda.textContent.toLowerCase() : '';
+                    if (!texto.includes(valor)) {
+                        visible = false;
+                    }
+                });
+                fila.style.display = visible ? '' : 'none';
+            });
+        }
+
+        function limpiarFiltrosTabla() {
+            document.querySelectorAll('#table-filters input').forEach(input => {
+                input.value = '';
+            });
+            aplicarFiltros();
+        }
+
+        /* Función para actualización automática */
+        function actualizarConsulta() {
+            // Opcional: actualizar cuando cambia la selección
+        }
+
+        function toggleDropdownMenu() {
+            const menu = document.getElementById('dropdownMenu');
+            menu.classList.toggle('active');
+        }
+
+        document.addEventListener('click', function(event) {
+            const menu = document.getElementById('dropdownMenu');
+            const btn = document.getElementById('adminIcon');
+
+            if (!menu || !btn || btn.style.display === 'none') {
+                return;
+            }
+
+            if (!menu.contains(event.target) && !btn.contains(event.target)) {
+                menu.classList.remove('active');
+            }
+        });
+
+        function aplicarVistaSesionAdmin() {
+            const estaLogeado = window.isAdminAuthenticated && window.isAdminAuthenticated();
+            const adminTitle = document.getElementById('adminSectionTitle');
+            const adminAccessItem = document.getElementById('adminAccessItem');
+            const adminAccessText = document.getElementById('adminAccessText');
+            const adminLogoutItem = document.getElementById('adminLogoutItem');
+            const adminIcon = document.getElementById('adminIcon');
+            const backButton = document.getElementById('backButton');
+
+            if (estaLogeado) {
+                if (adminTitle) {
+                    adminTitle.style.display = 'none';
+                }
+                if (adminAccessItem) {
+                    adminAccessItem.style.display = 'none';
+                    adminAccessItem.classList.remove('login-link');
+                }
+                if (adminLogoutItem) {
+                    adminLogoutItem.style.display = 'block';
+                }
+                if (adminIcon) {
+                    adminIcon.style.display = 'block';
+                }
+                if (backButton) {
+                    backButton.href = 'admin.html';
+                    backButton.textContent = '◄ Volver a Administración';
+                }
+            } else {
+                if (adminTitle) {
+                    adminTitle.style.display = 'none';
+                }
+                if (adminAccessText) {
+                    adminAccessText.textContent = 'Login';
+                }
+                if (adminAccessItem) {
+                    adminAccessItem.style.display = 'list-item';
+                    adminAccessItem.classList.add('login-link');
+                }
+                if (adminLogoutItem) {
+                    adminLogoutItem.style.display = 'none';
+                }
+                if (adminIcon) {
+                    adminIcon.style.display = 'none';
+                }
+                if (backButton) {
+                    backButton.href = 'menu-horarios.html';
+                    backButton.textContent = '◄ Volver al Menu';
+                }
+            }
+        }
+
+        function abrirAccesoAdmin() {
+            if (window.isAdminAuthenticated && window.isAdminAuthenticated()) {
+                window.location.href = './admin.html';
+                return;
+            }
+            abrirLogin();
+        }
+
+        /* Función para abrir login */
+        function abrirLogin() {
+            window.location.href = './login.html';
+        }
+
+        function cerrarSesion() {
+            if (window.clearAdminSession) {
+                window.clearAdminSession();
+            }
+            window.location.href = './login.html';
+        }
+
+        document.addEventListener('DOMContentLoaded', function() {
+            document.body.classList.remove('mobile-sidebar-open');
+            aplicarVistaSesionAdmin();
+            if (window.aplicarFacultadesEnSelect) {
+                window.aplicarFacultadesEnSelect('facultad', '---Seleccionar facultad---');
+            }
+        });
+    </script>
+</body>
+</html>
+
+
+
+

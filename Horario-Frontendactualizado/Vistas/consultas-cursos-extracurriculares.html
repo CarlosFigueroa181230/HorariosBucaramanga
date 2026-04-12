@@ -1,0 +1,432 @@
+﻿<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Horarios UPB V3</title>
+    <link rel="icon" type="image/png" href="../Assets/upb-logo.png">
+    <link rel="stylesheet" href="consultas-styles.css">
+    <script src="https://unpkg.com/lucide@0.469.0/dist/umd/lucide.min.js"></script>
+    <script src="lucide-icons.js"></script>
+    <script src="ux-dynamic.js"></script>
+    <script src="facultades-store.js"></script>
+    <script src="facultades-sync.js"></script>
+    <script src="cursos-extracurriculares-store.js"></script>
+    <script src="admin-auth.js"></script>
+    <script src="admin-local-modals.js"></script>
+</head>
+<body>
+    <div class="main-container">
+        <aside class="sidebar">
+            <button class="mobile-close-btn" type="button" onclick="toggleMobileSidebar(false)" aria-label="Cerrar menu">&lt;</button>
+            <div class="sidebar-title">HORARIOS UPB</div>
+
+            <div class="menu-section">
+                <div class="menu-header">MENU USUARIOS</div>
+                <ul class="menu-list">
+                    <li class="menu-toggle" onclick="toggleMenu(this)">
+                        <span class="menu-icon">☰</span>
+                        <span>MENU</span>
+                    </li>
+                    <div class="submenu" style="display: none;">
+                        <li onclick="irA('consultas-horarios-clases.html')"><span class="submenu-icon">📅</span> Horarios Clases</li>
+                        <li onclick="irA('consultas-examenes.html')"><span class="submenu-icon">📋</span> Exámenes Parciales</li>
+                        <li onclick="irA('consultas-supletorios.html')"><span class="submenu-icon">📋</span> Supletorios</li>
+                        <li onclick="irA('consultas-intersemestrales.html')"><span class="submenu-icon">📋</span> Cursos Intersemestrales</li>
+                        <li onclick="irA('consultas-cursos-extracurriculares.html')"><span class="submenu-icon">📋</span> Cursos Extracurriculares</li>
+                    </div>
+                </ul>
+            </div>
+
+            <div class="menu-section">
+                <div class="menu-header">MENU ADMINISTRACION</div>
+                <div class="menu-title" id="adminSectionTitle" style="display: none;"></div>
+                <ul class="menu-list">
+                    <li id="adminAccessItem" onclick="abrirAccesoAdmin()" class="login-link"><span class="submenu-icon">🚪</span> <span id="adminAccessText">Login</span></li>
+                    <li id="adminLogoutItem" onclick="cerrarSesion()" style="display: none;"><span class="submenu-icon">🚪</span> Logout</li>
+                </ul>
+            </div>
+        </aside>
+
+        <div class="mobile-overlay" onclick="toggleMobileSidebar(false)"></div>
+
+        <main class="content">
+            <div class="header">
+                <button class="mobile-menu-btn" type="button" onclick="toggleMobileSidebar()" aria-label="Abrir o cerrar menu">☰</button>
+                <h1>HORARIOS UPB V.3</h1>
+                <img id="adminIcon" src="../Assets/ICONO-ADMIN.png" alt="Admin" class="btn-prueba" style="display: none;" onclick="toggleDropdownMenu()">
+                <div class="dropdown-menu" id="dropdownMenu">
+                    <div class="dropdown-header">
+                        <img src="../Assets/upb-logo.png" alt="Logo UPB" class="dropdown-logo">
+                        <span>Horarios</span>
+                        <span class="dropdown-subtitle">Menu</span>
+                    </div>
+                    <div class="dropdown-content">
+                        <a href="consultas-horarios-clases.html"><span class="icon">📅</span> Horarios Clases</a>
+                        <a href="consultas-examenes.html"><span class="icon">📋</span> Exámenes Parciales</a>
+                        <a href="consultas-supletorios.html"><span class="icon">📋</span> Supletorios</a>
+                        <a href="consultas-intersemestrales.html"><span class="icon">📋</span> Cursos Intersemestrales</a>
+                        <a href="consultas-cursos-extracurriculares.html"><span class="icon">📋</span> Cursos Extracurriculares</a>
+                    </div>
+                    <div class="dropdown-divider"></div>
+                    <div class="dropdown-admin">
+                        <a href="#" onclick="abrirModalInfoAdmin(event)"><span class="icon">👤</span> Mi Información</a>
+                        <a href="#" onclick="abrirModalCambiarContraseña(event)"><span class="icon">🔑</span> Cambiar contraseña</a>
+                        <a href="admin.html"><span class="icon">🔍</span> Administración</a>
+                        <a href="login.html" onclick="cerrarSesion()"><span class="icon">🚪</span> Logout</a>
+                    </div>
+                </div>
+            </div>
+
+            <div class="inner-content">
+                <div class="back-button-container">
+                    <a href="menu-horarios.html" class="back-button" id="backButton">◄ Volver al Menu</a>
+                </div>
+
+                <div class="consulta-card">
+                    <div class="consulta-header">
+                        <h2>Consultas</h2>
+                        <p>Paginas/CursosExtracurriculares/Buscar</p>
+                    </div>
+
+                    <div class="filters-section">
+                        <div class="filter-group">
+                            <label for="tipo">Tipo</label>
+                            <select id="tipo" class="facultad-select" onchange="actualizarConsulta()">
+                                <option value="">---Seleccionar tipo---</option>
+                                <option value="Deportivas">Deportivas</option>
+                                <option value="Culturales">Culturales</option>
+                                <option value="Pastorales">Pastorales</option>
+                            </select>
+                        </div>
+
+                        <div class="action-buttons">
+                            <button class="btn-buscar" onclick="buscarDatos()">Buscar</button>
+                            <button class="btn-limpiar" onclick="limpiarFiltros()">Limpiar</button>
+                        </div>
+                    </div>
+
+                    <div class="results-section">
+                        <div class="results-info">
+                            Seleccione el tipo y pulse Buscar - Cursos Extracurriculares
+                        </div>
+
+                        <div id="results-header" class="results-header" style="display: none;">
+                            <div class="results-line results-name"><span id="carrera-nombre">-</span></div>
+                            <div class="results-line results-title">CURSOS EXTRACURRICULARES</div>
+                        </div>
+
+                        <div id="table-filters" class="table-filters" style="display: none;">
+                            <div>
+                                <label>Asignatura</label>
+                                <input type="text" data-col="0" list="asignatura-list" oninput="aplicarFiltros()" placeholder="Buscar asignatura">
+                                <datalist id="asignatura-list"></datalist>
+                            </div>
+                            <div>
+                                <label>NRC</label>
+                                <input type="text" data-col="1" list="nrc-list" oninput="aplicarFiltros()" placeholder="Buscar NRC">
+                                <datalist id="nrc-list"></datalist>
+                            </div>
+                            <div>
+                                <label>Instructor</label>
+                                <input type="text" data-col="2" list="instructor-list" oninput="aplicarFiltros()" placeholder="Buscar instructor">
+                                <datalist id="instructor-list"></datalist>
+                            </div>
+                            <div>
+                                <label>Cupos</label>
+                                <input type="text" data-col="3" list="cupos-list" oninput="aplicarFiltros()" placeholder="Buscar cupos">
+                                <datalist id="cupos-list"></datalist>
+                            </div>
+                            <div>
+                                <label>Horario semanal</label>
+                                <input type="text" data-col="4" list="horario-semanal-list" oninput="aplicarFiltros()" placeholder="Buscar horario semanal">
+                                <datalist id="horario-semanal-list"></datalist>
+                            </div>
+                            <div>
+                                <label>Salón</label>
+                                <input type="text" data-col="5" list="salon-list" oninput="aplicarFiltros()" placeholder="Buscar salón">
+                                <datalist id="salon-list"></datalist>
+                            </div>
+                        </div>
+
+                        <div id="filters-actions" class="filters-actions" style="display: none;">
+                            <button class="btn-limpiar-filtros" onclick="limpiarFiltrosTabla()">Limpiar filtros</button>
+                        </div>
+
+                        <div id="resultados" class="no-data">No hay cursos extracurriculares para el tipo seleccionado.</div>
+
+                        <div class="table-scroll">
+                            <table id="tabla-resultados" class="results-table" style="display: none;">
+                                <thead>
+                                    <tr>
+                                        <th>Asignatura</th>
+                                        <th>NRC</th>
+                                        <th>Instructor</th>
+                                        <th>Cupos</th>
+                                        <th>Horario semanal</th>
+                                        <th>Salón</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="tabla-body"></tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <script>
+        function toggleMenu(element) {
+            const submenu = element.nextElementSibling;
+            if (submenu && submenu.classList.contains('submenu')) {
+                submenu.style.display = submenu.style.display === 'none' ? 'block' : 'none';
+            }
+        }
+
+        function irA(pagina) {
+            toggleMobileSidebar(false);
+            window.location.href = pagina;
+        }
+
+        function toggleMobileSidebar(forceOpen) {
+            if (window.innerWidth > 768) {
+                document.body.classList.remove('mobile-sidebar-open');
+                return;
+            }
+
+            const shouldOpen = typeof forceOpen === 'boolean'
+                ? forceOpen
+                : !document.body.classList.contains('mobile-sidebar-open');
+
+            document.body.classList.toggle('mobile-sidebar-open', shouldOpen);
+        }
+
+        window.addEventListener('resize', function() {
+            if (window.innerWidth > 768) {
+                document.body.classList.remove('mobile-sidebar-open');
+            }
+        });
+
+        function actualizarConsulta() {
+            const select = document.getElementById('tipo');
+            const valor = select.value;
+            if (!valor) {
+                document.getElementById('results-header').style.display = 'none';
+            }
+        }
+
+        function obtenerCursosPorTipo() {
+            const tipo = document.getElementById('tipo').value;
+            if (!tipo) {
+                return [];
+            }
+
+            return window.CursosExtracurricularesStore.getAll().filter(item => (item.tipo || '') === tipo);
+        }
+
+        function mostrarFiltros(visible) {
+            document.getElementById('table-filters').style.display = visible ? 'grid' : 'none';
+            document.getElementById('filters-actions').style.display = visible ? 'flex' : 'none';
+        }
+
+        function poblarDatalistPorColumna(indiceColumna, datalistId) {
+            const tabla = document.getElementById('tabla-resultados');
+            const filas = Array.from(tabla.querySelectorAll('tbody tr'));
+            const valores = Array.from(new Set(filas.map(fila => fila.cells[indiceColumna]?.textContent.trim()).filter(Boolean))).sort();
+
+            const datalist = document.getElementById(datalistId);
+            datalist.innerHTML = '';
+            valores.forEach(valor => {
+                const option = document.createElement('option');
+                option.value = valor;
+                datalist.appendChild(option);
+            });
+        }
+
+        function actualizarDatalists() {
+            poblarDatalistPorColumna(0, 'asignatura-list');
+            poblarDatalistPorColumna(1, 'nrc-list');
+            poblarDatalistPorColumna(2, 'instructor-list');
+            poblarDatalistPorColumna(3, 'cupos-list');
+            poblarDatalistPorColumna(4, 'horario-semanal-list');
+            poblarDatalistPorColumna(5, 'salon-list');
+        }
+
+        function buscarDatos() {
+            const select = document.getElementById('tipo');
+            const tipo = select.value;
+            const resultados = document.getElementById('resultados');
+            const tabla = document.getElementById('tabla-resultados');
+            const header = document.getElementById('results-header');
+            const carreraNombre = document.getElementById('carrera-nombre');
+            const tbody = document.getElementById('tabla-body');
+
+            if (!tipo) {
+                alert('Por favor seleccione un tipo');
+                header.style.display = 'none';
+                resultados.style.display = 'block';
+                tabla.style.display = 'none';
+                carreraNombre.textContent = '-';
+                mostrarFiltros(false);
+                limpiarFiltrosTabla();
+                return;
+            }
+
+            const cursos = obtenerCursosPorTipo();
+            tbody.innerHTML = '';
+
+            if (!cursos.length) {
+                resultados.style.display = 'block';
+                tabla.style.display = 'none';
+                header.style.display = 'none';
+                mostrarFiltros(false);
+                limpiarFiltrosTabla();
+                return;
+            }
+
+            resultados.style.display = 'none';
+            tabla.style.display = 'table';
+            header.style.display = 'block';
+            carreraNombre.textContent = select.options[select.selectedIndex].text;
+
+            cursos.forEach(item => {
+                const fila = document.createElement('tr');
+                fila.innerHTML = `
+                    <td>${item.asignatura || '-'}</td>
+                    <td>${item.nrc || '-'}</td>
+                    <td>${item.instructor || '-'}</td>
+                    <td>${item.cupos || '-'}</td>
+                    <td>${item.horarioSemanal || '-'}</td>
+                    <td>${item.salon || '-'}</td>
+                `;
+                tbody.appendChild(fila);
+            });
+
+            mostrarFiltros(true);
+            limpiarFiltrosTabla();
+            actualizarDatalists();
+        }
+
+        function aplicarFiltros() {
+            const tabla = document.getElementById('tabla-resultados');
+            const filtros = Array.from(document.querySelectorAll('#table-filters input'));
+            const filas = Array.from(tabla.querySelectorAll('tbody tr'));
+            let visibles = 0;
+
+            filas.forEach(fila => {
+                const coincide = filtros.every(input => {
+                    const valor = input.value.trim().toLowerCase();
+                    if (!valor) {
+                        return true;
+                    }
+                    const columna = Number(input.dataset.col);
+                    const texto = (fila.cells[columna]?.textContent || '').toLowerCase();
+                    return texto.includes(valor);
+                });
+
+                fila.style.display = coincide ? '' : 'none';
+                if (coincide) {
+                    visibles += 1;
+                }
+            });
+
+            document.getElementById('resultados').style.display = visibles === 0 ? 'block' : 'none';
+        }
+
+        function limpiarFiltrosTabla() {
+            const filtros = Array.from(document.querySelectorAll('#table-filters input'));
+            filtros.forEach(input => {
+                input.value = '';
+            });
+
+            const filas = Array.from(document.querySelectorAll('#tabla-resultados tbody tr'));
+            filas.forEach(fila => {
+                fila.style.display = '';
+            });
+
+            const hayFilas = filas.length > 0;
+            document.getElementById('resultados').style.display = hayFilas ? 'none' : 'block';
+        }
+
+        function limpiarFiltros() {
+            document.getElementById('tipo').value = '';
+            document.getElementById('results-header').style.display = 'none';
+            document.getElementById('tabla-resultados').style.display = 'none';
+            document.getElementById('resultados').style.display = 'block';
+            document.getElementById('carrera-nombre').textContent = '-';
+            document.getElementById('tabla-body').innerHTML = '';
+            limpiarFiltrosTabla();
+            mostrarFiltros(false);
+        }
+
+        function toggleDropdownMenu() {
+            const menu = document.getElementById('dropdownMenu');
+            menu.classList.toggle('active');
+        }
+
+        document.addEventListener('click', function(event) {
+            const menu = document.getElementById('dropdownMenu');
+            const btn = document.getElementById('adminIcon');
+            if (!menu || !menu.contains(event.target) && btn && !btn.contains(event.target)) {
+                if (menu) {
+                    menu.classList.remove('active');
+                }
+            }
+        });
+
+        function abrirAccesoAdmin() {
+            if (window.isAdminAuthenticated && window.isAdminAuthenticated()) {
+                window.location.href = './admin.html';
+                return;
+            }
+            window.location.href = './login.html';
+        }
+
+        function actualizarMenuAdmin() {
+            const autenticado = window.isAdminAuthenticated && window.isAdminAuthenticated();
+            const adminTitle = document.getElementById('adminSectionTitle');
+            const adminAccessItem = document.getElementById('adminAccessItem');
+            const adminAccessText = document.getElementById('adminAccessText');
+            const adminLogoutItem = document.getElementById('adminLogoutItem');
+            const adminIcon = document.getElementById('adminIcon');
+
+            if (autenticado) {
+                adminTitle.style.display = 'none';
+                adminAccessItem.style.display = 'none';
+                adminAccessItem.classList.remove('login-link');
+                adminLogoutItem.style.display = 'list-item';
+                adminIcon.style.display = 'block';
+                document.getElementById('backButton').setAttribute('href', 'admin.html');
+                document.getElementById('backButton').textContent = '◄ Volver a Administrador';
+            } else {
+                adminTitle.style.display = 'none';
+                adminAccessText.textContent = 'Login';
+                adminAccessItem.style.display = 'list-item';
+                adminAccessItem.classList.add('login-link');
+                adminLogoutItem.style.display = 'none';
+                adminIcon.style.display = 'none';
+                document.getElementById('backButton').setAttribute('href', 'menu-horarios.html');
+                document.getElementById('backButton').textContent = '◄ Volver al Menu';
+            }
+        }
+
+        function cerrarSesion() {
+            if (window.clearAdminSession) {
+                window.clearAdminSession();
+            }
+            window.location.href = './login.html';
+        }
+
+        document.addEventListener('DOMContentLoaded', function() {
+            document.body.classList.remove('mobile-sidebar-open');
+            actualizarMenuAdmin();
+            mostrarFiltros(false);
+        });
+    </script>
+</body>
+</html>
+
+
+
+

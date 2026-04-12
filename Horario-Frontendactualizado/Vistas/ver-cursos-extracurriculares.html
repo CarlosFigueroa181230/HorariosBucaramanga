@@ -1,0 +1,583 @@
+﻿<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Horarios UPB V3</title>
+    <link rel="icon" type="image/png" href="../Assets/upb-logo.png">
+    <link rel="stylesheet" href="admin-styles.css">
+    <link rel="stylesheet" href="reportes-styles.css">
+    <script src="https://unpkg.com/lucide@0.469.0/dist/umd/lucide.min.js"></script>
+    <script src="lucide-icons.js"></script>
+    <script src="ux-dynamic.js"></script>
+    <script src="admin-auth.js"></script>
+    <script src="admin-local-modals.js"></script>
+    <script src="cursos-extracurriculares-store.js"></script>
+    <style>
+        #modalNuevoCurso .modal-content {
+            max-width: 760px;
+            border-radius: 18px;
+            overflow: hidden;
+            box-shadow: 0 24px 60px rgba(15, 23, 42, 0.22);
+            border: 1px solid rgba(169, 20, 20, 0.08);
+        }
+
+        #modalNuevoCurso .modal-header {
+            padding: 18px 22px;
+            background: linear-gradient(135deg, #fff7f7 0%, #ffffff 45%, #f8fbff 100%);
+        }
+
+        #modalNuevoCurso .modal-header h2 {
+            font-size: 24px;
+            font-weight: 800;
+            letter-spacing: 0.2px;
+            color: #1f2937;
+        }
+
+        #modalNuevoCurso .modal-body {
+            padding: 0;
+            background: #ffffff;
+        }
+
+        .curso-modal-intro {
+            padding: 18px 22px 12px;
+            border-bottom: 1px solid #edf1f5;
+            background: linear-gradient(180deg, #ffffff 0%, #fbfcfe 100%);
+        }
+
+        .curso-modal-intro p {
+            margin: 8px 0 0;
+            color: #5a6472;
+            font-size: 14px;
+            line-height: 1.5;
+        }
+
+        .curso-modal-badges {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+        }
+
+        .curso-modal-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            padding: 6px 10px;
+            border-radius: 999px;
+            background: #f4f7fb;
+            color: #334155;
+            font-size: 12px;
+            font-weight: 700;
+        }
+
+        .curso-modal-form {
+            padding: 18px 22px 22px;
+        }
+
+        .curso-form-grid {
+            display: grid;
+            grid-template-columns: repeat(2, minmax(0, 1fr));
+            gap: 16px;
+        }
+
+        .curso-form-grid .form-group {
+            margin-bottom: 0;
+        }
+
+        .curso-form-grid .form-group.full {
+            grid-column: 1 / -1;
+        }
+
+        .curso-form-grid .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            color: #243447;
+            font-weight: 700;
+            font-size: 14px;
+        }
+
+        .curso-form-grid .form-control {
+            width: 100%;
+            min-height: 46px;
+            padding: 11px 14px;
+            border: 1px solid #d7dee8;
+            border-radius: 12px;
+            background: #ffffff;
+            color: #1f2937;
+            font-size: 15px;
+            transition: border-color 0.2s ease, box-shadow 0.2s ease, transform 0.2s ease;
+        }
+
+        .curso-form-grid .form-control::placeholder {
+            color: #94a3b8;
+        }
+
+        .curso-form-grid .form-control:focus {
+            outline: none;
+            border-color: #a91414;
+            box-shadow: 0 0 0 4px rgba(169, 20, 20, 0.12);
+        }
+
+        .curso-form-grid .form-control:hover {
+            border-color: #b9c4d3;
+        }
+
+        .curso-form-grid .form-group textarea {
+            min-height: 92px;
+            resize: vertical;
+        }
+
+        .curso-form-grid .form-group select {
+            appearance: none;
+        }
+
+        .curso-form-grid .campo-hint {
+            margin-top: 6px;
+            color: #6b7280;
+            font-size: 12px;
+            line-height: 1.4;
+        }
+
+        #mensajeNuevoCurso {
+            margin-top: 14px;
+            margin-bottom: 0;
+        }
+
+        #modalNuevoCurso .modal-footer {
+            margin-top: 18px;
+            padding-top: 18px;
+            border-top: 1px solid #edf1f5;
+        }
+
+        #modalNuevoCurso .btn-cancelar,
+        #modalNuevoCurso .btn-guardar {
+            min-width: 150px;
+            min-height: 44px;
+            border-radius: 12px;
+            font-size: 15px;
+            font-weight: 800;
+            letter-spacing: 0.2px;
+        }
+
+        #modalNuevoCurso .btn-cancelar {
+            background: linear-gradient(180deg, #eef2f7 0%, #e2e8f0 100%);
+            color: #334155;
+        }
+
+        #modalNuevoCurso .btn-guardar {
+            background: linear-gradient(135deg, #a91414 0%, #8b1111 100%);
+            box-shadow: 0 10px 18px rgba(169, 20, 20, 0.18);
+        }
+
+        #modalNuevoCurso .btn-guardar:hover {
+            background: linear-gradient(135deg, #8d1010 0%, #740d0d 100%);
+        }
+
+        @media (max-width: 640px) {
+            #modalNuevoCurso .modal-content {
+                width: 95%;
+            }
+
+            .curso-form-grid {
+                grid-template-columns: 1fr;
+            }
+
+            #modalNuevoCurso .modal-footer {
+                flex-direction: column-reverse;
+            }
+
+            #modalNuevoCurso .btn-cancelar,
+            #modalNuevoCurso .btn-guardar {
+                width: 100%;
+            }
+        }
+    </style>
+    <script>
+        requireAdminSession();
+    </script>
+</head>
+<body>
+    <div class="header">
+        <div class="header-left">
+            <h1>HORARIOS UPB VERSION 3.0</h1>
+        </div>
+        <div class="header-right">
+            <img src="../Assets/ICONO-ADMIN.png" alt="Admin" class="btn-prueba" onclick="toggleDropdownMenu()">
+
+            <div class="dropdown-menu" id="dropdownMenu">
+                <div class="dropdown-header">
+                    <img src="../Assets/upb-logo.png" alt="Logo UPB" class="dropdown-logo">
+                    <span>Horarios</span>
+                    <span class="dropdown-subtitle">Menu</span>
+                </div>
+
+                <div class="dropdown-content">
+                    <a href="consultas-horarios-clases.html"><span class="icon">📅</span> Horarios Clases</a>
+                    <a href="consultas-examenes.html"><span class="icon">📋</span> Exámenes Parciales</a>
+                    <a href="consultas-supletorios.html"><span class="icon">📋</span> Supletorios</a>
+                    <a href="consultas-intersemestrales.html"><span class="icon">📋</span> Cursos Intersemestrales</a>
+                    <a href="consultas-cursos-extracurriculares.html"><span class="icon">📋</span> Cursos Extracurriculares</a>
+                </div>
+
+                <div class="dropdown-divider"></div>
+
+                <div class="dropdown-admin">
+                    <a href="#" onclick="abrirModalInfoAdmin(event)"><span class="icon">👤</span> Mi Información</a>
+                    <a href="#" onclick="abrirModalCambiarContraseña(event)"><span class="icon">🔑</span> Cambiar contraseña</a>
+                    <a href="admin.html"><span class="icon">🔍</span> Administración</a>
+                    <a href="login.html" onclick="cerrarSesion()"><span class="icon">🚪</span> Logout</a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="main-container">
+        <aside class="sidebar">
+            <div class="sidebar-title">HORARIOS UPB</div>
+
+            <div class="menu-section">
+                <div class="menu-header">MENU USUARIOS</div>
+                <ul class="menu-list">
+                    <li class="menu-toggle" onclick="toggleMenu(this)">
+                        <span class="menu-icon">☰</span>
+                        <span>MENU</span>
+                    </li>
+                    <div class="submenu" style="display: none;">
+                        <li onclick="irA('consultas-horarios-clases.html')"><span class="submenu-icon">📅</span> Horarios Clases</li>
+                        <li onclick="irA('consultas-examenes.html')"><span class="submenu-icon">📋</span> Exámenes Parciales</li>
+                        <li onclick="irA('consultas-supletorios.html')"><span class="submenu-icon">📋</span> Supletorios</li>
+                        <li onclick="irA('consultas-intersemestrales.html')"><span class="submenu-icon">📋</span> Cursos Intersemestrales</li>
+                        <li onclick="irA('consultas-cursos-extracurriculares.html')"><span class="submenu-icon">📋</span> Cursos Extracurriculares</li>
+                        <li onclick="irA('consultas-horario-personalizado.html')"><span class="submenu-icon">📋</span> Horario Personalizado</li>
+                    </div>
+                </ul>
+            </div>
+
+            <div class="menu-section">
+                <div class="menu-header">MENU ADMINISTRACION</div>
+                <div class="menu-title">Administracion</div>
+                <ul class="menu-list">
+                    <li onclick="cerrarSesion()"><span class="submenu-icon">🚪</span> Logout</li>
+                </ul>
+            </div>
+        </aside>
+
+        <main class="content">
+            <div class="back-button-container">
+                <a href="admin.html" class="back-button">< VOLVER AL MENU DE ADMINISTRACION</a>
+            </div>
+
+            <div class="content-header">
+                <h2>Gestión de Cursos Extracurriculares</h2>
+                <p class="breadcrumb">Pagina/CursosExtracurriculares/Reporte</p>
+            </div>
+
+            <div class="table-controls">
+                <div class="controls-left">
+                    <label>Mostrar
+                        <select id="registrosPorPagina" onchange="cambiarRegistrosPorPagina()">
+                            <option value="10">10</option>
+                            <option value="25">25</option>
+                            <option value="50">50</option>
+                        </select>
+                        registros por página
+                    </label>
+                </div>
+                <div class="controls-right">
+                    <label>Buscar:
+                        <input type="text" id="searchInput" onkeyup="filtrarTabla()">
+                    </label>
+                </div>
+            </div>
+
+            <div class="action-buttons">
+                <button class="btn-action btn-primary" onclick="abrirModalNuevoCurso()">NUEVO CURSO</button>
+                <button class="btn-action" onclick="imprimirTabla()">PRINT</button>
+            </div>
+
+            <div class="table-wrapper">
+                <table class="publications-table">
+                    <thead>
+                        <tr>
+                            <th>NRC</th>
+                            <th>TIPO</th>
+                            <th>ASIGNATURA</th>
+                            <th>INSTRUCTOR</th>
+                            <th>CUPOS</th>
+                            <th>HORARIO SEMANAL</th>
+                            <th>SALÓN</th>
+                            <th>FECHA ACTUALIZACIÓN</th>
+                            <th>ACCIONES</th>
+                        </tr>
+                    </thead>
+                    <tbody id="cursosTableBody"></tbody>
+                </table>
+            </div>
+
+            <div class="pagination" id="pagination"></div>
+        </main>
+    </div>
+
+    <div id="modalNuevoCurso" class="modal" style="display: none;">
+        <div class="modal-content modal-facultad">
+            <div class="modal-header">
+                <h2>Nuevo Curso Extracurricular</h2>
+                <button class="modal-close" onclick="cerrarModalNuevoCurso()">&times;</button>
+            </div>
+            <div class="modal-body">
+                <div class="curso-modal-intro">
+                    <div class="curso-modal-badges">
+                        <span class="curso-modal-badge">Alta rápida</span>
+                        <span class="curso-modal-badge">Campos obligatorios</span>
+                        <span class="curso-modal-badge">Visible en reportes</span>
+                    </div>
+                    <p>Completa los datos del curso extracurricular para que quede listo en el listado de administración y consultas.</p>
+                </div>
+                <form id="formNuevoCurso" class="curso-modal-form" onsubmit="guardarNuevoCurso(event)">
+                    <div class="curso-form-grid">
+                        <div class="form-group">
+                        <label for="nuevoTipoCurso">Tipo</label>
+                        <select id="nuevoTipoCurso" class="form-control" required>
+                            <option value="">--Seleccionar tipo--</option>
+                            <option value="Deportivas">Deportivas</option>
+                            <option value="Culturales">Culturales</option>
+                            <option value="Pastorales">Pastorales</option>
+                        </select>
+                        </div>
+                        <div class="form-group">
+                        <label for="nuevaAsignaturaCurso">Asignatura</label>
+                        <input type="text" id="nuevaAsignaturaCurso" class="form-control" placeholder="Ingrese la asignatura" required>
+                        </div>
+                        <div class="form-group">
+                        <label for="nuevoNrcCurso">NRC</label>
+                        <input type="text" id="nuevoNrcCurso" class="form-control" placeholder="Ej. DEP101" required>
+                        <div class="campo-hint">Usa un código corto y único para identificarlo rápido.</div>
+                        </div>
+                        <div class="form-group">
+                        <label for="nuevoInstructorCurso">Instructor</label>
+                        <input type="text" id="nuevoInstructorCurso" class="form-control" placeholder="Ingrese el instructor" required>
+                        </div>
+                        <div class="form-group full">
+                        <label for="nuevoHorarioSemanalCurso">Horario semanal</label>
+                        <input type="text" id="nuevoHorarioSemanalCurso" class="form-control" placeholder="Ej. Lunes y Miércoles 18:00 - 20:00" required>
+                        <div class="campo-hint">Escribe el horario de forma clara para que el reporte se lea bien.</div>
+                        </div>
+                        <div class="form-group">
+                        <label for="nuevosCuposCurso">Cupos</label>
+                        <input type="number" id="nuevosCuposCurso" class="form-control" min="1" required>
+                        </div>
+                        <div class="form-group">
+                        <label for="nuevoSalonCurso">Salón</label>
+                        <input type="text" id="nuevoSalonCurso" class="form-control" placeholder="Ej. Coliseo A" required>
+                        </div>
+                    </div>
+                    <div id="mensajeNuevoCurso" class="facultad-message" style="display: none;"></div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn-cancelar" onclick="cerrarModalNuevoCurso()">Cancelar</button>
+                        <button type="submit" class="btn-guardar">Guardar</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const estadoCursos = {
+            datos: [],
+            filtrados: [],
+            paginaActual: 1,
+            registrosPorPagina: 10
+        };
+
+        function toggleMenu(element) {
+            const submenu = element.nextElementSibling;
+            if (submenu && submenu.classList.contains('submenu')) {
+                submenu.style.display = submenu.style.display === 'none' ? 'block' : 'none';
+            }
+        }
+
+        function irA(pagina) {
+            window.location.href = pagina;
+        }
+
+        function toggleDropdownMenu() {
+            const menu = document.getElementById('dropdownMenu');
+            menu.classList.toggle('active');
+        }
+
+        document.addEventListener('click', function(event) {
+            const menu = document.getElementById('dropdownMenu');
+            const btn = document.querySelector('.btn-prueba');
+            if (!menu.contains(event.target) && !btn.contains(event.target)) {
+                menu.classList.remove('active');
+            }
+        });
+
+        function cambiarRegistrosPorPagina() {
+            estadoCursos.registrosPorPagina = Number(document.getElementById('registrosPorPagina').value);
+            estadoCursos.paginaActual = 1;
+            renderizarTabla();
+        }
+
+        function filtrarTabla() {
+            const filtro = document.getElementById('searchInput').value.trim().toLowerCase();
+            estadoCursos.filtrados = estadoCursos.datos.filter(item => {
+                const texto = `${item.nrc} ${item.tipo} ${item.asignatura} ${item.instructor} ${item.cupos} ${item.horarioSemanal} ${item.salon} ${item.fechaActualizacion}`.toLowerCase();
+                return texto.includes(filtro);
+            });
+            estadoCursos.paginaActual = 1;
+            renderizarTabla();
+        }
+
+        function imprimirTabla() {
+            window.print();
+        }
+
+        function abrirModalNuevoCurso() {
+            document.getElementById('modalNuevoCurso').style.display = 'flex';
+            limpiarMensajeNuevoCurso();
+        }
+
+        function cerrarModalNuevoCurso() {
+            document.getElementById('modalNuevoCurso').style.display = 'none';
+            document.getElementById('formNuevoCurso').reset();
+            limpiarMensajeNuevoCurso();
+        }
+
+        function limpiarMensajeNuevoCurso() {
+            const mensaje = document.getElementById('mensajeNuevoCurso');
+            mensaje.style.display = 'none';
+            mensaje.className = 'facultad-message';
+            mensaje.textContent = '';
+        }
+
+        function mostrarMensajeNuevoCurso(texto, exito) {
+            const mensaje = document.getElementById('mensajeNuevoCurso');
+            mensaje.textContent = texto;
+            mensaje.style.display = 'block';
+            mensaje.className = exito ? 'facultad-message success' : 'facultad-message error';
+        }
+
+        function guardarNuevoCurso(event) {
+            event.preventDefault();
+
+            const resultado = window.CursosExtracurricularesStore.create({
+                tipo: document.getElementById('nuevoTipoCurso').value,
+                asignatura: document.getElementById('nuevaAsignaturaCurso').value,
+                nrc: document.getElementById('nuevoNrcCurso').value,
+                instructor: document.getElementById('nuevoInstructorCurso').value,
+                cupos: document.getElementById('nuevosCuposCurso').value,
+                horarioSemanal: document.getElementById('nuevoHorarioSemanalCurso').value,
+                salon: document.getElementById('nuevoSalonCurso').value
+            });
+
+            if (!resultado.ok) {
+                mostrarMensajeNuevoCurso(`❌ ${resultado.message}`, false);
+                return;
+            }
+
+            mostrarMensajeNuevoCurso('✓ Curso extracurricular registrado correctamente.', true);
+            recargarCursos();
+            setTimeout(cerrarModalNuevoCurso, 900);
+        }
+
+        function editarCurso(nrc) {
+            window.location.href = `ver-cursos-extracurriculares-edicion.html?nrc=${encodeURIComponent(nrc)}`;
+        }
+
+        function recargarCursos() {
+            estadoCursos.datos = window.CursosExtracurricularesStore.getAll();
+            estadoCursos.filtrados = [...estadoCursos.datos];
+            renderizarTabla();
+        }
+
+        function renderizarTabla() {
+            const tbody = document.getElementById('cursosTableBody');
+            const inicio = (estadoCursos.paginaActual - 1) * estadoCursos.registrosPorPagina;
+            const fin = inicio + estadoCursos.registrosPorPagina;
+            const pagina = estadoCursos.filtrados.slice(inicio, fin);
+
+            tbody.innerHTML = '';
+            if (!pagina.length) {
+                tbody.innerHTML = '<tr><td colspan="9" class="table-empty">No hay cursos extracurriculares registrados.</td></tr>';
+                renderizarPaginacion();
+                return;
+            }
+
+            pagina.forEach(item => {
+                const fila = document.createElement('tr');
+                fila.innerHTML = `
+                    <td>${item.nrc || '-'}</td>
+                    <td>${item.tipo || '-'}</td>
+                    <td>${item.asignatura || '-'}</td>
+                    <td>${item.instructor || '-'}</td>
+                    <td>${item.cupos}</td>
+                    <td>${item.horarioSemanal || '-'}</td>
+                    <td>${item.salon || '-'}</td>
+                    <td>${item.fechaActualizacion}</td>
+                    <td><button class="btn-action btn-small" onclick="editarCurso('${String(item.nrc || '').replace(/'/g, "\\'")}')">EDITAR</button></td>
+                `;
+                tbody.appendChild(fila);
+            });
+
+            renderizarPaginacion();
+        }
+
+        function renderizarPaginacion() {
+            const totalPaginas = Math.max(1, Math.ceil(estadoCursos.filtrados.length / estadoCursos.registrosPorPagina));
+            if (estadoCursos.paginaActual > totalPaginas) {
+                estadoCursos.paginaActual = totalPaginas;
+            }
+
+            const pagination = document.getElementById('pagination');
+            pagination.innerHTML = '';
+
+            const crearBtn = (texto, pagina, active) => {
+                const btn = document.createElement('button');
+                btn.className = `page-btn ${active ? 'active' : ''}`.trim();
+                btn.textContent = texto;
+                btn.onclick = () => cambiarPagina(pagina);
+                return btn;
+            };
+
+            pagination.appendChild(crearBtn('«', 1, false));
+            pagination.appendChild(crearBtn('‹', estadoCursos.paginaActual - 1, false));
+            for (let i = 1; i <= totalPaginas; i++) {
+                pagination.appendChild(crearBtn(String(i), i, i === estadoCursos.paginaActual));
+            }
+            pagination.appendChild(crearBtn('›', estadoCursos.paginaActual + 1, false));
+            pagination.appendChild(crearBtn('»', totalPaginas, false));
+        }
+
+        function cambiarPagina(nuevaPagina) {
+            const totalPaginas = Math.max(1, Math.ceil(estadoCursos.filtrados.length / estadoCursos.registrosPorPagina));
+            if (nuevaPagina < 1) {
+                estadoCursos.paginaActual = 1;
+            } else if (nuevaPagina > totalPaginas) {
+                estadoCursos.paginaActual = totalPaginas;
+            } else {
+                estadoCursos.paginaActual = nuevaPagina;
+            }
+            renderizarTabla();
+        }
+
+        function cerrarSesion() {
+            if (window.clearAdminSession) {
+                window.clearAdminSession();
+            }
+            window.location.href = './login.html';
+        }
+
+        document.addEventListener('DOMContentLoaded', recargarCursos);
+        window.addEventListener('click', function(event) {
+            const modal = document.getElementById('modalNuevoCurso');
+            if (event.target === modal) {
+                cerrarModalNuevoCurso();
+            }
+        });
+    </script>
+</body>
+</html>
+
+
+

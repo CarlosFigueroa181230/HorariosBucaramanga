@@ -1,0 +1,776 @@
+﻿<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Horarios UPB V3</title>
+    <link rel="icon" type="image/png" href="../Assets/upb-logo.png">
+    <link rel="stylesheet" href="consultas-styles.css">
+    <script src="https://unpkg.com/lucide@0.469.0/dist/umd/lucide.min.js"></script>
+    <script src="lucide-icons.js"></script>
+    <script src="ux-dynamic.js"></script>
+    <script src="facultades-store.js"></script>
+    <script src="plantillas-store.js"></script>
+    <script src="facultades-sync.js"></script>
+    <script src="admin-auth.js"></script>
+    <script src="admin-local-modals.js"></script>
+</head>
+<body>
+    <!-- Contenedor principal -->
+    <div class="main-container">
+        <!-- Menú lateral -->
+        <aside class="sidebar">
+            <button class="mobile-close-btn" type="button" onclick="toggleMobileSidebar(false)" aria-label="Cerrar menu">&lt;</button>
+            <!-- Título del sidebar -->
+            <div class="sidebar-title">HORARIOS UPB</div>
+
+            <!-- Menú usuarios -->
+            <div class="menu-section">
+                <div class="menu-header">MENU USUARIOS</div>
+                <ul class="menu-list">
+                    <li class="menu-toggle" onclick="toggleMenu(this)">
+                        <span class="menu-icon">☰</span>
+                        <span>MENU</span>
+                    </li>
+                    <div class="submenu" style="display: none;">
+                        <li onclick="irA('consultas-horarios-clases.html')"><span class="submenu-icon">📅</span> Horarios Clases</li>
+                        <li onclick="irA('consultas-examenes.html')"><span class="submenu-icon">📋</span> Exámenes Parciales</li>
+                        <li onclick="irA('consultas-supletorios.html')"><span class="submenu-icon">📋</span> Supletorios</li>
+                        <li onclick="irA('consultas-intersemestrales.html')"><span class="submenu-icon">📋</span> Cursos Intersemestrales</li>
+                        <li onclick="irA('consultas-cursos-extracurriculares.html')"><span class="submenu-icon">📋</span> Cursos Extracurriculares</li>
+                    </div>
+                </ul>
+            </div>
+
+            <!-- Menú administración -->
+            <div class="menu-section">
+                <div class="menu-header">MENU ADMINISTRACION</div>
+                <div class="menu-title" id="adminSectionTitle" style="display: none;"></div>
+                <ul class="menu-list">
+                    <li id="adminAccessItem" onclick="abrirAccesoAdmin()" class="login-link"><span class="submenu-icon">🚪</span> <span id="adminAccessText">Login</span></li>
+                    <li id="adminLogoutItem" onclick="cerrarSesion()" style="display: none;"><span class="submenu-icon">🚪</span> Logout</li>
+                </ul>
+            </div>
+        </aside>
+
+        <div class="mobile-overlay" onclick="toggleMobileSidebar(false)"></div>
+
+        <!-- Contenido principal -->
+        <main class="content">
+            <!-- Header -->
+            <div class="header">
+            <button class="mobile-menu-btn" type="button" onclick="toggleMobileSidebar()" aria-label="Abrir o cerrar menu">☰</button>
+                <h1>HORARIOS UPB V.3</h1>
+                <img id="adminIcon" src="../Assets/ICONO-ADMIN.png" alt="Admin" class="btn-prueba" style="display: none;" onclick="toggleDropdownMenu()">
+                <div class="dropdown-menu" id="dropdownMenu">
+                    <div class="dropdown-header">
+                        <img src="../Assets/upb-logo.png" alt="Logo UPB" class="dropdown-logo">
+                        <span>Horarios</span>
+                        <span class="dropdown-subtitle">Menu</span>
+                    </div>
+                    <div class="dropdown-content">
+                        <a href="consultas-horarios-clases.html"><span class="icon">📅</span> Horarios Clases</a>
+                        <a href="consultas-examenes.html"><span class="icon">📋</span> Exámenes Parciales</a>
+                        <a href="consultas-supletorios.html"><span class="icon">📋</span> Supletorios</a>
+                        <a href="consultas-intersemestrales.html"><span class="icon">📋</span> Cursos Intersemestrales</a>
+                <a href="consultas-cursos-extracurriculares.html"><span class="icon">📋</span> Cursos Extracurriculares</a>
+                    </div>
+                    <div class="dropdown-divider"></div>
+                    <div class="dropdown-admin">
+                        <a href="#" onclick="abrirModalInfoAdmin(event)"><span class="icon">👤</span> Mi Información</a>
+                        <a href="#" onclick="abrirModalCambiarContraseña(event)"><span class="icon">🔑</span> Cambiar contraseña</a>
+                        <a href="admin.html"><span class="icon">🔍</span> Administración</a>
+                        <a href="login.html" onclick="cerrarSesion()"><span class="icon">🚪</span> Logout</a>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Contenido interno -->
+            <div class="inner-content">
+                <!-- Botón volver -->
+                <div class="back-button-container">
+                    <a href="menu-horarios.html" class="back-button" id="backButton">◄ Volver al Menu</a>
+                </div>
+
+                <!-- Tarjeta principal -->
+                <div class="consulta-card">
+                    <!-- Encabezado -->
+                    <div class="consulta-header">
+                        <h2>Consultas</h2>
+                        <p>Paginas/Horarios clase/buscar</p>
+                    </div>
+
+                    <!-- Filtros de búsqueda -->
+                    <div class="filters-section">
+                        <div class="filter-group">
+                            <label for="facultad">Facultad</label>
+                            <select id="facultad" class="facultad-select" onchange="actualizarConsulta()">
+                                <option value="">---Seleccionar facultad---</option>
+                                <option value="administracion-empresas">Administración De Empresas</option>
+                                <option value="centro-lenguas">Centro De Lenguas</option>
+                                <option value="ciencias-politicas">Ciencias Políticas Y Gobierno</option>
+                                <option value="comunicacion-social">Comunicación Social - Periodismo</option>
+                                <option value="ciencias-basicas">Departamento De Ciencias Básicas</option>
+                                <option value="formacion-humanistica">Departamento De Formación Humanística</option>
+                                <option value="derecho">Derecho</option>
+                                <option value="diseno-grafico">Diseño Gráfico</option>
+                                <option value="electivas">Electivas</option>
+                                <option value="ingenieria-industrial">Ingeniería Industrial</option>
+                                <option value="ingenieria-ambiental">Ingeniería Ambiental</option>
+                                <option value="ingenieria-civil">Ingeniería Civil</option>
+                                <option value="ingenieria-electronica">Ingeniería Electrónica</option>
+                                <option value="ingenieria-electrica">Ingeniería Eléctrica</option>
+                                <option value="ingenieria-mecanica">Ingeniería Mecánica</option>
+                                <option value="ingenieria-sistemas">Ingeniería De Sistemas E Informática</option>
+                                <option value="negocios-internacionales">Negocios Internacionales</option>
+                                <option value="psicologia">Psicología</option>
+                            </select>
+                        </div>
+
+                        <!-- Botones de acción -->
+                        <div class="action-buttons">
+                            <button class="btn-buscar" onclick="buscarDatos()">Buscar</button>
+                            <button class="btn-limpiar" onclick="limpiarFiltros()">Limpiar</button>
+                        </div>
+                    </div>
+
+                    <!-- Resultados -->
+                    <div class="results-section">
+                        <div class="results-info">
+                            Seleccione la facultad y Pulse el botón Buscar - Horarios de Clase
+                        </div>
+
+                        <div id="results-header" class="results-header" style="display: none;">
+                            <div class="results-line results-name"><span id="carrera-nombre">-</span></div>
+                            <div class="results-line results-title">HORARIOS DE CLASE PRIMER SEMESTRE (Año)</div>
+                            <div class="results-line results-availability">Disponible: 2024/01/15 -> 2024/06/15</div>
+                        </div>
+
+                        <div id="table-filters" class="table-filters" style="display: none;">
+                            <div class="semester-filter-group">
+                                <label>#Semestre</label>
+                                <select id="semester-filter" onchange="aplicarFiltros()">
+                                    <option value="">Todos</option>
+                                </select>
+                                <span class="semester-filter-hover-icon" aria-hidden="true"></span>
+                            </div>
+                            <div>
+                                <label>Asignatura</label>
+                                <input type="text" data-col="0" list="asignatura-list" oninput="aplicarFiltros()" placeholder="Buscar asignatura">
+                                <datalist id="asignatura-list"></datalist>
+                            </div>
+                            <div>
+                                <label>Materia</label>
+                                <input type="text" data-col="1" list="materia-list" oninput="aplicarFiltros()" placeholder="Buscar materia">
+                                <datalist id="materia-list"></datalist>
+                            </div>
+                            <div>
+                                <label>NRC</label>
+                                <input type="text" data-col="3" list="nrc-list" oninput="aplicarFiltros()" placeholder="Buscar NRC">
+                                <datalist id="nrc-list"></datalist>
+                            </div>
+                            <div>
+                                <label>Creditos</label>
+                                <input type="text" data-col="4" list="creditos-list" oninput="aplicarFiltros()" placeholder="Buscar creditos">
+                                <datalist id="creditos-list"></datalist>
+                            </div>
+                            <div>
+                                <label>Profesor</label>
+                                <input type="text" data-col="5" list="profesor-list" oninput="aplicarFiltros()" placeholder="Buscar profesor">
+                                <datalist id="profesor-list"></datalist>
+                            </div>
+                            <div>
+                                <label>Aula</label>
+                                <input type="text" data-col="6" list="aula-list" oninput="aplicarFiltros()" placeholder="Buscar aula">
+                                <datalist id="aula-list"></datalist>
+                            </div>
+                            <div>
+                                <label>Cupos</label>
+                                <input type="text" data-col="7" list="cupos-list" oninput="aplicarFiltros()" placeholder="Buscar cupos">
+                                <datalist id="cupos-list"></datalist>
+                            </div>
+                        </div>
+
+                        <div id="filters-actions" class="filters-actions" style="display: none;">
+                            <button class="btn-limpiar-filtros" onclick="limpiarFiltrosTabla()">Limpiar filtros</button>
+                        </div>
+
+                        <div id="semester-panels" class="semester-panels" style="display: none;"></div>
+
+                        <div id="resultados" class="no-data">
+                            No hay datos para la facultad seleccionada!
+                        </div>
+
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <!-- JavaScript -->
+    <script>
+        /* Función para desplegar/contraer menú */
+        function toggleMenu(element) {
+            const submenu = element.nextElementSibling;
+            if (submenu && submenu.classList.contains('submenu')) {
+                if (submenu.style.display === 'none') {
+                    submenu.style.display = 'block';
+                } else {
+                    submenu.style.display = 'none';
+                }
+            }
+        }
+
+        /* Función para navegación */
+        function irA(pagina) {
+            toggleMobileSidebar(false);
+            window.location.href = pagina;
+        }
+
+        function toggleMobileSidebar(forceOpen) {
+            if (window.innerWidth > 768) {
+                document.body.classList.remove('mobile-sidebar-open');
+                return;
+            }
+
+            const shouldOpen = typeof forceOpen === 'boolean'
+                ? forceOpen
+                : !document.body.classList.contains('mobile-sidebar-open');
+
+            document.body.classList.toggle('mobile-sidebar-open', shouldOpen);
+        }
+
+        window.addEventListener('resize', function() {
+            if (window.innerWidth > 768) {
+                document.body.classList.remove('mobile-sidebar-open');
+            }
+        });
+
+        const estadoConsultaHorarios = {
+            datos: []
+        };
+
+        function obtenerDatosPlantillaHorarios(nombreFacultad) {
+            if (!window.PlantillasStore || typeof window.PlantillasStore.getAll !== 'function') {
+                return [];
+            }
+
+            const clave = (nombreFacultad || '').trim().toLowerCase();
+            return window.PlantillasStore.getAll()
+                .filter(item => (item.facultad || '').trim().toLowerCase() === clave)
+                .map(item => ({
+                    asignatura: item.asignatura,
+                    materia: item.materia,
+                    semestre: item.semestre,
+                    nrc: item.nrc,
+                    creditos: item.creditos,
+                    profesor: item.profesor,
+                    aula: item.aula,
+                    cupos: item.cupos,
+                    lunes: '--',
+                    martes: '--',
+                    miercoles: '--',
+                    jueves: '--',
+                    viernes: '--',
+                    sabado: '--'
+                }));
+        }
+
+        function normalizarSemestre(valor, fallback) {
+            const numero = Number(valor);
+            if (Number.isFinite(numero) && numero > 0) {
+                return Math.trunc(numero);
+            }
+            return fallback;
+        }
+
+        function formatearTextoSemestre(semestre) {
+            const etiquetas = {
+                1: 'PRIMER SEMESTRE',
+                2: 'SEGUNDO SEMESTRE',
+                3: 'TERCER SEMESTRE',
+                4: 'CUARTO SEMESTRE',
+                5: 'QUINTO SEMESTRE',
+                6: 'SEXTO SEMESTRE',
+                7: 'SEPTIMO SEMESTRE',
+                8: 'OCTAVO SEMESTRE',
+                9: 'NOVENO SEMESTRE',
+                10: 'DECIMO SEMESTRE'
+            };
+
+            const numero = Number(semestre);
+            if (!Number.isFinite(numero) || numero <= 0) {
+                return 'TODOS LOS SEMESTRES';
+            }
+
+            return etiquetas[numero] || `SEMESTRE ${numero}`;
+        }
+
+        function poblarFiltroSemestre(datos) {
+            const select = document.getElementById('semester-filter');
+            if (!select) {
+                return;
+            }
+
+            const semestres = Array.from(
+                new Set(
+                    datos
+                        .map(item => normalizarSemestre(item.semestre, null))
+                        .filter(value => value !== null)
+                )
+            ).sort((a, b) => a - b);
+
+            select.innerHTML = '<option value="">Todos</option>';
+            semestres.forEach(semestre => {
+                const option = document.createElement('option');
+                option.value = String(semestre);
+                option.textContent = `Semestre ${semestre}`;
+                select.appendChild(option);
+            });
+        }
+
+        function renderizarTablaHorarios(datos) {
+            const contenedor = document.getElementById('semester-panels');
+            const resultados = document.getElementById('resultados');
+
+            if (!contenedor || !resultados) {
+                return;
+            }
+
+            contenedor.innerHTML = '';
+
+            if (!datos.length) {
+                resultados.style.display = 'block';
+                contenedor.style.display = 'none';
+                return;
+            }
+
+            const grupos = new Map();
+            datos.forEach(function (item) {
+                const semestre = normalizarSemestre(item.semestre, 1);
+                if (!grupos.has(semestre)) {
+                    grupos.set(semestre, []);
+                }
+                grupos.get(semestre).push(item);
+            });
+
+            Array.from(grupos.keys()).sort(function (a, b) {
+                return a - b;
+            }).forEach(function (semestre) {
+                const panel = document.createElement('section');
+                panel.className = 'semester-panel';
+                panel.dataset.semester = String(semestre);
+                panel.classList.add(`semester-panel-${semestre}`);
+
+                const encabezado = document.createElement('div');
+                encabezado.className = 'semester-panel-header';
+                encabezado.textContent = formatearTextoSemestre(semestre);
+
+                const tabla = document.createElement('table');
+                tabla.className = 'semester-panel-table';
+
+                tabla.innerHTML = `
+                    <thead>
+                        <tr>
+                            <th>Asignatura</th>
+                            <th>Materia</th>
+                            <th>Semestre</th>
+                            <th>NRC</th>
+                            <th>Creditos</th>
+                            <th>Profesor</th>
+                            <th>Aula</th>
+                            <th>Cupos</th>
+                            <th>Lunes</th>
+                            <th>Martes</th>
+                            <th>Miercoles</th>
+                            <th>Jueves</th>
+                            <th>Viernes</th>
+                            <th>Sabado</th>
+                        </tr>
+                    </thead>
+                    <tbody></tbody>
+                `;
+
+                const tbody = tabla.querySelector('tbody');
+                grupos.get(semestre).forEach(function (item) {
+                    const fila = document.createElement('tr');
+                    fila.dataset.rowType = 'data';
+                    fila.dataset.semester = String(semestre);
+                    fila.innerHTML = `
+                        <td>${item.asignatura || ''}</td>
+                        <td>${item.materia || ''}</td>
+                        <td>${semestre}</td>
+                        <td>${item.nrc || ''}</td>
+                        <td>${item.creditos ?? ''}</td>
+                        <td>${item.profesor || ''}</td>
+                        <td>${item.aula || ''}</td>
+                        <td>${item.cupos ?? ''}</td>
+                        <td>${item.lunes || '--'}</td>
+                        <td>${item.martes || '--'}</td>
+                        <td>${item.miercoles || '--'}</td>
+                        <td>${item.jueves || '--'}</td>
+                        <td>${item.viernes || '--'}</td>
+                        <td>${item.sabado || '--'}</td>
+                    `;
+                    tbody.appendChild(fila);
+                });
+
+                panel.appendChild(encabezado);
+                panel.appendChild(tabla);
+                contenedor.appendChild(panel);
+            });
+
+            contenedor.style.display = 'grid';
+            resultados.style.display = 'none';
+        }
+
+        /* Función para buscar datos */
+        function buscarDatos() {
+            const facultad = document.getElementById('facultad').value;
+            const resultados = document.getElementById('resultados');
+            const header = document.getElementById('results-header');
+            const carreraNombre = document.getElementById('carrera-nombre');
+
+            if (!facultad) {
+                alert('Por favor seleccione una facultad');
+                header.style.display = 'none';
+                resultados.style.display = 'block';
+                carreraNombre.textContent = '-';
+                mostrarFiltros(false);
+                limpiarFiltrosTabla();
+                return;
+            }
+
+            // Aquí iría la lógica para buscar datos del servidor
+            resultados.style.display = 'none';
+
+            const facultadTexto = document.getElementById('facultad').options[document.getElementById('facultad').selectedIndex].text;
+            carreraNombre.textContent = facultadTexto;
+            
+            // Datos simulados con materias reales de cada facultad
+            const datosSimulados = {
+                "administracion-empresas": [
+                    { asignatura: "Contabilidad General", materia: "Contabilidad", nrc: "10001", creditos: 3, profesor: "Msc. López", aula: "B201", cupos: 35, lunes: "08:00-10:00", martes: "08:00-10:00", miercoles: "--", jueves: "08:00-10:00", viernes: "08:00-10:00", sabado: "--" },
+                    { asignatura: "Administración Financiera", materia: "Finanzas", nrc: "10002", creditos: 3, profesor: "Dra. Martínez", aula: "B202", cupos: 30, lunes: "10:00-12:00", martes: "--", miercoles: "10:00-12:00", jueves: "--", viernes: "10:00-12:00", sabado: "--" },
+                    { asignatura: "Recursos Humanos", materia: "RH", nrc: "10003", creditos: 3, profesor: "Ing. Torres", aula: "B203", cupos: 32, lunes: "14:00-16:00", martes: "14:00-16:00", miercoles: "14:00-16:00", jueves: "--", viernes: "--", sabado: "--" }
+                ],
+                "centro-lenguas": [
+                    { asignatura: "Inglés I", materia: "Idiomas", nrc: "20001", creditos: 2, profesor: "Prof. Anderson", aula: "C101", cupos: 25, lunes: "09:00-10:30", martes: "--", miercoles: "09:00-10:30", jueves: "--", viernes: "09:00-10:30", sabado: "--" },
+                    { asignatura: "Francés Intermedio", materia: "Idiomas", nrc: "20002", creditos: 2, profesor: "Prof. Dupont", aula: "C102", cupos: 20, lunes: "--", martes: "10:00-11:30", miercoles: "--", jueves: "10:00-11:30", viernes: "--", sabado: "10:00-12:00" }
+                ],
+                "ciencias-politicas": [
+                    { asignatura: "Teoría Política", materia: "Política", nrc: "30001", creditos: 3, profesor: "Dr. Hernández", aula: "D101", cupos: 40, lunes: "07:00-09:00", martes: "--", miercoles: "07:00-09:00", jueves: "--", viernes: "07:00-09:00", sabado: "--" },
+                    { asignatura: "Derecho Constitucional", materia: "Derecho", nrc: "30002", creditos: 3, profesor: "Dra. González", aula: "D102", cupos: 38, lunes: "--", martes: "09:00-11:00", miercoles: "--", jueves: "09:00-11:00", viernes: "--", sabado: "09:00-11:00" }
+                ],
+                "comunicacion-social": [
+                    { asignatura: "Redacción Periodística", materia: "Journalism", nrc: "40001", creditos: 3, profesor: "Msc. Rodríguez", aula: "E101", cupos: 30, lunes: "10:00-12:00", martes: "10:00-12:00", miercoles: "--", jueves: "10:00-12:00", viernes: "--", sabado: "--" },
+                    { asignatura: "Producción Audiovisual", materia: "Media", nrc: "40002", creditos: 3, profesor: "Dra. Silva", aula: "E102", cupos: 25, lunes: "--", martes: "14:00-16:00", miercoles: "14:00-16:00", jueves: "--", viernes: "14:00-16:00", sabado: "--" }
+                ],
+                "ciencias-basicas": [
+                    { asignatura: "Cálculo I", materia: "Matemáticas", nrc: "50001", creditos: 4, profesor: "Dr. García", aula: "F101", cupos: 45, lunes: "07:00-09:00", martes: "07:00-09:00", miercoles: "--", jueves: "07:00-09:00", viernes: "--", sabado: "08:00-10:00" },
+                    { asignatura: "Física General", materia: "Física", nrc: "50002", creditos: 4, profesor: "Dr. Pérez", aula: "F102", cupos: 40, lunes: "--", martes: "09:00-11:00", miercoles: "09:00-11:00", jueves: "--", viernes: "09:00-11:00", sabado: "--" }
+                ],
+                "formacion-humanistica": [
+                    { asignatura: "Filosofía Moderna", materia: "Filosofía", nrc: "60001", creditos: 2, profesor: "Dr. Domínguez", aula: "G101", cupos: 35, lunes: "15:00-17:00", martes: "--", miercoles: "15:00-17:00", jueves: "--", viernes: "15:00-17:00", sabado: "--" },
+                    { asignatura: "Historia de América Latina", materia: "Historia", nrc: "60002", creditos: 2, profesor: "Dra. Moreno", aula: "G102", cupos: 38, lunes: "--", martes: "16:00-18:00", miercoles: "--", jueves: "16:00-18:00", viernes: "--", sabado: "16:00-18:00" }
+                ],
+                "derecho": [
+                    { asignatura: "Derecho Penal I", materia: "Penal", nrc: "70001", creditos: 4, profesor: "Dr. Reyes", aula: "H101", cupos: 40, lunes: "08:00-10:00", martes: "--", miercoles: "08:00-10:00", jueves: "--", viernes: "08:00-10:00", sabado: "09:00-11:00" },
+                    { asignatura: "Derecho Civil I", materia: "Civil", nrc: "70002", creditos: 4, profesor: "Dra. Vargas", aula: "H102", cupos: 38, lunes: "--", martes: "10:00-12:00", miercoles: "--", jueves: "10:00-12:00", viernes: "--", sabado: "11:00-13:00" }
+                ],
+                "diseno-grafico": [
+                    { asignatura: "Teoría del Color", materia: "Diseño", nrc: "80001", creditos: 2, profesor: "Dra. López", aula: "I101", cupos: 25, lunes: "09:00-11:00", martes: "09:00-11:00", miercoles: "--", jueves: "09:00-11:00", viernes: "--", sabado: "--" },
+                    { asignatura: "Diseño Gráfico Digital", materia: "Diseño", nrc: "80002", creditos: 3, profesor: "Prof. Martínez", aula: "I102", cupos: 20, lunes: "--", martes: "14:00-17:00", miercoles: "14:00-17:00", jueves: "--", viernes: "14:00-17:00", sabado: "--" }
+                ],
+                "electivas": [
+                    { asignatura: "Emprendimiento", materia: "Negocios", nrc: "90001", creditos: 2, profesor: "Msc. Sánchez", aula: "J101", cupos: 30, lunes: "17:00-19:00", martes: "--", miercoles: "17:00-19:00", jueves: "--", viernes: "17:00-19:00", sabado: "--" }
+                ],
+                "ingenieria-industrial": [
+                    { asignatura: "Ingeniería de Procesos", materia: "Procesos", nrc: "100001", creditos: 3, profesor: "Ing. Ortiz", aula: "K101", cupos: 35, lunes: "07:00-09:00", martes: "07:00-09:00", miercoles: "--", jueves: "07:00-09:00", viernes: "--", sabado: "08:00-10:00" },
+                    { asignatura: "Producción", materia: "Producción", nrc: "100002", creditos: 3, profesor: "Ing. Ruiz", aula: "K102", cupos: 32, lunes: "--", martes: "10:00-12:00", miercoles: "10:00-12:00", jueves: "--", viernes: "10:00-12:00", sabado: "--" }
+                ],
+                "ingenieria-ambiental": [
+                    { asignatura: "Evaluación de Impacto Ambiental", materia: "Gestión Ambiental", nrc: "110001", creditos: 3, profesor: "Dra. Arias", aula: "L101", cupos: 30, lunes: "09:00-11:00", martes: "--", miercoles: "09:00-11:00", jueves: "--", viernes: "09:00-11:00", sabado: "--" },
+                    { asignatura: "Tratamiento de Aguas", materia: "Agua", nrc: "110002", creditos: 3, profesor: "Ing. Castro", aula: "L102", cupos: 28, lunes: "--", martes: "14:00-16:00", miercoles: "--", jueves: "14:00-16:00", viernes: "14:00-16:00", sabado: "--" }
+                ],
+                "ingenieria-civil": [
+                    { asignatura: "Resistencia de Materiales", materia: "Estructuras", nrc: "120001", creditos: 4, profesor: "Dr. Huerta", aula: "M101", cupos: 38, lunes: "08:00-10:00", martes: "08:00-10:00", miercoles: "--", jueves: "08:00-10:00", viernes: "--", sabado: "09:00-11:00" },
+                    { asignatura: "Diseño de Estructuras", materia: "Estructuras", nrc: "120002", creditos: 4, profesor: "Ing. Fuentes", aula: "M102", cupos: 35, lunes: "--", martes: "10:00-12:00", miercoles: "10:00-12:00", jueves: "--", viernes: "10:00-12:00", sabado: "11:00-13:00" }
+                ],
+                "ingenieria-electronica": [
+                    { asignatura: "Circuitos Digitales", materia: "Electrónica", nrc: "130001", creditos: 3, profesor: "Dr. Quiroga", aula: "N101", cupos: 32, lunes: "09:00-11:00", martes: "--", miercoles: "09:00-11:00", jueves: "--", viernes: "09:00-11:00", sabado: "10:00-12:00" },
+                    { asignatura: "Microcontroladores", materia: "Electrónica", nrc: "130002", creditos: 3, profesor: "Ing. Navarro", aula: "N102", cupos: 30, lunes: "--", martes: "14:00-16:00", miercoles: "--", jueves: "14:00-16:00", viernes: "14:00-16:00", sabado: "--" }
+                ],
+                "ingenieria-electrica": [
+                    { asignatura: "Máquinas Eléctricas", materia: "Máquinas", nrc: "140001", creditos: 3, profesor: "Dr. Montes", aula: "O101", cupos: 35, lunes: "07:00-09:00", martes: "07:00-09:00", miercoles: "--", jueves: "07:00-09:00", viernes: "--", sabado: "08:00-10:00" },
+                    { asignatura: "Sistemas de Potencia", materia: "Potencia", nrc: "140002", creditos: 3, profesor: "Ing. Vera", aula: "O102", cupos: 33, lunes: "--", martes: "10:00-12:00", miercoles: "10:00-12:00", jueves: "--", viernes: "10:00-12:00", sabado: "--" }
+                ],
+                "ingenieria-mecanica": [
+                    { asignatura: "Termodinámica", materia: "Térmica", nrc: "150001", creditos: 4, profesor: "Dr. Espinoza", aula: "P101", cupos: 37, lunes: "08:00-10:00", martes: "--", miercoles: "08:00-10:00", jueves: "--", viernes: "08:00-10:00", sabado: "09:00-11:00" },
+                    { asignatura: "Mecánica de Fluidos", materia: "Fluidos", nrc: "150002", creditos: 4, profesor: "Ing. Botero", aula: "P102", cupos: 35, lunes: "--", martes: "10:00-12:00", miercoles: "--", jueves: "10:00-12:00", viernes: "10:00-12:00", sabado: "11:00-13:00" }
+                ],
+                "ingenieria-sistemas": [
+                    { asignatura: "Programación Avanzada", materia: "Programación", nrc: "160001", creditos: 3, profesor: "Msc. Gómez", aula: "Q101", cupos: 40, lunes: "07:00-09:00", martes: "07:00-09:00", miercoles: "--", jueves: "07:00-09:00", viernes: "--", sabado: "08:00-10:00" },
+                    { asignatura: "Bases de Datos", materia: "Bases de Datos", nrc: "160002", creditos: 3, profesor: "Dr. Puentes", aula: "Q102", cupos: 38, lunes: "--", martes: "10:00-12:00", miercoles: "10:00-12:00", jueves: "--", viernes: "10:00-12:00", sabado: "--" },
+                    { asignatura: "Análisis de Sistemas", materia: "Sistemas", nrc: "160003", creditos: 3, profesor: "Ing. Giraldo", aula: "Q103", cupos: 36, lunes: "14:00-16:00", martes: "--", miercoles: "14:00-16:00", jueves: "14:00-16:00", viernes: "--", sabado: "--" }
+                ],
+                "negocios-internacionales": [
+                    { asignatura: "Comercio Internacional", materia: "Comercio", nrc: "170001", creditos: 3, profesor: "Dra. Cardona", aula: "R101", cupos: 35, lunes: "09:00-11:00", martes: "09:00-11:00", miercoles: "--", jueves: "09:00-11:00", viernes: "--", sabado: "--" },
+                    { asignatura: "Negociación Internacional", materia: "Negociación", nrc: "170002", creditos: 3, profesor: "Prof. Rivera", aula: "R102", cupos: 32, lunes: "--", martes: "14:00-16:00", miercoles: "14:00-16:00", jueves: "--", viernes: "14:00-16:00", sabado: "14:00-16:00" }
+                ],
+                "psicologia": [
+                    { asignatura: "Psicología General", materia: "Psicología Fundamental", nrc: "180001", creditos: 3, profesor: "Dra. Flores", aula: "S101", cupos: 40, lunes: "08:00-10:00", martes: "--", miercoles: "08:00-10:00", jueves: "--", viernes: "08:00-10:00", sabado: "--" },
+                    { asignatura: "Psicopatología", materia: "Clínica", nrc: "180002", creditos: 3, profesor: "Dr. Campos", aula: "S102", cupos: 35, lunes: "--", martes: "10:00-12:00", miercoles: "--", jueves: "10:00-12:00", viernes: "10:00-12:00", sabado: "10:00-12:00" }
+                ]
+            };
+
+            const datosPlantilla = obtenerDatosPlantillaHorarios(facultadTexto);
+            const datos = datosPlantilla.length ? datosPlantilla : (datosSimulados[facultad] || []);
+            const datosNormalizados = datos.map((dato, index) => ({
+                ...dato,
+                semestre: normalizarSemestre(dato.semestre, (index % 10) + 1)
+            }));
+            estadoConsultaHorarios.datos = datosNormalizados;
+            if (datos.length === 0) {
+                resultados.style.display = 'block';
+                header.style.display = 'none';
+                carreraNombre.textContent = '-';
+                mostrarFiltros(false);
+                document.getElementById('semester-panels').innerHTML = '';
+                document.getElementById('semester-panels').style.display = 'none';
+            } else {
+                header.style.display = 'block';
+                mostrarFiltros(true);
+                poblarFiltroSemestre(datosNormalizados);
+                renderizarTablaHorarios(datosNormalizados);
+                poblarListasFiltros();
+                limpiarFiltrosTabla();
+            }
+        }
+
+        /* Función para limpiar filtros */
+        function limpiarFiltros() {
+            document.getElementById('facultad').value = '';
+            document.getElementById('resultados').style.display = 'block';
+            document.getElementById('results-header').style.display = 'none';
+            document.getElementById('carrera-nombre').textContent = '-';
+            mostrarFiltros(false);
+            document.getElementById('semester-panels').innerHTML = '';
+            document.getElementById('semester-panels').style.display = 'none';
+            limpiarFiltrosTabla();
+        }
+
+        function mostrarFiltros(mostrar) {
+            const filtros = document.getElementById('table-filters');
+            const acciones = document.getElementById('filters-actions');
+            if (filtros) {
+                filtros.style.display = mostrar ? 'grid' : 'none';
+            }
+            if (acciones) {
+                acciones.style.display = mostrar ? 'flex' : 'none';
+            }
+        }
+
+        function poblarListasFiltros() {
+            const filtros = document.querySelectorAll('#table-filters input');
+            const filas = document.querySelectorAll('#semester-panels tr[data-row-type="data"]');
+
+            filtros.forEach(input => {
+                const col = parseInt(input.getAttribute('data-col'), 10);
+                const listId = input.getAttribute('list');
+                const dataList = document.getElementById(listId);
+                if (!dataList) {
+                    return;
+                }
+                const valores = new Set();
+                filas.forEach(fila => {
+                    const celda = fila.cells[col];
+                    if (!celda) {
+                        return;
+                    }
+                    const texto = celda.textContent.trim();
+                    if (texto) {
+                        valores.add(texto);
+                    }
+                });
+                dataList.innerHTML = '';
+                Array.from(valores).sort().forEach(valor => {
+                    const option = document.createElement('option');
+                    option.value = valor;
+                    dataList.appendChild(option);
+                });
+            });
+        }
+
+        function aplicarFiltros() {
+            const filtroSemestre = document.getElementById('semester-filter');
+            const valorSemestre = filtroSemestre ? filtroSemestre.value.trim().toLowerCase() : '';
+            const filtros = document.querySelectorAll('#table-filters input');
+            const paneles = document.querySelectorAll('#semester-panels .semester-panel');
+            const filasDatos = document.querySelectorAll('#semester-panels tr[data-row-type="data"]');
+            const visibilidadSemestres = new Map();
+
+            filasDatos.forEach(fila => {
+                let visible = true;
+
+                if (valorSemestre) {
+                    const textoSemestre = fila.dataset.semester ? fila.dataset.semester.trim().toLowerCase() : '';
+                    if (textoSemestre !== valorSemestre) {
+                        visible = false;
+                    }
+                }
+
+                filtros.forEach(input => {
+                    const valor = input.value.trim().toLowerCase();
+                    if (!valor) {
+                        return;
+                    }
+                    const col = parseInt(input.getAttribute('data-col'), 10);
+                    const celda = fila.cells[col];
+                    const texto = celda ? celda.textContent.toLowerCase() : '';
+                    if (!texto.includes(valor)) {
+                        visible = false;
+                    }
+                });
+                fila.style.display = visible ? '' : 'none';
+
+                const semestreFila = fila.dataset.semester || '';
+                if (!visibilidadSemestres.has(semestreFila)) {
+                    visibilidadSemestres.set(semestreFila, false);
+                }
+                if (visible) {
+                    visibilidadSemestres.set(semestreFila, true);
+                }
+            });
+
+            paneles.forEach(panel => {
+                const semestrePanel = panel.dataset.semester || '';
+                const visible = visibilidadSemestres.get(semestrePanel);
+                panel.style.display = visible ? 'block' : 'none';
+            });
+
+            const contenedor = document.getElementById('semester-panels');
+            if (contenedor) {
+                contenedor.style.display = paneles.length ? 'grid' : 'none';
+            }
+        }
+
+        function limpiarFiltrosTabla() {
+            const filtroSemestre = document.getElementById('semester-filter');
+            if (filtroSemestre) {
+                filtroSemestre.value = '';
+            }
+            document.querySelectorAll('#table-filters input').forEach(input => {
+                input.value = '';
+            });
+            aplicarFiltros();
+        }
+
+        /* Función para actualización automática */
+        function actualizarConsulta() {
+            // Opcional: actualizar cuando cambia la selección
+        }
+
+        function toggleDropdownMenu() {
+            const menu = document.getElementById('dropdownMenu');
+            menu.classList.toggle('active');
+        }
+
+        document.addEventListener('click', function(event) {
+            const menu = document.getElementById('dropdownMenu');
+            const btn = document.getElementById('adminIcon');
+
+            if (!menu || !btn || btn.style.display === 'none') {
+                return;
+            }
+
+            if (!menu.contains(event.target) && !btn.contains(event.target)) {
+                menu.classList.remove('active');
+            }
+        });
+
+        function aplicarVistaSesionAdmin() {
+            const estaLogeado = window.isAdminAuthenticated && window.isAdminAuthenticated();
+            const adminTitle = document.getElementById('adminSectionTitle');
+            const adminAccessItem = document.getElementById('adminAccessItem');
+            const adminAccessText = document.getElementById('adminAccessText');
+            const adminLogoutItem = document.getElementById('adminLogoutItem');
+            const adminIcon = document.getElementById('adminIcon');
+            const backButton = document.getElementById('backButton');
+
+            if (estaLogeado) {
+                if (adminTitle) {
+                    adminTitle.style.display = 'none';
+                }
+                if (adminAccessItem) {
+                    adminAccessItem.style.display = 'none';
+                    adminAccessItem.classList.remove('login-link');
+                }
+                if (adminLogoutItem) {
+                    adminLogoutItem.style.display = 'block';
+                }
+                if (adminIcon) {
+                    adminIcon.style.display = 'block';
+                }
+                if (backButton) {
+                    backButton.href = 'admin.html';
+                    backButton.textContent = '◄ Volver a Administración';
+                }
+            } else {
+                if (adminTitle) {
+                    adminTitle.style.display = 'none';
+                }
+                if (adminAccessText) {
+                    adminAccessText.textContent = 'Login';
+                }
+                if (adminAccessItem) {
+                    adminAccessItem.style.display = 'list-item';
+                    adminAccessItem.classList.add('login-link');
+                }
+                if (adminLogoutItem) {
+                    adminLogoutItem.style.display = 'none';
+                }
+                if (adminIcon) {
+                    adminIcon.style.display = 'none';
+                }
+                if (backButton) {
+                    backButton.href = 'menu-horarios.html';
+                    backButton.textContent = '◄ Volver al Menu';
+                }
+            }
+        }
+
+        function abrirAccesoAdmin() {
+            if (window.isAdminAuthenticated && window.isAdminAuthenticated()) {
+                window.location.href = './admin.html';
+                return;
+            }
+            abrirLogin();
+        }
+
+        /* Función para abrir login */
+        function abrirLogin() {
+            window.location.href = './login.html';
+        }
+
+        function cerrarSesion() {
+            if (window.clearAdminSession) {
+                window.clearAdminSession();
+            }
+            window.location.href = './login.html';
+        }
+
+        document.addEventListener('DOMContentLoaded', function() {
+            document.body.classList.remove('mobile-sidebar-open');
+            aplicarVistaSesionAdmin();
+            if (window.aplicarFacultadesEnSelect) {
+                window.aplicarFacultadesEnSelect('facultad', '---Seleccionar facultad---');
+            }
+        });
+    </script>
+</body>
+</html>
+
+
+
+

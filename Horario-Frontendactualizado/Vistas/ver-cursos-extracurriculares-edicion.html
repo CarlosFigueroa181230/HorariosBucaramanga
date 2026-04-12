@@ -1,0 +1,250 @@
+﻿<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Horarios UPB V3</title>
+    <link rel="icon" type="image/png" href="../Assets/upb-logo.png">
+    <link rel="stylesheet" href="admin-styles.css">
+    <link rel="stylesheet" href="publicaciones-styles.css">
+    <script src="https://unpkg.com/lucide@0.469.0/dist/umd/lucide.min.js"></script>
+    <script src="lucide-icons.js"></script>
+    <script src="ux-dynamic.js"></script>
+    <script src="admin-auth.js"></script>
+    <script src="admin-local-modals.js"></script>
+    <script src="cursos-extracurriculares-store.js"></script>
+    <script>
+        requireAdminSession();
+    </script>
+</head>
+<body>
+    <div class="header">
+        <div class="header-left">
+            <h1>HORARIOS UPB VERSION 3.0</h1>
+        </div>
+        <div class="header-right">
+            <img src="../Assets/ICONO-ADMIN.png" alt="Admin" class="btn-prueba" onclick="toggleDropdownMenu()">
+
+            <div class="dropdown-menu" id="dropdownMenu">
+                <div class="dropdown-header">
+                    <img src="../Assets/upb-logo.png" alt="Logo UPB" class="dropdown-logo">
+                    <span>Horarios</span>
+                    <span class="dropdown-subtitle">Menu</span>
+                </div>
+
+                <div class="dropdown-content">
+                    <a href="consultas-horarios-clases.html"><span class="icon">📅</span> Horarios Clases</a>
+                    <a href="consultas-examenes.html"><span class="icon">📋</span> Exámenes Parciales</a>
+                    <a href="consultas-supletorios.html"><span class="icon">📋</span> Supletorios</a>
+                    <a href="consultas-intersemestrales.html"><span class="icon">📋</span> Cursos Intersemestrales</a>
+                    <a href="consultas-cursos-extracurriculares.html"><span class="icon">📋</span> Cursos Extracurriculares</a>
+                </div>
+
+                <div class="dropdown-divider"></div>
+
+                <div class="dropdown-admin">
+                    <a href="#" onclick="abrirModalInfoAdmin(event)"><span class="icon">👤</span> Mi Información</a>
+                    <a href="#" onclick="abrirModalCambiarContraseña(event)"><span class="icon">🔑</span> Cambiar contraseña</a>
+                    <a href="admin.html"><span class="icon">🔍</span> Administración</a>
+                    <a href="login.html" onclick="cerrarSesion()"><span class="icon">🚪</span> Logout</a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="main-container">
+        <aside class="sidebar">
+            <div class="sidebar-title">HORARIOS UPB</div>
+
+            <div class="menu-section">
+                <div class="menu-header">MENU USUARIOS</div>
+                <ul class="menu-list">
+                    <li class="menu-toggle" onclick="toggleMenu(this)">
+                        <span class="menu-icon">☰</span>
+                        <span>MENU</span>
+                    </li>
+                    <div class="submenu" style="display: none;">
+                        <li onclick="irA('consultas-horarios-clases.html')"><span class="submenu-icon">📅</span> Horarios Clases</li>
+                        <li onclick="irA('consultas-examenes.html')"><span class="submenu-icon">📋</span> Exámenes Parciales</li>
+                        <li onclick="irA('consultas-supletorios.html')"><span class="submenu-icon">📋</span> Supletorios</li>
+                        <li onclick="irA('consultas-intersemestrales.html')"><span class="submenu-icon">📋</span> Cursos Intersemestrales</li>
+                        <li onclick="irA('consultas-cursos-extracurriculares.html')"><span class="submenu-icon">📋</span> Cursos Extracurriculares</li>
+                        <li onclick="irA('consultas-horario-personalizado.html')"><span class="submenu-icon">📋</span> Horario Personalizado</li>
+                    </div>
+                </ul>
+            </div>
+
+            <div class="menu-section">
+                <div class="menu-header">MENU ADMINISTRACION</div>
+                <div class="menu-title">Administracion</div>
+                <ul class="menu-list">
+                    <li onclick="cerrarSesion()"><span class="submenu-icon">🚪</span> Logout</li>
+                </ul>
+            </div>
+        </aside>
+
+        <main class="content">
+            <div class="back-button-container">
+                <a href="ver-cursos-extracurriculares.html" class="back-button">< VOLVER AL REPORTE DE CURSOS EXTRACURRICULARES</a>
+            </div>
+
+            <div class="content-header">
+                <h2>Edición de Curso Extracurricular</h2>
+                <p class="breadcrumb">Pagina/CursosExtracurriculares/Edicion</p>
+            </div>
+
+            <form class="publication-form" id="formEditarCurso">
+                <div class="form-group">
+                    <label for="tipo">Tipo</label>
+                    <select id="tipo" class="form-control" required>
+                        <option value="">--Seleccionar tipo--</option>
+                        <option value="Deportivas">Deportivas</option>
+                        <option value="Culturales">Culturales</option>
+                        <option value="Pastorales">Pastorales</option>
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label for="asignatura">Asignatura</label>
+                    <input type="text" id="asignatura" class="form-control" required>
+                </div>
+
+                <div class="form-group">
+                    <label for="nrc">NRC</label>
+                    <input type="text" id="nrc" class="form-control" required>
+                </div>
+
+                <div class="form-group">
+                    <label for="instructor">Instructor</label>
+                    <input type="text" id="instructor" class="form-control" required>
+                </div>
+
+                <div class="form-group">
+                    <label for="horarioSemanal">Horario semanal</label>
+                    <input type="text" id="horarioSemanal" class="form-control" required>
+                </div>
+
+                <div class="form-group">
+                    <label for="cupos">Cupos</label>
+                    <input type="number" id="cupos" class="form-control" min="1" required>
+                </div>
+
+                <div class="form-group">
+                    <label for="salon">Salón</label>
+                    <input type="text" id="salon" class="form-control" required>
+                </div>
+
+                <div id="mensajeEdicionCurso" class="info-message" style="display: none;"></div>
+
+                <div class="form-group">
+                    <button type="submit" class="btn-actualizar">ACTUALIZAR</button>
+                </div>
+            </form>
+        </main>
+    </div>
+
+    <script>
+        let cursoEditandoNrc = null;
+
+        function toggleMenu(element) {
+            const submenu = element.nextElementSibling;
+            if (submenu && submenu.classList.contains('submenu')) {
+                submenu.style.display = submenu.style.display === 'none' ? 'block' : 'none';
+            }
+        }
+
+        function irA(pagina) {
+            window.location.href = pagina;
+        }
+
+        function toggleDropdownMenu() {
+            const menu = document.getElementById('dropdownMenu');
+            menu.classList.toggle('active');
+        }
+
+        document.addEventListener('click', function(event) {
+            const menu = document.getElementById('dropdownMenu');
+            const btn = document.querySelector('.btn-prueba');
+            if (!menu.contains(event.target) && !btn.contains(event.target)) {
+                menu.classList.remove('active');
+            }
+        });
+
+        function mostrarMensaje(texto, esError) {
+            const mensaje = document.getElementById('mensajeEdicionCurso');
+            mensaje.style.display = 'block';
+            mensaje.textContent = texto;
+            mensaje.style.color = esError ? '#e74c3c' : '#155724';
+            mensaje.style.borderColor = esError ? '#f5c6cb' : '#c3e6cb';
+            mensaje.style.backgroundColor = esError ? '#f8d7da' : '#d4edda';
+        }
+
+        function cargarCurso() {
+            const params = new URLSearchParams(window.location.search);
+            const nrc = params.get('nrc');
+
+            if (!nrc) {
+                mostrarMensaje('❌ No se recibió un NRC válido.', true);
+                return;
+            }
+
+            const curso = window.CursosExtracurricularesStore.getByNrc(nrc);
+            if (!curso) {
+                mostrarMensaje('❌ No se encontró el curso extracurricular.', true);
+                return;
+            }
+
+            cursoEditandoNrc = curso.nrc;
+            document.getElementById('tipo').value = curso.tipo || 'Deportivas';
+            document.getElementById('asignatura').value = curso.asignatura || '';
+            document.getElementById('nrc').value = curso.nrc || '';
+            document.getElementById('instructor').value = curso.instructor || '';
+            document.getElementById('horarioSemanal').value = curso.horarioSemanal || '';
+            document.getElementById('cupos').value = curso.cupos;
+            document.getElementById('salon').value = curso.salon || '';
+        }
+
+        function guardarCurso(event) {
+            event.preventDefault();
+
+            if (!cursoEditandoNrc) {
+                mostrarMensaje('❌ No hay curso seleccionado.', true);
+                return;
+            }
+
+            const resultado = window.CursosExtracurricularesStore.updateByNrc(cursoEditandoNrc, {
+                tipo: document.getElementById('tipo').value,
+                asignatura: document.getElementById('asignatura').value,
+                nrc: document.getElementById('nrc').value,
+                instructor: document.getElementById('instructor').value,
+                cupos: document.getElementById('cupos').value,
+                horarioSemanal: document.getElementById('horarioSemanal').value,
+                salon: document.getElementById('salon').value
+            });
+
+            if (!resultado.ok) {
+                mostrarMensaje(`❌ ${resultado.message}`, true);
+                return;
+            }
+
+            cursoEditandoNrc = resultado.data.nrc;
+            mostrarMensaje('✓ Curso extracurricular actualizado correctamente.', false);
+        }
+
+        function cerrarSesion() {
+            if (window.clearAdminSession) {
+                window.clearAdminSession();
+            }
+            window.location.href = './login.html';
+        }
+
+        document.addEventListener('DOMContentLoaded', function() {
+            document.getElementById('formEditarCurso').addEventListener('submit', guardarCurso);
+            cargarCurso();
+        });
+    </script>
+</body>
+</html>
+
+
+

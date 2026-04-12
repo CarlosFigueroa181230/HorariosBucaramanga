@@ -1,0 +1,233 @@
+﻿<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Horarios UPB V3</title>
+    <link rel="icon" type="image/png" href="../Assets/upb-logo.png">
+    <link rel="stylesheet" href="admin-styles.css">
+    <link rel="stylesheet" href="publicaciones-styles.css">
+    <script src="https://unpkg.com/lucide@0.469.0/dist/umd/lucide.min.js"></script>
+    <script src="lucide-icons.js"></script>
+    <script src="ux-dynamic.js"></script>
+    <script src="admin-auth.js"></script>
+    <script src="admin-local-modals.js"></script>
+    <script src="facultades-store.js"></script>
+    <script>
+        requireAdminSession();
+    </script>
+</head>
+<body>
+    <!-- Header -->
+    <div class="header">
+        <div class="header-left">
+            <h1>HORARIOS UPB VERSION 3.0</h1>
+        </div>
+        <div class="header-right">
+            <!-- Botón Admin -->
+            <img src="../Assets/ICONO-ADMIN.png" alt="Admin" class="btn-prueba" onclick="toggleDropdownMenu()">
+
+            <!-- Menú Desplegable -->
+            <div class="dropdown-menu" id="dropdownMenu">
+            <div class="dropdown-header">
+                <img src="../Assets/upb-logo.png" alt="Logo UPB" class="dropdown-logo">
+                <span>Horarios</span>
+                <span class="dropdown-subtitle">Menu</span>
+            </div>
+
+            <div class="dropdown-content">
+                <a href="consultas-horarios-clases.html"><span class="icon">📅</span> Horarios Clases</a>
+                <a href="consultas-examenes.html"><span class="icon">📋</span> Exámenes Parciales</a>
+                <a href="consultas-supletorios.html"><span class="icon">📋</span> Supletorios</a>
+                <a href="consultas-intersemestrales.html"><span class="icon">📋</span> Cursos Intersemestrales</a>
+                <a href="consultas-cursos-extracurriculares.html"><span class="icon">📋</span> Cursos Extracurriculares</a>
+            </div>
+
+            <div class="dropdown-divider"></div>
+
+            <div class="dropdown-admin">
+                <a href="#" onclick="abrirModalInfoAdmin(event)"><span class="icon">👤</span> Mi Información</a>
+                <a href="#" onclick="abrirModalCambiarContraseña(event)"><span class="icon">🔑</span> Cambiar contraseña</a>
+                <a href="admin.html"><span class="icon">🔍</span> Administración</a>
+                <a href="login.html" onclick="cerrarSesion()"><span class="icon">🚪</span> Logout</a>
+            </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Contenedor principal -->
+    <div class="main-container">
+        <!-- Menú lateral -->
+        <aside class="sidebar">
+            <!-- Título del sidebar -->
+            <div class="sidebar-title">HORARIOS UPB</div>
+
+            <!-- Menú usuarios -->
+            <div class="menu-section">
+                <div class="menu-header">MENU USUARIOS</div>
+                <ul class="menu-list">
+                    <li class="menu-toggle" onclick="toggleMenu(this)">
+                        <span class="menu-icon">☰</span>
+                        <span>MENU</span>
+                    </li>
+                    <div class="submenu" style="display: none;">
+                        <li onclick="irA('consultas-horarios-clases.html')"><span class="submenu-icon">📅</span> Horarios Clases</li>
+                        <li onclick="irA('consultas-examenes.html')"><span class="submenu-icon">📋</span> Exámenes Parciales</li>
+                        <li onclick="irA('consultas-supletorios.html')"><span class="submenu-icon">📋</span> Supletorios</li>
+                        <li onclick="irA('consultas-intersemestrales.html')"><span class="submenu-icon">📋</span> Cursos Intersemestrales</li>
+                        <li onclick="irA('consultas-cursos-extracurriculares.html')"><span class="submenu-icon">📋</span> Cursos Extracurriculares</li>
+                        <li onclick="irA('consultas-horario-personalizado.html')"><span class="submenu-icon">📋</span> Horario Personalizado</li>
+                    </div>
+                </ul>
+            </div>
+
+            <!-- Menú administración -->
+            <div class="menu-section">
+                <div class="menu-header">MENU ADMINISTRACION</div>
+                <div class="menu-title">Administracion</div>
+                <ul class="menu-list">
+                    <li onclick="cerrarSesion()"><span class="submenu-icon">🚪</span> Logout</li>
+                </ul>
+            </div>
+        </aside>
+
+        <!-- Contenido principal -->
+        <main class="content">
+            <!-- Botón volver -->
+            <div class="back-button-container">
+                <a href="ver-facultades.html" class="back-button">< VOLVER AL REPORTE DE FACULTAD</a>
+            </div>
+
+            <!-- Encabezado de contenido -->
+            <div class="content-header">
+                <h2>Reporte de Facultades</h2>
+                <p class="breadcrumb">Pagina/Facultades/Edicion</p>
+            </div>
+
+            <!-- Formulario de edición -->
+            <form class="publication-form" id="formEditarFacultad">
+                <!-- Descripcion -->
+                <div class="form-group">
+                    <label for="descripcion">Descripcion</label>
+                    <input type="text" id="descripcion" class="form-control" placeholder="Ingrese la descripción" required>
+                </div>
+
+                <!-- Escuela -->
+                <div class="form-group">
+                    <label for="escuela">Escuela</label>
+                    <input type="text" id="escuela" class="form-control" placeholder="Ingrese la escuela" required>
+                </div>
+
+                <div id="mensajeEdicionFacultad" class="info-message" style="display: none;"></div>
+
+                <!-- Botón Actualizar -->
+                <div class="form-group">
+                    <button type="submit" class="btn-actualizar">ACTUALIZAR</button>
+                </div>
+            </form>
+        </main>
+    </div>
+
+    <!-- JavaScript -->
+    <script>
+        /* Función para desplegar/contraer menú */
+        function toggleMenu(element) {
+            const submenu = element.nextElementSibling;
+            if (submenu && submenu.classList.contains('submenu')) {
+                if (submenu.style.display === 'none') {
+                    submenu.style.display = 'block';
+                } else {
+                    submenu.style.display = 'none';
+                }
+            }
+        }
+
+        function irA(pagina) {
+            window.location.href = pagina;
+        }
+
+        /* Función para togglear el menú desplegable del header */
+        function toggleDropdownMenu() {
+            const menu = document.getElementById('dropdownMenu');
+            menu.classList.toggle('active');
+        }
+
+        /* Cerrar el menú si se hace clic fuera de él */
+        document.addEventListener('click', function(event) {
+            const menu = document.getElementById('dropdownMenu');
+            const btn = document.querySelector('.btn-prueba');
+            
+            if (!menu.contains(event.target) && !btn.contains(event.target)) {
+                menu.classList.remove('active');
+            }
+        });
+
+        let facultadEditandoId = null;
+
+        function mostrarMensajeEdicion(texto, esError) {
+            const mensaje = document.getElementById('mensajeEdicionFacultad');
+            mensaje.style.display = 'block';
+            mensaje.textContent = texto;
+            mensaje.style.color = esError ? '#e74c3c' : '#155724';
+            mensaje.style.borderColor = esError ? '#f5c6cb' : '#c3e6cb';
+            mensaje.style.backgroundColor = esError ? '#f8d7da' : '#d4edda';
+        }
+
+        function cargarFacultad() {
+            const params = new URLSearchParams(window.location.search);
+            const id = Number(params.get('id'));
+
+            if (!id) {
+                mostrarMensajeEdicion('❌ No se recibió un ID válido.', true);
+                return;
+            }
+
+            const facultad = window.FacultadesStore.getById(id);
+            if (!facultad) {
+                mostrarMensajeEdicion('❌ La facultad no existe o fue eliminada.', true);
+                return;
+            }
+
+            facultadEditandoId = id;
+            document.getElementById('descripcion').value = facultad.facultad;
+            document.getElementById('escuela').value = facultad.escuela;
+        }
+
+        function actualizarFacultad(event) {
+            event.preventDefault();
+
+            if (!facultadEditandoId) {
+                mostrarMensajeEdicion('❌ No hay una facultad seleccionada para editar.', true);
+                return;
+            }
+
+            const facultad = document.getElementById('descripcion').value;
+            const escuela = document.getElementById('escuela').value;
+            const resultado = window.FacultadesStore.update(facultadEditandoId, { facultad, escuela });
+
+            if (!resultado.ok) {
+                mostrarMensajeEdicion(`❌ ${resultado.message}`, true);
+                return;
+            }
+
+            mostrarMensajeEdicion('✓ Facultad y escuela actualizadas correctamente.', false);
+        }
+
+        /* Función para cerrar sesión */
+        function cerrarSesion() {
+            if (window.clearAdminSession) {
+                window.clearAdminSession();
+            }
+            window.location.href = './login.html';
+        }
+
+        document.addEventListener('DOMContentLoaded', function() {
+            document.getElementById('formEditarFacultad').addEventListener('submit', actualizarFacultad);
+            cargarFacultad();
+        });
+    </script>
+</body>
+</html>
+
+
+

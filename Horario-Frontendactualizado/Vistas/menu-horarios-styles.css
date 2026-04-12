@@ -1,0 +1,604 @@
+/* Estilos generales */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    background-color: #f5f5f5;
+    color: #333333;
+}
+
+:root {
+    --admin-sidebar-width: 240px;
+    --admin-header-height: 60px;
+}
+
+/* Contenedor principal */
+.main-container {
+    display: flex;
+    min-height: calc(100vh - var(--admin-header-height));
+    margin-left: var(--admin-sidebar-width);
+}
+
+/* Sidebar */
+.sidebar {
+    width: var(--admin-sidebar-width);
+    background-color: #ffffff;
+    border-right: 1px solid #e0e0e0;
+    padding: 20px;
+    position: fixed;
+    height: 100vh;
+    overflow-y: auto;
+    left: 0;
+    top: 0;
+}
+
+.sidebar-title {
+    color: #a91414;
+    font-size: 16px;
+    font-weight: 700;
+    margin-bottom: 25px;
+    border-bottom: 2px solid #a91414;
+    padding-bottom: 12px;
+    text-align: left;
+}
+
+.menu-section {
+    margin-bottom: 25px;
+}
+
+.menu-header {
+    color: #000000;
+    font-size: 11px;
+    font-weight: 700;
+    margin-bottom: 12px;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    padding-bottom: 8px;
+}
+
+.menu-list {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+}
+
+.menu-toggle,
+.menu-list li {
+    padding: 10px 20px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    color: #333333;
+    font-size: 13px;
+    font-weight: 500;
+    transition: all 0.3s;
+    border-left: 3px solid transparent;
+}
+
+.menu-toggle:hover,
+.menu-list li:hover {
+    background-color: #e8e8e8;
+    border-left-color: #a91414;
+}
+
+.menu-icon,
+.submenu-icon {
+    font-size: 14px;
+    min-width: 16px;
+}
+
+.arrow {
+    font-size: 10px;
+    margin-left: auto;
+}
+
+.submenu {
+    padding: 0;
+    margin: 0;
+}
+
+.submenu li {
+    padding: 10px 20px;
+    padding-left: 40px;
+    font-size: 12px;
+    color: #555555;
+    border-left: 3px solid transparent;
+    cursor: pointer;
+    transition: all 0.3s;
+    margin: 0;
+}
+
+/* Contenido principal */
+.content {
+    flex: 1;
+    padding: 0;
+}
+
+/* Header */
+.header {
+    background-color: #ffffff;
+    border-bottom: 3px solid #a91414;
+    padding: 10px 20px;
+    height: var(--admin-header-height);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    position: fixed;
+    top: 0;
+    left: var(--admin-sidebar-width);
+    right: 0;
+    z-index: 100;
+}
+
+.header h1 {
+    font-size: 22px;
+    font-weight: 700;
+    letter-spacing: 1px;
+    color: #a91414;
+}
+
+/* Contenedor de tarjetas */
+.cards-container {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 25px;
+    padding: 30px;
+    background-color: #f5f5f5;
+    min-height: calc(100vh - var(--admin-header-height));
+    margin-top: var(--admin-header-height);
+}
+
+/* Tarjeta general */
+.card {
+    background-color: #ffffff;
+    border-radius: 6px;
+    padding: 25px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+    transition: transform 0.3s, box-shadow 0.3s;
+}
+
+.card:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+}
+
+/* Tarjeta de bienvenida */
+.welcome-card h2 {
+    color: #a91414;
+    font-size: 16px;
+    font-weight: 700;
+    margin-bottom: 15px;
+    padding-bottom: 10px;
+    border-bottom: 2px solid #a91414;
+}
+
+.welcome-card p {
+    color: #333333;
+    font-size: 13px;
+    line-height: 1.6;
+    text-align: justify;
+}
+
+.highlight {
+    color: #a91414;
+    font-weight: 700;
+}
+
+/* Tarjeta de redes sociales */
+.social-card {
+    display: flex;
+    flex-direction: column;
+}
+
+.social-header {
+    display: flex;
+    align-items: center;
+    gap: 20px;
+    margin-bottom: 25px;
+    padding-bottom: 15px;
+    border-bottom: 2px solid #a91414;
+}
+
+.upb-logo-container {
+    flex-shrink: 0;
+}
+
+.upb-logo {
+    width: 80px;
+    height: auto;
+}
+
+.social-title h3 {
+    color: #a91414;
+    font-size: 16px;
+    font-weight: 700;
+    margin-bottom: 5px;
+}
+
+.social-title p {
+    color: #666666;
+    font-size: 12px;
+    font-weight: 600;
+}
+
+.social-buttons {
+    display: grid;
+    grid-template-columns: repeat(5, 1fr);
+    gap: 12px;
+}
+
+.social-btn {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    padding: 15px 10px;
+    background-color: #f9f9f9;
+    border: 1px solid #e0e0e0;
+    border-radius: 4px;
+    cursor: pointer;
+    transition: all 0.3s;
+    font-size: 11px;
+    font-weight: 600;
+    color: #333333;
+}
+
+.social-btn:hover {
+    background-color: #a91414;
+    color: #ffffff;
+    border-color: #a91414;
+}
+
+.social-icon {
+    font-size: 20px;
+}
+
+/* Responsive */
+@media (max-width: 1200px) {
+    .cards-container {
+        grid-template-columns: 1fr;
+    }
+}
+
+@media (max-width: 768px) {
+    .sidebar {
+        position: relative;
+        width: 100%;
+        height: auto;
+        border-right: none;
+        border-bottom: 2px solid #e0e0e0;
+    }
+
+    .content {
+        margin-left: 0;
+    }
+
+    .main-container {
+        flex-direction: column;
+    }
+
+    .social-buttons {
+        grid-template-columns: repeat(3, 1fr);
+    }
+
+    .header h1 {
+        font-size: 18px;
+    }
+}
+
+/* Ajuste visual accesible (50+) */
+body {
+    font-size: 17px;
+    line-height: 1.55;
+}
+
+.header {
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.08);
+}
+
+.header h1 {
+    font-size: 26px;
+}
+
+.sidebar-title {
+    font-size: 19px;
+}
+
+.menu-header {
+    font-size: 12px;
+}
+
+.menu-toggle,
+.menu-list li {
+    font-size: 15px;
+}
+
+.submenu li {
+    font-size: 14px;
+}
+
+.card {
+    border-radius: 12px;
+    box-shadow: 0 8px 22px rgba(0, 0, 0, 0.1);
+}
+
+.welcome-card h2,
+.social-title h3 {
+    font-size: 22px;
+}
+
+.welcome-card p {
+    font-size: 15px;
+}
+
+.social-title p,
+.social-btn {
+    font-size: 14px;
+}
+
+.social-btn {
+    border-radius: 10px;
+}
+
+input:focus,
+select:focus,
+textarea:focus,
+button:focus-visible,
+a:focus-visible {
+    outline: 3px solid rgba(169, 20, 20, 0.25);
+    outline-offset: 2px;
+}
+
+.mobile-menu-btn,
+.mobile-close-btn,
+.mobile-overlay {
+    display: none;
+}
+
+@media (max-width: 768px) {
+    body {
+        background-color: #ececec;
+        overflow-x: hidden;
+    }
+
+    .main-container {
+        margin-left: 0;
+        min-height: 100vh;
+    }
+
+    .content {
+        width: 100%;
+    }
+
+    .header {
+        left: 12px;
+        right: 12px;
+        top: 10px;
+        height: 52px;
+        border-radius: 12px;
+        border-bottom-width: 2px;
+        box-shadow: 0 10px 24px rgba(0, 0, 0, 0.14);
+        padding: 8px 12px;
+        z-index: 220;
+    }
+
+    .header h1 {
+        font-size: 11px;
+        letter-spacing: 0.7px;
+        text-align: center;
+    }
+
+    .mobile-menu-btn {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        position: absolute;
+        left: 10px;
+        top: 50%;
+        transform: translateY(-50%);
+        width: 32px;
+        height: 32px;
+        border: none;
+        border-radius: 8px;
+        background-color: #f2f2f2;
+        color: #111111;
+        font-size: 19px;
+        cursor: pointer;
+        z-index: 1;
+    }
+
+    .mobile-menu-btn:active {
+        transform: translateY(-50%) scale(0.96);
+    }
+
+    .sidebar {
+        display: block;
+        width: min(84vw, 340px);
+        border-right: 0;
+        border-radius: 0 16px 16px 0;
+        box-shadow: 10px 0 28px rgba(0, 0, 0, 0.22);
+        position: fixed;
+        left: 0;
+        top: 0;
+        height: 100vh;
+        z-index: 260;
+        background-color: #f3f3f3;
+        transform: translateX(-104%);
+        transition: transform 0.32s ease;
+        padding: 82px 16px 18px;
+        overflow-x: visible;
+        visibility: hidden;
+        pointer-events: none;
+    }
+
+    body.mobile-sidebar-open .sidebar {
+        transform: translateX(0);
+        visibility: visible;
+        pointer-events: auto;
+    }
+
+    .mobile-close-btn {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        position: absolute;
+        top: 14px;
+        right: 12px;
+        width: 34px;
+        height: 34px;
+        border: none;
+        border-radius: 999px;
+        background-color: #a91414;
+        color: #ffffff;
+        font-size: 22px;
+        line-height: 1;
+        cursor: pointer;
+        box-shadow: 0 8px 20px rgba(169, 20, 20, 0.35);
+        z-index: 3;
+    }
+
+    .mobile-overlay {
+        display: block;
+        position: fixed;
+        inset: 0;
+        background: rgba(0, 0, 0, 0.34);
+        opacity: 0;
+        visibility: hidden;
+        pointer-events: none;
+        transition: opacity 0.32s ease, visibility 0.32s ease;
+        z-index: 240;
+    }
+
+    body.mobile-sidebar-open .mobile-overlay {
+        opacity: 1;
+        visibility: visible;
+        pointer-events: auto;
+    }
+
+    .sidebar-title {
+        font-size: 16px;
+    }
+
+    .menu-header {
+        font-size: 12px;
+        margin-bottom: 10px;
+    }
+
+    .menu-toggle,
+    .menu-list li,
+    .submenu li {
+        font-size: 14px;
+        padding-left: 8px;
+        padding-right: 8px;
+    }
+
+    .submenu li {
+        padding-left: 26px;
+    }
+
+    .cards-container {
+        margin-top: 70px;
+        padding: 12px;
+        gap: 12px;
+        grid-template-columns: 1fr;
+    }
+
+    .card {
+        border-radius: 12px;
+        padding: 14px;
+        box-shadow: 0 8px 20px rgba(0, 0, 0, 0.12);
+    }
+
+    .welcome-card h2,
+    .social-title h3 {
+        font-size: 18px;
+    }
+
+    .welcome-card p,
+    .social-title p,
+    .social-btn {
+        font-size: 12px;
+    }
+
+    .social-header {
+        gap: 10px;
+        margin-bottom: 14px;
+        padding-bottom: 10px;
+    }
+
+    .upb-logo {
+        width: 60px;
+    }
+
+    .social-buttons {
+        grid-template-columns: repeat(3, 1fr);
+        gap: 8px;
+    }
+
+    .social-btn {
+        min-height: 70px;
+        padding: 9px 6px;
+        border-radius: 8px;
+    }
+
+    .social-icon {
+        font-size: 16px;
+    }
+}
+
+@media (min-width: 769px) {
+    .header {
+        position: sticky;
+        top: 0;
+        left: auto;
+        right: auto;
+        width: 100%;
+    }
+
+    .cards-container {
+        margin-top: 0;
+    }
+}
+
+/* Escala tipografica unificada para banner y menu (referencia visual) */
+:root {
+    --ui-font-base: 17px;
+    --ui-banner-title: 26px;
+    --ui-sidebar-title: 16px;
+    --ui-menu-section-title: 11px;
+    --ui-menu-item: 13px;
+    --ui-submenu-item: 12px;
+}
+
+body {
+    font-size: var(--ui-font-base);
+    line-height: 1.55;
+}
+
+.header h1 {
+    font-size: var(--ui-banner-title);
+    letter-spacing: 0.3px;
+}
+
+.sidebar-title {
+    font-size: var(--ui-sidebar-title);
+}
+
+.menu-header {
+    font-size: var(--ui-menu-section-title);
+}
+
+.menu-toggle,
+.menu-list li {
+    font-size: var(--ui-menu-item);
+}
+
+.submenu li {
+    font-size: var(--ui-submenu-item);
+}

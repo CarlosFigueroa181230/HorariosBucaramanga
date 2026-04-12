@@ -1,0 +1,495 @@
+﻿<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Horarios UPB V3</title>
+    <link rel="icon" type="image/png" href="../Assets/upb-logo.png">
+    <link rel="stylesheet" href="admin-styles.css">
+    <link rel="stylesheet" href="publicaciones-styles.css">
+    <script src="https://unpkg.com/lucide@0.469.0/dist/umd/lucide.min.js"></script>
+    <script src="lucide-icons.js"></script>
+    <script src="ux-dynamic.js"></script>
+    <script src="admin-auth.js"></script>
+    <script src="admin-local-modals.js"></script>
+    <script src="facultades-store.js"></script>
+    <script src="materias-store.js"></script>
+    <script src="plantillas-store.js"></script>
+    <script>
+        requireAdminSession();
+    </script>
+</head>
+<body>
+    <!-- Header -->
+    <div class="header">
+        <div class="header-left">
+            <h1>HORARIOS UPB VERSION 3.0</h1>
+        </div>
+        <div class="header-right">
+            <!-- Botón Admin -->
+            <img src="../Assets/ICONO-ADMIN.png" alt="Admin" class="btn-prueba" onclick="toggleDropdownMenu()">
+
+            <!-- Menú Desplegable -->
+            <div class="dropdown-menu" id="dropdownMenu">
+            <div class="dropdown-header">
+                <img src="../Assets/upb-logo.png" alt="Logo UPB" class="dropdown-logo">
+                <span>Horarios</span>
+                <span class="dropdown-subtitle">Menu</span>
+            </div>
+
+            <div class="dropdown-content">
+                <a href="consultas-horarios-clases.html"><span class="icon">📅</span> Horarios Clases</a>
+                <a href="consultas-examenes.html"><span class="icon">📋</span> Exámenes Parciales</a>
+                <a href="consultas-supletorios.html"><span class="icon">📋</span> Supletorios</a>
+                <a href="consultas-intersemestrales.html"><span class="icon">📋</span> Cursos Intersemestrales</a>
+                <a href="consultas-cursos-extracurriculares.html"><span class="icon">📋</span> Cursos Extracurriculares</a>
+            </div>
+
+            <div class="dropdown-divider"></div>
+
+            <div class="dropdown-admin">
+                <a href="#" onclick="abrirModalInfoAdmin(event)"><span class="icon">👤</span> Mi Información</a>
+                <a href="#" onclick="abrirModalCambiarContraseña(event)"><span class="icon">🔑</span> Cambiar contraseña</a>
+                <a href="admin.html"><span class="icon">🔍</span> Administración</a>
+                <a href="login.html" onclick="cerrarSesion()"><span class="icon">🚪</span> Logout</a>
+            </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Contenedor principal -->
+    <div class="main-container">
+        <!-- Menú lateral -->
+        <aside class="sidebar">
+            <!-- Título del sidebar -->
+            <div class="sidebar-title">HORARIOS UPB</div>
+
+            <!-- Menú usuarios -->
+            <div class="menu-section">
+                <div class="menu-header">MENU USUARIOS</div>
+                <ul class="menu-list">
+                    <li class="menu-toggle" onclick="toggleMenu(this)">
+                        <span class="menu-icon">☰</span>
+                        <span>MENU</span>
+                    </li>
+                    <div class="submenu" style="display: none;">
+                        <li onclick="irA('consultas-horarios-clases.html')"><span class="submenu-icon">📅</span> Horarios Clases</li>
+                        <li onclick="irA('consultas-examenes.html')"><span class="submenu-icon">📋</span> Exámenes Parciales</li>
+                        <li onclick="irA('consultas-supletorios.html')"><span class="submenu-icon">📋</span> Supletorios</li>
+                        <li onclick="irA('consultas-intersemestrales.html')"><span class="submenu-icon">📋</span> Cursos Intersemestrales</li>
+                        <li onclick="irA('consultas-cursos-extracurriculares.html')"><span class="submenu-icon">📋</span> Cursos Extracurriculares</li>
+                        <li onclick="irA('consultas-horario-personalizado.html')"><span class="submenu-icon">📋</span> Horario Personalizado</li>
+                    </div>
+                </ul>
+            </div>
+
+            <!-- Menú administración -->
+            <div class="menu-section">
+                <div class="menu-header">MENU ADMINISTRACION</div>
+                <div class="menu-title">Administracion</div>
+                <ul class="menu-list">
+                    <li onclick="cerrarSesion()"><span class="submenu-icon">🚪</span> Logout</li>
+                </ul>
+            </div>
+        </aside>
+
+        <!-- Contenido principal -->
+        <main class="content">
+            <!-- Botón volver -->
+            <div class="back-button-container">
+                <a href="ver-edicion-plantilla.html" class="back-button">< VOLVER AL MENU DE ADMINISTRACION</a>
+            </div>
+
+            <!-- Encabezado de contenido -->
+            <div class="content-header">
+                <h2>Edicion Plantilla Cargada</h2>
+                <p class="breadcrumb">Pagina/Plantilla/Edicion</p>
+            </div>
+
+            <!-- Formulario de edición -->
+            <form class="publication-form" id="formEditarPlantilla">
+                <!-- Facultad -->
+                <div class="form-group">
+                    <label for="facultad">Facultad</label>
+                    <select id="facultad" class="form-control" required></select>
+                </div>
+
+                <div class="form-group">
+                    <label for="escuela">Escuela</label>
+                    <select id="escuela" class="form-control" required></select>
+                </div>
+
+                <div class="form-group">
+                    <label for="tipo">Tipo de plantilla</label>
+                    <select id="tipo" class="form-control" required>
+                        <option value="Horarios">Horarios</option>
+                        <option value="Examenes">Examenes</option>
+                        <option value="Supletorios">Supletorios</option>
+                        <option value="Intersemestrales">Intersemestrales</option>
+                    </select>
+                </div>
+
+                <!-- Asignatura -->
+                <div class="form-group">
+                    <label for="asignatura">Asignatura</label>
+                    <input type="text" id="asignatura" class="form-control" placeholder="Ingrese la asignatura" required>
+                </div>
+
+                <!-- Materia -->
+                <div class="form-group">
+                    <label for="materia">Materia</label>
+                    <select id="materia" class="form-control" required></select>
+                </div>
+
+                <div class="form-group">
+                    <label for="semestre">Semestre</label>
+                    <input type="number" id="semestre" class="form-control" min="1" max="12" required>
+                </div>
+
+                <!-- NRC -->
+                <div class="form-group">
+                    <label for="nrc">NRC</label>
+                    <input type="text" id="nrc" class="form-control" placeholder="Ingrese el NRC" required>
+                </div>
+
+                <!-- Créditos -->
+                <div class="form-group">
+                    <label for="creditos">Creditos</label>
+                    <input type="number" id="creditos" class="form-control" placeholder="Ingrese los créditos" min="1" required>
+                </div>
+
+                <!-- Profesor -->
+                <div class="form-group">
+                    <label for="profesor">Profesor</label>
+                    <input type="text" id="profesor" class="form-control" placeholder="Ingrese el profesor" required>
+                </div>
+
+                <!-- Aula -->
+                <div class="form-group">
+                    <label for="aula">Aula</label>
+                    <input type="text" id="aula" class="form-control" placeholder="Ingrese el aula" required>
+                </div>
+
+                <!-- Cupos -->
+                <div class="form-group">
+                    <label for="cupos">Cupos</label>
+                    <input type="number" id="cupos" class="form-control" placeholder="Ingrese los cupos" min="1" required>
+                </div>
+
+                <div class="form-group">
+                    <label for="lun">Lunes</label>
+                    <input type="text" id="lun" class="form-control" placeholder="Ej. 08:00-10:00">
+                </div>
+
+                <div class="form-group">
+                    <label for="mar">Martes</label>
+                    <input type="text" id="mar" class="form-control" placeholder="Ej. 08:00-10:00">
+                </div>
+
+                <div class="form-group">
+                    <label for="mier">Miércoles</label>
+                    <input type="text" id="mier" class="form-control" placeholder="Ej. 08:00-10:00">
+                </div>
+
+                <div class="form-group">
+                    <label for="juev">Jueves</label>
+                    <input type="text" id="juev" class="form-control" placeholder="Ej. 08:00-10:00">
+                </div>
+
+                <div class="form-group">
+                    <label for="vier">Viernes</label>
+                    <input type="text" id="vier" class="form-control" placeholder="Ej. 08:00-10:00">
+                </div>
+
+                <div class="form-group">
+                    <label for="sabad">Sábado</label>
+                    <input type="text" id="sabad" class="form-control" placeholder="Ej. 08:00-10:00">
+                </div>
+
+                <div id="mensajeEdicionPlantilla" class="info-message" style="display: none;"></div>
+
+                <!-- Botón Actualizar -->
+                <div class="form-group">
+                    <button type="submit" class="btn-actualizar" id="btnGuardarPlantilla">ACTUALIZAR</button>
+                    <button type="button" class="btn-seleccionar" id="btnEliminarPlantilla" style="margin-left: 10px; display: none;">ELIMINAR</button>
+                </div>
+            </form>
+        </main>
+    </div>
+
+    <!-- JavaScript -->
+    <script>
+        /* Función para desplegar/contraer menú */
+        function toggleMenu(element) {
+            const submenu = element.nextElementSibling;
+            if (submenu && submenu.classList.contains('submenu')) {
+                if (submenu.style.display === 'none') {
+                    submenu.style.display = 'block';
+                } else {
+                    submenu.style.display = 'none';
+                }
+            }
+        }
+
+        function irA(pagina) {
+            window.location.href = pagina;
+        }
+
+        /* Función para togglear el menú desplegable del header */
+        function toggleDropdownMenu() {
+            const menu = document.getElementById('dropdownMenu');
+            menu.classList.toggle('active');
+        }
+
+        /* Cerrar el menú si se hace clic fuera de él */
+        document.addEventListener('click', function(event) {
+            const menu = document.getElementById('dropdownMenu');
+            const btn = document.querySelector('.btn-prueba');
+            
+            if (!menu.contains(event.target) && !btn.contains(event.target)) {
+                menu.classList.remove('active');
+            }
+        });
+
+        let plantillaEditandoId = null;
+        let catalogoMaterias = [];
+
+        function opcion(value, label) {
+            const opt = document.createElement('option');
+            opt.value = value;
+            opt.textContent = label;
+            return opt;
+        }
+
+        function poblarFacultades(valorSeleccionado) {
+            const select = document.getElementById('facultad');
+            const lista = window.FacultadesStore.getAll();
+            const facultades = [...new Set(lista.map(item => item.facultad))].sort((a, b) => a.localeCompare(b));
+
+            select.innerHTML = '';
+            select.appendChild(opcion('', '--Seleccionar facultad--'));
+            facultades.forEach(nombre => select.appendChild(opcion(nombre, nombre)));
+
+            if (valorSeleccionado) {
+                select.value = valorSeleccionado;
+            }
+        }
+
+        function poblarEscuelas(facultad, valorSeleccionado) {
+            const select = document.getElementById('escuela');
+            const escuelas = facultad ? window.FacultadesStore.getSchoolsByFaculty(facultad) : [];
+
+            select.innerHTML = '';
+            select.appendChild(opcion('', '--Seleccionar escuela--'));
+            escuelas.forEach(nombre => select.appendChild(opcion(nombre, nombre)));
+
+            if (valorSeleccionado) {
+                select.value = valorSeleccionado;
+            }
+        }
+
+        function poblarMaterias(facultad, escuela, valorSeleccionado) {
+            const select = document.getElementById('materia');
+            const filtradas = catalogoMaterias.filter(item => {
+                const coincideFacultad = !facultad || item.facultad === facultad;
+                const coincideEscuela = !escuela || item.escuela === escuela;
+                return coincideFacultad && coincideEscuela;
+            });
+
+            select.innerHTML = '';
+            select.appendChild(opcion('', '--Seleccionar materia existente--'));
+            filtradas.forEach(item => select.appendChild(opcion(item.materia, item.materia)));
+
+            if (valorSeleccionado) {
+                select.value = valorSeleccionado;
+            }
+        }
+
+        function onCambioFacultad() {
+            const facultad = document.getElementById('facultad').value;
+            poblarEscuelas(facultad, '');
+            poblarMaterias(facultad, '', '');
+        }
+
+        function onCambioEscuela() {
+            const facultad = document.getElementById('facultad').value;
+            const escuela = document.getElementById('escuela').value;
+            poblarMaterias(facultad, escuela, '');
+        }
+
+        function onCambioMateria() {
+            const materia = document.getElementById('materia').value;
+            const asignatura = document.getElementById('asignatura');
+            const creditos = document.getElementById('creditos');
+            const semestre = document.getElementById('semestre');
+
+            const seleccion = catalogoMaterias.find(item => item.materia === materia);
+            if (seleccion && !asignatura.value.trim()) {
+                asignatura.value = seleccion.materia;
+            }
+            if (seleccion && !creditos.value) {
+                creditos.value = seleccion.creditos;
+            }
+            if (seleccion && !semestre.value) {
+                semestre.value = seleccion.semestre || 1;
+            }
+        }
+
+        function inicializarCatalogos() {
+            catalogoMaterias = window.MateriasStore.getAll();
+            poblarFacultades('');
+            poblarEscuelas('', '');
+            poblarMaterias('', '', '');
+        }
+
+        function inferirEscuela(plantilla) {
+            const encontrada = catalogoMaterias.find(item => {
+                return item.facultad === plantilla.facultad && item.materia === plantilla.materia;
+            });
+            return encontrada ? encontrada.escuela : '';
+        }
+
+        function mostrarMensajePlantilla(texto, esError) {
+            const mensaje = document.getElementById('mensajeEdicionPlantilla');
+            mensaje.style.display = 'block';
+            mensaje.textContent = texto;
+            mensaje.style.color = esError ? '#e74c3c' : '#155724';
+            mensaje.style.borderColor = esError ? '#f5c6cb' : '#c3e6cb';
+            mensaje.style.backgroundColor = esError ? '#f8d7da' : '#d4edda';
+        }
+
+        function cargarPlantilla() {
+            const params = new URLSearchParams(window.location.search);
+            const id = Number(params.get('id'));
+            const btnGuardar = document.getElementById('btnGuardarPlantilla');
+            const btnEliminar = document.getElementById('btnEliminarPlantilla');
+
+            if (!id) {
+                plantillaEditandoId = null;
+                btnGuardar.textContent = 'GUARDAR';
+                btnEliminar.style.display = 'none';
+                return;
+            }
+
+            const plantilla = window.PlantillasStore.getById(id);
+            if (!plantilla) {
+                mostrarMensajePlantilla('❌ La plantilla no existe o fue eliminada.', true);
+                return;
+            }
+
+            plantillaEditandoId = id;
+            btnGuardar.textContent = 'ACTUALIZAR';
+            btnEliminar.style.display = 'inline-block';
+
+            const escuelaInicial = plantilla.escuela || inferirEscuela(plantilla);
+
+            poblarFacultades(plantilla.facultad);
+            poblarEscuelas(plantilla.facultad, escuelaInicial);
+            poblarMaterias(plantilla.facultad, escuelaInicial, plantilla.materia);
+
+            document.getElementById('facultad').value = plantilla.facultad;
+            document.getElementById('escuela').value = escuelaInicial;
+            document.getElementById('tipo').value = plantilla.tipo || 'Horarios';
+            document.getElementById('asignatura').value = plantilla.asignatura;
+            document.getElementById('materia').value = plantilla.materia;
+            document.getElementById('semestre').value = plantilla.semestre || 1;
+            document.getElementById('nrc').value = plantilla.nrc;
+            document.getElementById('creditos').value = plantilla.creditos;
+            document.getElementById('profesor').value = plantilla.profesor;
+            document.getElementById('aula').value = plantilla.aula;
+            document.getElementById('cupos').value = plantilla.cupos;
+            document.getElementById('lun').value = plantilla.lun || '';
+            document.getElementById('mar').value = plantilla.mar || '';
+            document.getElementById('mier').value = plantilla.mier || '';
+            document.getElementById('juev').value = plantilla.juev || '';
+            document.getElementById('vier').value = plantilla.vier || '';
+            document.getElementById('sabad').value = plantilla.sabad || '';
+        }
+
+        function guardarPlantilla(event) {
+            event.preventDefault();
+
+            const payload = {
+                tipo: document.getElementById('tipo').value,
+                facultad: document.getElementById('facultad').value,
+                escuela: document.getElementById('escuela').value,
+                asignatura: document.getElementById('asignatura').value,
+                materia: document.getElementById('materia').value,
+                semestre: document.getElementById('semestre').value,
+                nrc: document.getElementById('nrc').value,
+                creditos: document.getElementById('creditos').value,
+                profesor: document.getElementById('profesor').value,
+                aula: document.getElementById('aula').value,
+                cupos: document.getElementById('cupos').value,
+                lun: document.getElementById('lun').value,
+                mar: document.getElementById('mar').value,
+                mier: document.getElementById('mier').value,
+                juev: document.getElementById('juev').value,
+                vier: document.getElementById('vier').value,
+                sabad: document.getElementById('sabad').value
+            };
+
+            const resultado = plantillaEditandoId
+                ? window.PlantillasStore.update(plantillaEditandoId, payload)
+                : window.PlantillasStore.create(payload);
+
+            if (!resultado.ok) {
+                mostrarMensajePlantilla(`❌ ${resultado.message}`, true);
+                return;
+            }
+
+            if (!plantillaEditandoId) {
+                plantillaEditandoId = resultado.data.id;
+                const nuevaUrl = `ver-edicion-plantilla-edicion.html?id=${plantillaEditandoId}`;
+                window.history.replaceState({}, '', nuevaUrl);
+                document.getElementById('btnGuardarPlantilla').textContent = 'ACTUALIZAR';
+                document.getElementById('btnEliminarPlantilla').style.display = 'inline-block';
+                mostrarMensajePlantilla('✓ Plantilla creada correctamente.', false);
+                return;
+            }
+
+            mostrarMensajePlantilla('✓ Plantilla actualizada correctamente.', false);
+        }
+
+        function eliminarPlantilla() {
+            if (!plantillaEditandoId) {
+                mostrarMensajePlantilla('❌ Primero debe guardar la plantilla para poder eliminarla.', true);
+                return;
+            }
+
+            if (!confirm('¿Desea eliminar esta plantilla?')) {
+                return;
+            }
+
+            const resultado = window.PlantillasStore.remove(plantillaEditandoId);
+            if (!resultado.ok) {
+                mostrarMensajePlantilla(`❌ ${resultado.message}`, true);
+                return;
+            }
+
+            window.location.href = 'ver-edicion-plantilla.html';
+        }
+
+        /* Función para cerrar sesión */
+        function cerrarSesion() {
+            if (window.clearAdminSession) {
+                window.clearAdminSession();
+            }
+            window.location.href = './login.html';
+        }
+
+        document.addEventListener('DOMContentLoaded', function() {
+            inicializarCatalogos();
+            document.getElementById('facultad').addEventListener('change', onCambioFacultad);
+            document.getElementById('escuela').addEventListener('change', onCambioEscuela);
+            document.getElementById('materia').addEventListener('change', onCambioMateria);
+            document.getElementById('formEditarPlantilla').addEventListener('submit', guardarPlantilla);
+            document.getElementById('btnEliminarPlantilla').addEventListener('click', eliminarPlantilla);
+            cargarPlantilla();
+        });
+    </script>
+</body>
+</html>
+
+
+
