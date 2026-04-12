@@ -297,6 +297,8 @@
     }
 
     function ensureHorarioPersonalizadoLinks() {
+        let addedDynamicLinks = false;
+
         const submenuLists = document.querySelectorAll('.submenu');
         submenuLists.forEach(function (submenu) {
             const exists = submenu.querySelector('li[onclick*="consultas-horario-personalizado.html"]');
@@ -306,8 +308,9 @@
 
             const item = document.createElement('li');
             item.setAttribute('onclick', "irA('consultas-horario-personalizado.html')");
-            item.innerHTML = '<span class="submenu-icon">🧩</span> Horario Personalizado';
+            item.innerHTML = '<span class="submenu-icon">📋</span> Horario Personalizado';
             submenu.appendChild(item);
+            addedDynamicLinks = true;
         });
 
         const dropdowns = document.querySelectorAll('.dropdown-content');
@@ -319,9 +322,14 @@
 
             const link = document.createElement('a');
             link.href = 'consultas-horario-personalizado.html';
-            link.innerHTML = '<span class="icon">🧩</span> Horario Personalizado';
+            link.innerHTML = '<span class="icon">📋</span> Horario Personalizado';
             dropdown.appendChild(link);
+            addedDynamicLinks = true;
         });
+
+        if (addedDynamicLinks && typeof window.refreshLucideIcons === 'function') {
+            window.refreshLucideIcons();
+        }
     }
 
     function initDynamicUX() {

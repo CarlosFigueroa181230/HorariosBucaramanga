@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="es">
 <head>
     <meta charset="UTF-8">
@@ -38,6 +38,7 @@
                 <a href="consultas-examenes.html"><span class="icon">📋</span> Exámenes Parciales</a>
                 <a href="consultas-supletorios.html"><span class="icon">📋</span> Supletorios</a>
                 <a href="consultas-intersemestrales.html"><span class="icon">📋</span> Cursos Intersemestrales</a>
+                <a href="consultas-cursos-extracurriculares.html"><span class="icon">📋</span> Cursos Extracurriculares</a>
             </div>
 
             <div class="dropdown-divider"></div>
@@ -72,6 +73,8 @@
                         <li onclick="irA('consultas-examenes.html')"><span class="submenu-icon">📋</span> Exámenes Parciales</li>
                         <li onclick="irA('consultas-supletorios.html')"><span class="submenu-icon">📋</span> Supletorios</li>
                         <li onclick="irA('consultas-intersemestrales.html')"><span class="submenu-icon">📋</span> Cursos Intersemestrales</li>
+                        <li onclick="irA('consultas-cursos-extracurriculares.html')"><span class="submenu-icon">📋</span> Cursos Extracurriculares</li>
+                        <li onclick="irA('consultas-horario-personalizado.html')"><span class="submenu-icon">📋</span> Horario Personalizado</li>
                     </div>
                 </ul>
             </div>
@@ -148,6 +151,12 @@
                         <div class="card-icon">📚</div>
                         <strong>Materias</strong>
                         <p>Crear y editar materias por facultad y escuela.</p>
+                    </a>
+
+                    <a href="ver-cursos-extracurriculares.html" class="process-card blue">
+                        <div class="card-icon">📋</div>
+                        <strong>CursosExtracurriculares</strong>
+                        <p>Crear y editar cursos extracurriculares para usuarios.</p>
                     </a>
                 </div>
             </div>
@@ -232,7 +241,7 @@
         /* Función para descargar plantilla */
         function descargarPlantilla() {
             const columnas = [
-                'FACULTAD', 'ESCUELA', 'ASIGNATURA', 'MATERIA', 'CURSO', 'NRC',
+                'FACULTAD', 'ESCUELA', 'ASIGNATURA', 'MATERIA', 'SEMESTRE', 'NRC',
                 'CREDITOS', 'PROFESOR', 'AULA', 'CUPOS', 'LUN', 'MAR', 'MIER', 'JUEV', 'VIER', 'SABAD'
             ];
 
@@ -575,3 +584,7 @@
     </script>
 </body>
 </html>
+
+
+
+

@@ -20,6 +20,7 @@
     <div class="main-container">
         <!-- Menú lateral -->
         <aside class="sidebar">
+            <button class="mobile-close-btn" type="button" onclick="toggleMobileSidebar(false)" aria-label="Cerrar menu">&lt;</button>
             <!-- Título del sidebar -->
             <div class="sidebar-title">HORARIOS UPB</div>
 
@@ -36,6 +37,7 @@
                         <li onclick="irA('consultas-examenes.html')"><span class="submenu-icon">📋</span> Exámenes Parciales</li>
                         <li onclick="irA('consultas-supletorios.html')"><span class="submenu-icon">📋</span> Supletorios</li>
                         <li onclick="irA('consultas-intersemestrales.html')"><span class="submenu-icon">📋</span> Cursos Intersemestrales</li>
+                        <li onclick="irA('consultas-cursos-extracurriculares.html')"><span class="submenu-icon">📋</span> Cursos Extracurriculares</li>
                     </div>
                 </ul>
             </div>
@@ -51,11 +53,14 @@
             </div>
         </aside>
 
+        <div class="mobile-overlay" onclick="toggleMobileSidebar(false)"></div>
+
         <!-- Contenido principal -->
         <main class="content">
             <!-- Header -->
             <div class="header">
-                <h1>HORARIOS UPB VERSION 3.0</h1>
+            <button class="mobile-menu-btn" type="button" onclick="toggleMobileSidebar()" aria-label="Abrir o cerrar menu">☰</button>
+                <h1>HORARIOS UPB V.3</h1>
                 <img id="adminIcon" src="../Assets/ICONO-ADMIN.png" alt="Admin" class="btn-prueba" style="display: none;" onclick="toggleDropdownMenu()">
                 <div class="dropdown-menu" id="dropdownMenu">
                     <div class="dropdown-header">
@@ -68,6 +73,7 @@
                         <a href="consultas-examenes.html"><span class="icon">📋</span> Exámenes Parciales</a>
                         <a href="consultas-supletorios.html"><span class="icon">📋</span> Supletorios</a>
                         <a href="consultas-intersemestrales.html"><span class="icon">📋</span> Cursos Intersemestrales</a>
+                <a href="consultas-cursos-extracurriculares.html"><span class="icon">📋</span> Cursos Extracurriculares</a>
                     </div>
                     <div class="dropdown-divider"></div>
                     <div class="dropdown-admin">
@@ -220,8 +226,28 @@
 
         /* Función para navegación */
         function irA(pagina) {
+            toggleMobileSidebar(false);
             window.location.href = pagina;
         }
+
+        function toggleMobileSidebar(forceOpen) {
+            if (window.innerWidth > 768) {
+                document.body.classList.remove('mobile-sidebar-open');
+                return;
+            }
+
+            const shouldOpen = typeof forceOpen === 'boolean'
+                ? forceOpen
+                : !document.body.classList.contains('mobile-sidebar-open');
+
+            document.body.classList.toggle('mobile-sidebar-open', shouldOpen);
+        }
+
+        window.addEventListener('resize', function() {
+            if (window.innerWidth > 768) {
+                document.body.classList.remove('mobile-sidebar-open');
+            }
+        });
 
         function obtenerDatosPlantillaSupletorios(nombreFacultad) {
             if (!window.PlantillasStore || typeof window.PlantillasStore.getAll !== 'function') {
@@ -241,113 +267,68 @@
                 }));
         }
 
-        /* Función para buscar datos */
-        function buscarDatos() {
-            const facultad = document.getElementById('facultad').value;
-            const resultados = document.getElementById('resultados');
-            const tabla = document.getElementById('tabla-resultados');
+        async function buscarDatos() {
+            const facultadSelect = document.getElementById('facultad');
+            const facultadValue = facultadSelect.value;
+            const facultadTexto = facultadSelect.options[facultadSelect.selectedIndex].text;
+            
+            const resultadosMostrados = document.getElementById('resultados');
             const header = document.getElementById('results-header');
             const carreraNombre = document.getElementById('carrera-nombre');
+            const tabla = document.getElementById('tabla-resultados');
 
-            if (!facultad) {
+            if (!facultadValue) {
                 alert('Por favor seleccione una facultad');
-                header.style.display = 'none';
-                resultados.style.display = 'block';
-                tabla.style.display = 'none';
-                carreraNombre.textContent = '-';
-                mostrarFiltros(false);
-                limpiarFiltrosTabla();
                 return;
             }
 
-            resultados.style.display = 'none';
-            tabla.style.display = 'table';
+            try {
+                resultadosMostrados.textContent = 'Buscando supletorios en la base de datos...';
+                resultadosMostrados.style.display = 'block';
+                header.style.display = 'none';
+                tabla.style.display = 'none';
 
-            const facultadTexto = document.getElementById('facultad').options[document.getElementById('facultad').selectedIndex].text;
-            carreraNombre.textContent = facultadTexto;
-            
-            // Datos simulados - Exámenes supletorios para todas las facultades
-            const datosSimulados = {
-                "administracion-empresas": [
-                    { asignatura: "Contabilidad General", fecha: "2024-05-10", horaInicio: "09:00", horaFin: "11:00", salon: "B201", docente: "Msc. López" },
-                    { asignatura: "Administración Financiera", fecha: "2024-05-13", horaInicio: "10:00", horaFin: "12:00", salon: "B202", docente: "Dra. Martínez" },
-                    { asignatura: "Recursos Humanos", fecha: "2024-05-17", horaInicio: "14:00", horaFin: "16:00", salon: "B203", docente: "Ing. Torres" }
-                ],
-                "centro-lenguas": [
-                    { asignatura: "Inglés I", fecha: "2024-05-11", horaInicio: "09:00", horaFin: "10:30", salon: "C101", docente: "Prof. Anderson" },
-                    { asignatura: "Francés Intermedio", fecha: "2024-05-15", horaInicio: "10:00", horaFin: "11:30", salon: "C102", docente: "Prof. Dupont" }
-                ],
-                "ciencias-politicas": [
-                    { asignatura: "Teoría Política", fecha: "2024-05-09", horaInicio: "07:00", horaFin: "09:00", salon: "D101", docente: "Dr. Hernández" },
-                    { asignatura: "Derecho Constitucional", fecha: "2024-05-14", horaInicio: "09:00", horaFin: "11:00", salon: "D102", docente: "Dra. González" }
-                ],
-                "comunicacion-social": [
-                    { asignatura: "Redacción Periodística", fecha: "2024-05-12", horaInicio: "10:00", horaFin: "12:00", salon: "E101", docente: "Msc. Rodríguez" },
-                    { asignatura: "Producción Audiovisual", fecha: "2024-05-16", horaInicio: "14:00", horaFin: "16:00", salon: "E102", docente: "Dra. Silva" }
-                ],
-                "ciencias-basicas": [
-                    { asignatura: "Cálculo I", fecha: "2024-05-08", horaInicio: "07:00", horaFin: "09:00", salon: "F101", docente: "Dr. García" },
-                    { asignatura: "Física General", fecha: "2024-05-13", horaInicio: "09:00", horaFin: "11:00", salon: "F102", docente: "Dr. Pérez" }
-                ],
-                "formacion-humanistica": [
-                    { asignatura: "Filosofía Moderna", fecha: "2024-05-10", horaInicio: "15:00", horaFin: "17:00", salon: "G101", docente: "Dr. Domínguez" },
-                    { asignatura: "Historia de América Latina", fecha: "2024-05-15", horaInicio: "16:00", horaFin: "18:00", salon: "G102", docente: "Dra. Moreno" }
-                ],
-                "derecho": [
-                    { asignatura: "Derecho Penal I", fecha: "2024-05-09", horaInicio: "08:00", horaFin: "10:00", salon: "H101", docente: "Dr. Reyes" },
-                    { asignatura: "Derecho Civil I", fecha: "2024-05-14", horaInicio: "10:00", horaFin: "12:00", salon: "H102", docente: "Dra. Vargas" }
-                ],
-                "diseno-grafico": [
-                    { asignatura: "Teoría del Color", fecha: "2024-05-11", horaInicio: "09:00", horaFin: "11:00", salon: "I101", docente: "Dra. López" },
-                    { asignatura: "Diseño Gráfico Digital", fecha: "2024-05-16", horaInicio: "14:00", horaFin: "17:00", salon: "I102", docente: "Prof. Martínez" }
-                ],
-                "electivas": [
-                    { asignatura: "Emprendimiento", fecha: "2024-05-12", horaInicio: "17:00", horaFin: "19:00", salon: "J101", docente: "Msc. Sánchez" }
-                ],
-                "ingenieria-industrial": [
-                    { asignatura: "Ingeniería de Procesos", fecha: "2024-05-08", horaInicio: "07:00", horaFin: "09:00", salon: "K101", docente: "Ing. Ortiz" },
-                    { asignatura: "Producción", fecha: "2024-05-13", horaInicio: "10:00", horaFin: "12:00", salon: "K102", docente: "Ing. Ruiz" }
-                ],
-                "ingenieria-ambiental": [
-                    { asignatura: "Evaluación de Impacto Ambiental", fecha: "2024-05-09", horaInicio: "09:00", horaFin: "11:00", salon: "L101", docente: "Dra. Arias" },
-                    { asignatura: "Tratamiento de Aguas", fecha: "2024-05-14", horaInicio: "14:00", horaFin: "16:00", salon: "L102", docente: "Ing. Castro" }
-                ],
-                "ingenieria-civil": [
-                    { asignatura: "Resistencia de Materiales", fecha: "2024-05-10", horaInicio: "08:00", horaFin: "10:00", salon: "M101", docente: "Dr. Huerta" },
-                    { asignatura: "Diseño de Estructuras", fecha: "2024-05-15", horaInicio: "10:00", horaFin: "12:00", salon: "M102", docente: "Ing. Fuentes" }
-                ],
-                "ingenieria-electronica": [
-                    { asignatura: "Circuitos Digitales", fecha: "2024-05-11", horaInicio: "09:00", horaFin: "11:00", salon: "N101", docente: "Dr. Quiroga" },
-                    { asignatura: "Microcontroladores", fecha: "2024-05-16", horaInicio: "14:00", horaFin: "16:00", salon: "N102", docente: "Ing. Navarro" }
-                ],
-                "ingenieria-electrica": [
-                    { asignatura: "Máquinas Eléctricas", fecha: "2024-05-08", horaInicio: "07:00", horaFin: "09:00", salon: "O101", docente: "Dr. Montes" },
-                    { asignatura: "Sistemas de Potencia", fecha: "2024-05-13", horaInicio: "10:00", horaFin: "12:00", salon: "O102", docente: "Ing. Vera" }
-                ],
-                "ingenieria-mecanica": [
-                    { asignatura: "Termodinámica", fecha: "2024-05-09", horaInicio: "08:00", horaFin: "10:00", salon: "P101", docente: "Dr. Espinoza" },
-                    { asignatura: "Mecánica de Fluidos", fecha: "2024-05-14", horaInicio: "10:00", horaFin: "12:00", salon: "P102", docente: "Ing. Botero" }
-                ],
-                "ingenieria-sistemas": [
-                    { asignatura: "Programación Avanzada", fecha: "2024-05-07", horaInicio: "07:00", horaFin: "09:00", salon: "Q101", docente: "Msc. Gómez" },
-                    { asignatura: "Bases de Datos", fecha: "2024-05-12", horaInicio: "10:00", horaFin: "12:00", salon: "Q102", docente: "Dr. Puentes" },
-                    { asignatura: "Análisis de Sistemas", fecha: "2024-05-17", horaInicio: "14:00", horaFin: "16:00", salon: "Q103", docente: "Ing. Giraldo" }
-                ],
-                "negocios-internacionales": [
-                    { asignatura: "Comercio Internacional", fecha: "2024-05-10", horaInicio: "09:00", horaFin: "11:00", salon: "R101", docente: "Dra. Cardona" },
-                    { asignatura: "Negociación Internacional", fecha: "2024-05-15", horaInicio: "14:00", horaFin: "16:00", salon: "R102", docente: "Prof. Rivera" }
-                ],
-                "psicologia": [
-                    { asignatura: "Psicología General", fecha: "2024-05-08", horaInicio: "08:00", horaFin: "10:00", salon: "S101", docente: "Dra. Flores" },
-                    { asignatura: "Psicopatología", fecha: "2024-05-13", horaInicio: "10:00", horaFin: "12:00", salon: "S102", docente: "Dr. Campos" }
-                ]
-            };
+                const response = await fetch(`http://localhost:3000/api/horarios?tipo=supletorios&facultad=${encodeURIComponent(facultadTexto)}`);
+                const result = await response.json();
 
-            const tbody = document.getElementById('tabla-body');
-            tbody.innerHTML = '';
+                if (result.success && result.horarios && result.horarios.length > 0) {
+                    carreraNombre.textContent = facultadTexto;
+                    header.style.display = 'block';
+                    resultadosMostrados.style.display = 'none';
+                    tabla.style.display = 'table';
 
-            const datosPlantilla = obtenerDatosPlantillaSupletorios(facultadTexto);
-            const datos = datosPlantilla.length ? datosPlantilla : (datosSimulados[facultad] || []);
+                    const tbody = document.getElementById('tabla-body');
+                    tbody.innerHTML = '';
+                    
+                    result.horarios.forEach(dato => {
+                        const fila = `
+                            <tr>
+                                <td>${dato.asignatura}</td>
+                                <td>${dato.fecha || 'Pendiente'}</td>
+                                <td>${dato.lunes || (dato.martes || (dato.miercoles || (dato.jueves || (dato.viernes || (dato.sabado || 'Pendiente')))))}</td>
+                                <td>--</td>
+                                <td>${dato.aula}</td>
+                                <td>${dato.profesor}</td>
+                            </tr>
+                        `;
+                        tbody.innerHTML += fila;
+                    });
+
+                    mostrarFiltros(true);
+                    poblarListasFiltros();
+                    limpiarFiltrosTabla();
+                } else {
+                    resultadosMostrados.textContent = 'No hay supletorios registrados para esta facultad en MySQL!';
+                    resultadosMostrados.style.display = 'block';
+                    header.style.display = 'none';
+                    tabla.style.display = 'none';
+                    mostrarFiltros(false);
+                }
+            } catch (error) {
+                console.error('Error al buscar supletorios:', error);
+                alert('Error al conectar con el servidor.');
+            }
+        }
             if (datos.length === 0) {
                 resultados.style.display = 'block';
                 tabla.style.display = 'none';
@@ -483,6 +464,7 @@
 
         function aplicarVistaSesionAdmin() {
             const estaLogeado = window.isAdminAuthenticated && window.isAdminAuthenticated();
+            const adminTitle = document.getElementById('adminSectionTitle');
             const adminAccessItem = document.getElementById('adminAccessItem');
             const adminAccessText = document.getElementById('adminAccessText');
             const adminLogoutItem = document.getElementById('adminLogoutItem');
@@ -490,6 +472,9 @@
             const backButton = document.getElementById('backButton');
 
             if (estaLogeado) {
+                if (adminTitle) {
+                    adminTitle.style.display = 'none';
+                }
                 if (adminAccessItem) {
                     adminAccessItem.style.display = 'none';
                     adminAccessItem.classList.remove('login-link');
@@ -505,6 +490,9 @@
                     backButton.textContent = '◄ Volver a Administración';
                 }
             } else {
+                if (adminTitle) {
+                    adminTitle.style.display = 'none';
+                }
                 if (adminAccessText) {
                     adminAccessText.textContent = 'Login';
                 }
@@ -546,6 +534,7 @@
         }
 
         document.addEventListener('DOMContentLoaded', function() {
+            document.body.classList.remove('mobile-sidebar-open');
             aplicarVistaSesionAdmin();
             if (window.aplicarFacultadesEnSelect) {
                 window.aplicarFacultadesEnSelect('facultad', '---Seleccionar facultad---');
@@ -554,3 +543,7 @@
     </script>
 </body>
 </html>
+
+
+
+

@@ -39,6 +39,7 @@
                 <a href="consultas-examenes.html"><span class="icon">📋</span> Exámenes Parciales</a>
                 <a href="consultas-supletorios.html"><span class="icon">📋</span> Supletorios</a>
                 <a href="consultas-intersemestrales.html"><span class="icon">📋</span> Cursos Intersemestrales</a>
+                <a href="consultas-cursos-extracurriculares.html"><span class="icon">📋</span> Cursos Extracurriculares</a>
             </div>
 
             <div class="dropdown-divider"></div>
@@ -73,6 +74,8 @@
                         <li onclick="irA('consultas-examenes.html')"><span class="submenu-icon">📋</span> Exámenes Parciales</li>
                         <li onclick="irA('consultas-supletorios.html')"><span class="submenu-icon">📋</span> Supletorios</li>
                         <li onclick="irA('consultas-intersemestrales.html')"><span class="submenu-icon">📋</span> Cursos Intersemestrales</li>
+                        <li onclick="irA('consultas-cursos-extracurriculares.html')"><span class="submenu-icon">📋</span> Cursos Extracurriculares</li>
+                        <li onclick="irA('consultas-horario-personalizado.html')"><span class="submenu-icon">📋</span> Horario Personalizado</li>
                     </div>
                 </ul>
             </div>
@@ -145,7 +148,10 @@
                             <th>FECHA DE CREACION</th>
                         </tr>
                     </thead>
-                    <tbody id="publicationsTableBody">
+                    <tbody id="reportsTableBody">
+                        <tr>
+                            <td colspan="10" style="text-align: center;">Cargando reportes...</td>
+                        </tr>
                     </tbody>
                 </table>
             </div>
@@ -165,107 +171,6 @@
 
     <!-- JavaScript -->
     <script>
-        const estadoPublicaciones = {
-            datos: [],
-            filtrados: [],
-            paginaActual: 1,
-            registrosPorPagina: 10
-        };
-
-        /* Función para cargar desde MySQL */
-        async function cargarPublicaciones() {
-            try {
-                const response = await fetch('http://localhost:3000/api/reportes');
-                const data = await response.json();
-                
-                if (data.success && data.reportes) {
-                    estadoPublicaciones.datos = data.reportes;
-                    estadoPublicaciones.filtrados = [...estadoPublicaciones.datos];
-                    renderizarTabla();
-                }
-            } catch (error) {
-                console.error('Error cargando reportes:', error);
-                alert('No se pudo cargar el historial de la BD');
-            }
-        }
-
-        /* Renderizar Tabla */
-        function renderizarTabla() {
-            const tbody = document.getElementById('publicationsTableBody');
-            const inicio = (estadoPublicaciones.paginaActual - 1) * estadoPublicaciones.registrosPorPagina;
-            const fin = inicio + estadoPublicaciones.registrosPorPagina;
-            const pagina = estadoPublicaciones.filtrados.slice(inicio, fin);
-
-            tbody.innerHTML = '';
-
-            if (!pagina.length) {
-                tbody.innerHTML = `<tr><td colspan="10" class="table-empty">No hay publicaciones registradas.</td></tr>`;
-                renderizarPaginacion();
-                return;
-            }
-
-            pagina.forEach(item => {
-                const fila = document.createElement('tr');
-                fila.innerHTML = `
-                    <td><a href="ver-publicaciones-edicion.html?id=${item.id}" class="table-link">${item.id}</a></td>
-                    <td>${item.tipo}</td>
-                    <td>${item.facultad}</td>
-                    <td>${item.disponible}</td>
-                    <td>${item.archivo}</td>
-                    <td>${item.creador}</td>
-                    <td>${item.fechaInicio}</td>
-                    <td>${item.fechaFin}</td>
-                    <td>${item.descripcion}</td>
-                    <td>${item.fechaCreacion}</td>
-                `;
-                tbody.appendChild(fila);
-            });
-
-            renderizarPaginacion();
-        }
-
-        /* Funciones de paginación similares a ver-facultades */
-        function renderizarPaginacion() {
-            const totalPaginas = Math.max(1, Math.ceil(estadoPublicaciones.filtrados.length / estadoPublicaciones.registrosPorPagina));
-            if (estadoPublicaciones.paginaActual > totalPaginas) {
-                estadoPublicaciones.paginaActual = totalPaginas;
-            }
-
-            const pagination = document.querySelector('.pagination');
-            pagination.innerHTML = '';
-
-            const crearBoton = (texto, onClick, activo) => {
-                const btn = document.createElement('button');
-                btn.className = `page-btn ${activo ? 'active' : ''}`.trim();
-                btn.textContent = texto;
-                btn.onclick = onClick;
-                return btn;
-            };
-
-            pagination.appendChild(crearBoton('«', () => cambiarPagina(1), false));
-            pagination.appendChild(crearBoton('‹', () => cambiarPagina(estadoPublicaciones.paginaActual - 1), false));
-
-            for (let i = 1; i <= totalPaginas; i++) {
-                pagination.appendChild(crearBoton(String(i), () => cambiarPagina(i), i === estadoPublicaciones.paginaActual));
-            }
-
-            pagination.appendChild(crearBoton('›', () => cambiarPagina(estadoPublicaciones.paginaActual + 1), false));
-            pagination.appendChild(crearBoton('»', () => cambiarPagina(totalPaginas), false));
-        }
-
-        function cambiarPagina(nuevaPagina) {
-            const totalPaginas = Math.max(1, Math.ceil(estadoPublicaciones.filtrados.length / estadoPublicaciones.registrosPorPagina));
-            if (nuevaPagina < 1) estadoPublicaciones.paginaActual = 1;
-            else if (nuevaPagina > totalPaginas) estadoPublicaciones.paginaActual = totalPaginas;
-            else estadoPublicaciones.paginaActual = nuevaPagina;
-            renderizarTabla();
-        }
-
-        /* Ejecutar al cargar la pagina */
-        document.addEventListener('DOMContentLoaded', function() {
-            cargarPublicaciones();
-        });
-
         /* Función para desplegar/contraer menú */
         function toggleMenu(element) {
             const submenu = element.nextElementSibling;
@@ -300,21 +205,25 @@
 
         /* Función para cambiar registros por página */
         function cambiarRegistrosPorPagina() {
-            const valor = Number(document.getElementById('registrosPorPagina').value);
-            estadoPublicaciones.registrosPorPagina = valor;
-            estadoPublicaciones.paginaActual = 1;
-            renderizarTabla();
+            const valor = document.getElementById('registrosPorPagina').value;
+            console.log('Registros por página: ' + valor);
         }
 
         /* Función para filtrar tabla */
         function filtrarTabla() {
-            const filtro = document.getElementById('searchInput').value.trim().toLowerCase();
-            estadoPublicaciones.filtrados = estadoPublicaciones.datos.filter(item => {
-                const texto = `${item.id} ${item.tipo} ${item.facultad} ${item.archivo} ${item.descripcion}`.toLowerCase();
-                return texto.includes(filtro);
-            });
-            estadoPublicaciones.paginaActual = 1;
-            renderizarTabla();
+            const input = document.getElementById('searchInput');
+            const filter = input.value.toUpperCase();
+            const table = document.getElementById('publicationsTable');
+            const rows = table.getElementsByTagName('tr');
+
+            for (let i = 1; i < rows.length; i++) {
+                const text = rows[i].textContent || rows[i].innerText;
+                if (text.toUpperCase().indexOf(filter) > -1) {
+                    rows[i].style.display = '';
+                } else {
+                    rows[i].style.display = 'none';
+                }
+            }
         }
 
         /* Función para copiar tabla */
@@ -337,6 +246,58 @@
             alert('Exportando a PDF...');
         }
 
+        /* Función para cargar reportes desde la API */
+        async function cargarReportes() {
+            const tableBody = document.getElementById('reportsTableBody');
+            
+            try {
+                const response = await fetch('http://localhost:3000/api/reportes');
+                const result = await response.json();
+
+                if (result.success && result.reportes) {
+                    tableBody.innerHTML = '';
+                    
+                    if (result.reportes.length === 0) {
+                        tableBody.innerHTML = '<tr><td colspan="10" style="text-align: center;">No se encontraron reportes en la base de datos.</td></tr>';
+                        return;
+                    }
+
+                    result.reportes.forEach(reporte => {
+                        const row = document.createElement('tr');
+                        
+                        // El controlador ya devuelve las fechas formateadas como string YYYY-MM-DD
+                        const fechaCreacion = reporte.fechaCreacion || '--';
+                        const fechaInicio = reporte.fechaInicio || '--';
+                        const fechaFin = reporte.fechaFin || '--';
+
+                        row.innerHTML = `
+                            <td><a href="ver-publicaciones-edicion.html?id=${reporte.id}" class="table-link">${reporte.id}</a></td>
+                            <td>${reporte.tipo || '--'}</td>
+                            <td>${reporte.facultad || '--'}</td>
+                            <td>${reporte.disponible || 'No'}</td>
+                            <td>${reporte.archivo || '--'}</td>
+                            <td>${reporte.creador || 'Admin'}</td>
+                            <td>${fechaInicio}</td>
+                            <td>${fechaFin}</td>
+                            <td>${reporte.descripcion || '--'}</td>
+                            <td>${fechaCreacion}</td>
+                        `;
+                        tableBody.appendChild(row);
+                    });
+                } else {
+                    tableBody.innerHTML = '<tr><td colspan="10" style="text-align: center; color: red;">Error al obtener reportes del servidor.</td></tr>';
+                }
+            } catch (error) {
+                console.error('Error cargando reportes:', error);
+                tableBody.innerHTML = '<tr><td colspan="10" style="text-align: center; color: red;">No se pudo conectar con el servidor backend.</td></tr>';
+            }
+        }
+
+        /* Inicialización al cargar la página */
+        document.addEventListener('DOMContentLoaded', function() {
+            cargarReportes();
+        });
+
         /* Función para cambiar página */
         function cambiarPagina(direccion) {
             console.log('Cambiar página: ' + direccion);
@@ -352,3 +313,6 @@
     </script>
 </body>
 </html>
+
+
+

@@ -6,6 +6,8 @@
         if (text.includes('exámenes') || text.includes('examenes')) return 'file-text';
         if (text.includes('supletorios')) return 'clipboard-check';
         if (text.includes('intersemestrales')) return 'calendar-plus';
+        if (text.includes('cursos extracurriculares') || text.includes('cursosextracurriculares')) return 'clipboard-check';
+        if (text.includes('horario personalizado')) return 'clipboard-check';
         if (text.includes('mi información') || text.includes('mi informacion')) return 'user-round';
         if (text.includes('cambiar contraseña') || text.includes('cambiar contrase')) return 'key-round';
         if (text.includes('administración') || text.includes('administracion')) return 'settings';
@@ -85,6 +87,8 @@
             styleLucideIcons();
         }
     }
+
+    window.refreshLucideIcons = initLucideIcons;
 
     if (document.readyState === 'loading') {
         document.addEventListener('DOMContentLoaded', initLucideIcons);

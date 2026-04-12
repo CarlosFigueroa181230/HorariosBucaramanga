@@ -93,7 +93,7 @@
                 const data = await response.json();
 
                 if (data.success) {
-                    // Iniciar sesion con datos provenientes de base de datos
+                    // Iniciar sesión con datos provenientes de la base de datos
                     window.setAdminSession(data.user);
                     
                     // Redirigir a la página de administración
@@ -103,7 +103,7 @@
                 }
             } catch (error) {
                 console.error('Error de login:', error);
-                alert('No se pudo conectar con el servidor backend (MySQL). Verifica que npm start esté corriendo en /backend.');
+                alert('No se pudo conectar con el servidor backend. Asegúrate de que el servidor esté corriendo en el puerto 3000.');
             } finally {
                 btn.textContent = 'Ingresar';
                 btn.disabled = false;
@@ -113,3 +113,6 @@
 
 </body>
 </html>
+
+
+

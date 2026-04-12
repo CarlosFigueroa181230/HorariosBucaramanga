@@ -11,16 +11,21 @@ body {
     color: #333333;
 }
 
+:root {
+    --admin-sidebar-width: 240px;
+    --admin-header-height: 60px;
+}
+
 /* Contenedor principal */
 .main-container {
     display: flex;
-    min-height: calc(100vh - 60px);
-    margin-left: 200px;
+    min-height: calc(100vh - var(--admin-header-height));
+    margin-left: var(--admin-sidebar-width);
 }
 
 /* Sidebar */
 .sidebar {
-    width: 200px;
+    width: var(--admin-sidebar-width);
     background-color: #ffffff;
     border-right: 1px solid #e0e0e0;
     padding: 20px;
@@ -119,13 +124,13 @@ body {
     background-color: #ffffff;
     border-bottom: 3px solid #a91414;
     padding: 10px 20px;
-    height: 60px;
+    height: var(--admin-header-height);
     display: flex;
     justify-content: center;
     align-items: center;
     position: fixed;
     top: 0;
-    left: 200px;
+    left: var(--admin-sidebar-width);
     right: 0;
     z-index: 100;
 }
@@ -144,8 +149,8 @@ body {
     gap: 25px;
     padding: 30px;
     background-color: #f5f5f5;
-    min-height: calc(100vh - 60px);
-    margin-top: 60px;
+    min-height: calc(100vh - var(--admin-header-height));
+    margin-top: var(--admin-header-height);
 }
 
 /* Tarjeta general */
@@ -348,4 +353,252 @@ button:focus-visible,
 a:focus-visible {
     outline: 3px solid rgba(169, 20, 20, 0.25);
     outline-offset: 2px;
+}
+
+.mobile-menu-btn,
+.mobile-close-btn,
+.mobile-overlay {
+    display: none;
+}
+
+@media (max-width: 768px) {
+    body {
+        background-color: #ececec;
+        overflow-x: hidden;
+    }
+
+    .main-container {
+        margin-left: 0;
+        min-height: 100vh;
+    }
+
+    .content {
+        width: 100%;
+    }
+
+    .header {
+        left: 12px;
+        right: 12px;
+        top: 10px;
+        height: 52px;
+        border-radius: 12px;
+        border-bottom-width: 2px;
+        box-shadow: 0 10px 24px rgba(0, 0, 0, 0.14);
+        padding: 8px 12px;
+        z-index: 220;
+    }
+
+    .header h1 {
+        font-size: 11px;
+        letter-spacing: 0.7px;
+        text-align: center;
+    }
+
+    .mobile-menu-btn {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        position: absolute;
+        left: 10px;
+        top: 50%;
+        transform: translateY(-50%);
+        width: 32px;
+        height: 32px;
+        border: none;
+        border-radius: 8px;
+        background-color: #f2f2f2;
+        color: #111111;
+        font-size: 19px;
+        cursor: pointer;
+        z-index: 1;
+    }
+
+    .mobile-menu-btn:active {
+        transform: translateY(-50%) scale(0.96);
+    }
+
+    .sidebar {
+        display: block;
+        width: min(84vw, 340px);
+        border-right: 0;
+        border-radius: 0 16px 16px 0;
+        box-shadow: 10px 0 28px rgba(0, 0, 0, 0.22);
+        position: fixed;
+        left: 0;
+        top: 0;
+        height: 100vh;
+        z-index: 260;
+        background-color: #f3f3f3;
+        transform: translateX(-104%);
+        transition: transform 0.32s ease;
+        padding: 82px 16px 18px;
+        overflow-x: visible;
+        visibility: hidden;
+        pointer-events: none;
+    }
+
+    body.mobile-sidebar-open .sidebar {
+        transform: translateX(0);
+        visibility: visible;
+        pointer-events: auto;
+    }
+
+    .mobile-close-btn {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        position: absolute;
+        top: 14px;
+        right: 12px;
+        width: 34px;
+        height: 34px;
+        border: none;
+        border-radius: 999px;
+        background-color: #a91414;
+        color: #ffffff;
+        font-size: 22px;
+        line-height: 1;
+        cursor: pointer;
+        box-shadow: 0 8px 20px rgba(169, 20, 20, 0.35);
+        z-index: 3;
+    }
+
+    .mobile-overlay {
+        display: block;
+        position: fixed;
+        inset: 0;
+        background: rgba(0, 0, 0, 0.34);
+        opacity: 0;
+        visibility: hidden;
+        pointer-events: none;
+        transition: opacity 0.32s ease, visibility 0.32s ease;
+        z-index: 240;
+    }
+
+    body.mobile-sidebar-open .mobile-overlay {
+        opacity: 1;
+        visibility: visible;
+        pointer-events: auto;
+    }
+
+    .sidebar-title {
+        font-size: 16px;
+    }
+
+    .menu-header {
+        font-size: 12px;
+        margin-bottom: 10px;
+    }
+
+    .menu-toggle,
+    .menu-list li,
+    .submenu li {
+        font-size: 14px;
+        padding-left: 8px;
+        padding-right: 8px;
+    }
+
+    .submenu li {
+        padding-left: 26px;
+    }
+
+    .cards-container {
+        margin-top: 70px;
+        padding: 12px;
+        gap: 12px;
+        grid-template-columns: 1fr;
+    }
+
+    .card {
+        border-radius: 12px;
+        padding: 14px;
+        box-shadow: 0 8px 20px rgba(0, 0, 0, 0.12);
+    }
+
+    .welcome-card h2,
+    .social-title h3 {
+        font-size: 18px;
+    }
+
+    .welcome-card p,
+    .social-title p,
+    .social-btn {
+        font-size: 12px;
+    }
+
+    .social-header {
+        gap: 10px;
+        margin-bottom: 14px;
+        padding-bottom: 10px;
+    }
+
+    .upb-logo {
+        width: 60px;
+    }
+
+    .social-buttons {
+        grid-template-columns: repeat(3, 1fr);
+        gap: 8px;
+    }
+
+    .social-btn {
+        min-height: 70px;
+        padding: 9px 6px;
+        border-radius: 8px;
+    }
+
+    .social-icon {
+        font-size: 16px;
+    }
+}
+
+@media (min-width: 769px) {
+    .header {
+        position: sticky;
+        top: 0;
+        left: auto;
+        right: auto;
+        width: 100%;
+    }
+
+    .cards-container {
+        margin-top: 0;
+    }
+}
+
+/* Escala tipografica unificada para banner y menu (referencia visual) */
+:root {
+    --ui-font-base: 17px;
+    --ui-banner-title: 26px;
+    --ui-sidebar-title: 16px;
+    --ui-menu-section-title: 11px;
+    --ui-menu-item: 13px;
+    --ui-submenu-item: 12px;
+}
+
+body {
+    font-size: var(--ui-font-base);
+    line-height: 1.55;
+}
+
+.header h1 {
+    font-size: var(--ui-banner-title);
+    letter-spacing: 0.3px;
+}
+
+.sidebar-title {
+    font-size: var(--ui-sidebar-title);
+}
+
+.menu-header {
+    font-size: var(--ui-menu-section-title);
+}
+
+.menu-toggle,
+.menu-list li {
+    font-size: var(--ui-menu-item);
+}
+
+.submenu li {
+    font-size: var(--ui-submenu-item);
 }

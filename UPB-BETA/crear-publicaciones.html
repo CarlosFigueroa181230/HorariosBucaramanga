@@ -9,13 +9,13 @@
     <link rel="stylesheet" href="publicaciones-styles.css">
     <script src="https://unpkg.com/lucide@0.469.0/dist/umd/lucide.min.js"></script>
     <script src="lucide-icons.js"></script>
+    <!-- XLSX library for Excel parsing -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
     <script src="ux-dynamic.js"></script>
     <script src="facultades-store.js"></script>
     <script src="facultades-sync.js"></script>
     <script src="admin-auth.js"></script>
     <script src="admin-local-modals.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.min.js"></script>
-    <script src="https://unpkg.com/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
     <script>
         requireAdminSession();
     </script>
@@ -43,6 +43,7 @@
                 <a href="consultas-examenes.html"><span class="icon">📋</span> Exámenes Parciales</a>
                 <a href="consultas-supletorios.html"><span class="icon">📋</span> Supletorios</a>
                 <a href="consultas-intersemestrales.html"><span class="icon">📋</span> Cursos Intersemestrales</a>
+                <a href="consultas-cursos-extracurriculares.html"><span class="icon">📋</span> Cursos Extracurriculares</a>
             </div>
 
             <div class="dropdown-divider"></div>
@@ -77,6 +78,8 @@
                         <li onclick="irA('consultas-examenes.html')"><span class="submenu-icon">📋</span> Exámenes Parciales</li>
                         <li onclick="irA('consultas-supletorios.html')"><span class="submenu-icon">📋</span> Supletorios</li>
                         <li onclick="irA('consultas-intersemestrales.html')"><span class="submenu-icon">📋</span> Cursos Intersemestrales</li>
+                        <li onclick="irA('consultas-cursos-extracurriculares.html')"><span class="submenu-icon">📋</span> Cursos Extracurriculares</li>
+                        <li onclick="irA('consultas-horario-personalizado.html')"><span class="submenu-icon">📋</span> Horario Personalizado</li>
                     </div>
                 </ul>
             </div>
@@ -115,6 +118,7 @@
                         <option value="examenes">Exámenes Parciales</option>
                         <option value="supletorios">Supletorios</option>
                         <option value="intersemestrales">Cursos Intersemestrales</option>
+                        <option value="extracurriculares">Cursos Extracurriculares</option>
                     </select>
                 </div>
 
@@ -227,92 +231,84 @@
             }
         }
 
-        /* Validación del formulario y Subida al Backend */
+        /* Validación y envío del formulario a la API */
         document.querySelector('.publication-form').addEventListener('submit', async function(e) {
             e.preventDefault();
             
+            const btn = document.querySelector('.btn-guardar');
             const fileInput = document.getElementById('archivoExcel');
-            if (!fileInput.files.length) {
-                alert('Por favor selecciona un archivo Excel primero.');
+            const session = window.getAdminSession ? window.getAdminSession() : null;
+
+            if (!fileInput.files || fileInput.files.length === 0) {
+                alert('Por favor selecciona un archivo Excel');
                 return;
             }
 
-            const file = fileInput.files[0];
-            const reader = new FileReader();
+            try {
+                btn.textContent = 'Procesando...';
+                btn.disabled = true;
 
-            reader.onload = async function(event) {
-                try {
-                    const data = new Uint8Array(event.target.result);
-                    const workbook = XLSX.read(data, { type: 'array' });
-                    
-                    const jsonResult = { sheets: {} };
-                    workbook.SheetNames.forEach(sheetName => {
-                        const sheet = workbook.Sheets[sheetName];
-                        const sheetData = XLSX.utils.sheet_to_json(sheet, { defval: '' });
-                        jsonResult.sheets[sheetName] = { data: sheetData };
-                    });
+                const file = fileInput.files[0];
+                const reader = new FileReader();
 
-                    // Mostrar indicador de carga
-                    const btnGuardar = document.querySelector('.btn-guardar');
-                    const textoOriginal = btnGuardar.innerText;
-                    btnGuardar.innerText = 'Subiendo y procesando...';
-                    btnGuardar.disabled = true;
-
-                    // Capturar el Creador (Usuario loguado)
-                    let currentUserId = 1;
+                reader.onload = async function(event) {
                     try {
-                        const currentUser = JSON.parse(localStorage.getItem('currentUser'));
-                        if (currentUser && currentUser.id) currentUserId = currentUser.id;
-                    } catch(e) {}
+                        const data = new Uint8Array(event.target.result);
+                        const workbook = XLSX.read(data, { type: 'array' });
+                        
+                        // Estructura de "sheets" esperada por el backend
+                        const convertedSheets = {};
+                        workbook.SheetNames.forEach(sheetName => {
+                            const sheet = workbook.Sheets[sheetName];
+                            const sheetData = XLSX.utils.sheet_to_json(sheet, { defval: '' });
+                            convertedSheets[sheetName] = {
+                                name: sheetName,
+                                data: sheetData
+                            };
+                        });
 
-                    jsonResult.fileName = file.name;
-                    jsonResult.creadorId = currentUserId;
-                    
-                    // Extraer los metadatos del formulario para el reporte
-                    jsonResult.fechaInicio = document.getElementById('fechaInicio').value || null;
-                    jsonResult.fechaFin = document.getElementById('fechaFinalizacion').value || null;
-                    jsonResult.descripcion = document.getElementById('descripcion').value || '';
-                    const selectTipo = document.getElementById('tipoPublicacion');
-                    jsonResult.tipo = selectTipo ? selectTipo.options[selectTipo.selectedIndex].text : 'Horarios de Clases';
-                    
-                    // Intentar mapear la facultad seleccionada en el formulario (su texto real)
-                    const selectFacultad = document.getElementById('facultad');
-                    if (selectFacultad && selectFacultad.selectedIndex >= 0) {
-                        jsonResult.facultadFormulario = selectFacultad.options[selectFacultad.selectedIndex].text;
+                        const payload = {
+                            sheets: convertedSheets,
+                            fileName: file.name,
+                            creadorId: session ? session.userId : 1,
+                            fechaInicio: document.getElementById('fechaInicio').value,
+                            fechaFin: document.getElementById('fechaFinalizacion').value,
+                            descripcion: document.getElementById('descripcion').value,
+                            tipo: document.getElementById('tipoPublicacion').value,
+                            facultadFormulario: document.getElementById('facultad').options[document.getElementById('facultad').selectedIndex].text
+                        };
+
+                        const response = await fetch('http://localhost:3000/api/horarios/upload', {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify(payload)
+                        });
+
+                        const result = await response.json();
+
+                        if (result.success) {
+                            alert('Publicación creada y datos guardados en MySQL exitosamente.');
+                            window.location.href = './admin.html';
+                        } else {
+                            alert('Error: ' + result.message);
+                        }
+                    } catch (err) {
+                        console.error('Error procesando excel:', err);
+                        alert('Error al leer el archivo Excel.');
+                    } finally {
+                        btn.textContent = 'Guardar';
+                        btn.disabled = false;
                     }
+                };
 
-                    // Enviar al Backend
-                    const response = await fetch('http://localhost:3000/api/horarios/upload', {
-                        method: 'POST',
-                        headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify(jsonResult)
-                    });
+                reader.readAsArrayBuffer(file);
 
-                    const resData = await response.json();
-                    
-                    btnGuardar.innerText = textoOriginal;
-                    btnGuardar.disabled = false;
-
-                    if (response.ok && resData.success) {
-                        alert('¡Éxito! ' + resData.message);
-                        // Opcional: Redirigir a los listados de publicaciones una vez subido
-                        window.location.href = 'ver-publicaciones.html';
-                    } else {
-                        alert('Hubo un problema al guardar en la BD: ' + (resData.message || 'Error desconocido'));
-                    }
-
-                } catch (error) {
-                    console.error('Error procesando el archivo:', error);
-                    alert('Error local procesando el Excel: ' + error.message);
-                    
-                    // Restauramos el botón guardado en caso de crasheo
-                    const btnGuardar = document.querySelector('.btn-guardar');
-                    btnGuardar.innerText = 'Guardar';
-                    btnGuardar.disabled = false;
-                }
-            };
-            
-            reader.readAsArrayBuffer(file);
+            } catch (error) {
+                console.error('Error en el envío:', error);
+                alert('Ocurrió un error al intentar conectar con el servidor.');
+                btn.textContent = 'Guardar';
+                btn.disabled = false;
+            }
         });
 
         document.addEventListener('DOMContentLoaded', function () {
@@ -331,3 +327,5 @@
     </script>
 </body>
 </html>
+
+

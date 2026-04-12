@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="es">
 <head>
     <meta charset="UTF-8">
@@ -21,6 +21,7 @@
     <div class="main-container">
         <!-- Menú lateral -->
         <aside class="sidebar">
+            <button class="mobile-close-btn" type="button" onclick="cerrarMenuYVolverInicio()" aria-label="Cerrar menu y volver al inicio" title="Cerrar menu">&lt;</button>
             <!-- Título del sidebar -->
             <div class="sidebar-title">HORARIOS UPB</div>
 
@@ -37,7 +38,8 @@
                         <li onclick="irA('consultas-examenes.html')"><span class="submenu-icon">📋</span> Exámenes Parciales</li>
                         <li onclick="irA('consultas-supletorios.html')"><span class="submenu-icon">📋</span> Supletorios</li>
                         <li onclick="irA('consultas-intersemestrales.html')"><span class="submenu-icon">📋</span> Cursos Intersemestrales</li>
-                        <li onclick="irA('consultas-horario-personalizado.html')"><span class="submenu-icon">🧩</span> Horario Personalizado</li>
+                        <li onclick="irA('consultas-cursos-extracurriculares.html')"><span class="submenu-icon">📋</span> Cursos Extracurriculares</li>
+                        <li onclick="irA('consultas-horario-personalizado.html')"><span class="submenu-icon">📋</span> Horario Personalizado</li>
                     </div>
                 </ul>
             </div>
@@ -53,11 +55,14 @@
             </div>
         </aside>
 
+        <div class="mobile-overlay" onclick="toggleMobileSidebar(false)"></div>
+
         <!-- Contenido principal -->
         <main class="content">
             <!-- Header -->
             <div class="header">
-                <h1>HORARIOS UPB VERSION 3.0</h1>
+                <button class="mobile-menu-btn" type="button" onclick="toggleMobileSidebar()" aria-label="Abrir o cerrar menu">☰</button>
+                <h1>HORARIOS UPB V.3</h1>
             </div>
 
             <!-- Contenedor de tarjetas -->
@@ -131,13 +136,58 @@ ESTA ES UNA VERSIÓN ACTUALIZADA PARA QUE ESTÉ DISPONIBLE EN TODOS TUS DISPOSIT
 
         /* Función para navegación */
         function irA(pagina) {
+            toggleMobileSidebar(false);
             window.location.href = pagina;
         }
 
         /* Función para abrir login */
         function abrirLogin() {
+            toggleMobileSidebar(false);
             window.location.href = './login.html';
         }
+
+        /* Cierra menú móvil y muestra la página principal */
+        function cerrarMenuYVolverInicio() {
+            toggleMobileSidebar(false);
+            const principal = document.querySelector('.cards-container');
+            if (principal) {
+                principal.scrollIntoView({ behavior: 'smooth', block: 'start' });
+            } else {
+                window.scrollTo({ top: 0, behavior: 'smooth' });
+            }
+        }
+
+        /* Menú lateral para móvil */
+        function toggleMobileSidebar(forceOpen) {
+            if (window.innerWidth > 768) {
+                document.body.classList.remove('mobile-sidebar-open');
+                return;
+            }
+
+            const shouldOpen = typeof forceOpen === 'boolean'
+                ? forceOpen
+                : !document.body.classList.contains('mobile-sidebar-open');
+
+            if (shouldOpen) {
+                document.body.classList.add('mobile-sidebar-open');
+            } else {
+                document.body.classList.remove('mobile-sidebar-open');
+            }
+        }
+
+        window.addEventListener('resize', function() {
+            if (window.innerWidth > 768) {
+                document.body.classList.remove('mobile-sidebar-open');
+            }
+        });
+
+        document.addEventListener('DOMContentLoaded', function() {
+            document.body.classList.remove('mobile-sidebar-open');
+        });
     </script>
 </body>
 </html>
+
+
+
+
