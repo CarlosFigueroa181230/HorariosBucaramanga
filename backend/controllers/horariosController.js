@@ -327,7 +327,10 @@ exports.getHorarios = async (req, res) => {
         const data = Object.values(map);
         res.json({ success: true, horarios: data });
     } catch (error) {
-        console.error('Error al obtener horarios:', error);
-        res.status(500).json({ success: false, message: 'Error del servidor al obtener horarios' });
+        console.error('🔥 Error Detallado al obtener horarios:');
+        console.error('Mensaje:', error.message);
+        console.error('Stack:', error.stack);
+        if (error.sql) console.error('SQL Executed:', error.sql);
+        res.status(500).json({ success: false, message: 'Error del servidor al obtener horarios', error: error.message });
     }
 };

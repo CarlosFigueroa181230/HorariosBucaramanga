@@ -62,7 +62,18 @@ app.use('/api/horarios', horariosRoutes);
 app.use('/api/facultades', facultadesRoutes);
 app.use('/api/reportes', reportesRoutes);
 
+const https = require('https');
+const fs = require('fs');
+const path = require('path');
+
+// Cargar certificados SSL
+const privateKey = fs.readFileSync(path.join(__dirname, 'security', 'server.key'), 'utf8');
+const certificate = fs.readFileSync(path.join(__dirname, 'security', 'server.cert'), 'utf8');
+const credentials = { key: privateKey, cert: certificate };
+
 // Start the server
-app.listen(PORT, () => {
-    console.log(`🚀 Backend server is running on http://localhost:${PORT}`);
+const httpsServer = https.createServer(credentials, app);
+
+httpsServer.listen(PORT, () => {
+    console.log(`🚀 Backend server is running on https://localhost:${PORT}`);
 });
