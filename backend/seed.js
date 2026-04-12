@@ -50,6 +50,14 @@ async function seed() {
                 console.log(`Facultad ya existe: ${item.facultad}`);
             }
         }
+        // 3. Crear usuario administrador por defecto
+        let [usuarios] = await db.execute('SELECT id_usuario FROM Usuario WHERE usuario = ?', ['admin']);
+        if (usuarios.length === 0) {
+            await db.execute('INSERT INTO Usuario (usuario, contrasena, rol) VALUES (?, ?, ?)', ['admin', 'admin123', 'admin']);
+            console.log('Creado usuario admin por defecto: admin / admin123');
+        } else {
+            console.log('El usuario admin ya existe.');
+        }
         
         console.log('Seed completado.');
         process.exit(0);

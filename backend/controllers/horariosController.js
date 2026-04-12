@@ -57,7 +57,28 @@ exports.uploadExcelData = async (req, res) => {
         // Iniciamos la transacción (Se ejecutará Todo o Nada, por seguridad)
         await connection.beginTransaction();
 
-        // Creamos la "Escuela de Ingenierías" si no existe como base
+        // 1. Registrar la acción en Reporte PRIMERO para obtener el ID y vincular publicaciones
+        let userId = creadorId ? parseInt(creadorId) : 1;
+        let tipoPub = tipo || 'Horarios de Clases';
+        let descPub = descripcion || 'Cargados mediante archivo Excel';
+        let fInicio = fechaInicio || null;
+        let fFin = fechaFin || null;
+
+        // Determinar ID Facultad Principal para el Reporte
+        let globalFacultadId = null;
+        if (facultadFormulario) {
+            let [facs] = await connection.execute('SELECT id_facultad FROM Facultad WHERE nombre = ? OR nombre LIKE ? LIMIT 1', [facultadFormulario, `%${facultadFormulario}%`]);
+            if (facs.length > 0) globalFacultadId = facs[0].id_facultad;
+        }
+
+        const [reporteResult] = await connection.execute(
+            `INSERT INTO Reporte (tipo, id_facultad, disponible, id_creador, fecha_inicio, fecha_fin, descripcion, fecha_creacion, archivo_nombre) 
+             VALUES (?, ?, ?, ?, ?, ?, ?, CURDATE(), ?)`,
+            [tipoPub, globalFacultadId, 1, userId, fInicio, fFin, descPub, fileName || 'archivo_desconocido.xlsx']
+        );
+        const currentReporteId = reporteResult.insertId;
+
+        // 2. Crear la "Escuela de Ingenierías" si no existe como base
         const escuelaId = await findOrCreate(connection, 'Escuela', 'nombre', 'Escuela de Ingenierías', { fecha_creacion: new Date() });
 
         let currentSemestreId = null;
@@ -165,8 +186,8 @@ exports.uploadExcelData = async (req, res) => {
                         }
 
                         const [insPub] = await connection.execute(
-                            'INSERT INTO Publicacion (nrc, id_facultad, id_asignatura, id_curso, id_opcion, creditos) VALUES (?, ?, ?, ?, ?, ?)',
-                            [nrc, facultadId, asigId, cursoId, safeOpcionId, creditos]
+                            'INSERT INTO Publicacion (nrc, id_facultad, id_asignatura, id_curso, id_opcion, creditos, id_reporte) VALUES (?, ?, ?, ?, ?, ?, ?)',
+                            [nrc, facultadId, asigId, cursoId, safeOpcionId, creditos, currentReporteId]
                         );
                         pubId = insPub.insertId;
                     }
@@ -181,8 +202,12 @@ exports.uploadExcelData = async (req, res) => {
                         // SAB se omitirá temporalmente porque en el JSON las keys del excel son muy sueltas y 'Sábado' no esta en las cols generadas ahorita pero agreguémoslo en caso de que lo necesiten.
                     };
                     
-                    // Asegurar qeu 'SÁB' o 'SAB' no crashee
+                    // Asegurar que 'SÁB' o 'SAB' no crashee
                     const validDayKeys = Object.keys(row).filter(key => mapDays[key] || key.startsWith('S') && key.includes('B'));
+                    
+                    // Soporte para Fecha Exacta (Exámenes, etc.)
+                    const dateKey = Object.keys(row).find(k => k.toUpperCase().includes('FECHA'));
+                    const fechaVal = dateKey ? row[dateKey] : null;
 
                     for (const col of validDayKeys) {
                         if (row[col] && row[col].toString().trim() !== '') {
@@ -210,25 +235,8 @@ exports.uploadExcelData = async (req, res) => {
             }
         }
 
-        // Determinar ID Facultad Principal
-        let globalFacultadId = null;
-        if (facultadFormulario) {
-            let [facs] = await connection.execute('SELECT id_facultad FROM Facultad WHERE nombre = ? OR nombre LIKE ? LIMIT 1', [facultadFormulario, `%${facultadFormulario}%`]);
-            if (facs.length > 0) globalFacultadId = facs[0].id_facultad;
-        }
-
-        // Registrar la acción en Reporte
-        let userId = creadorId ? parseInt(creadorId) : 1;
-        let tipoPub = tipo || 'Horarios de Clases';
-        let descPub = descripcion || 'Cargados mediante archivo Excel';
-        let fInicio = fechaInicio || null;
-        let fFin = fechaFin || null;
-
-        await connection.execute(
-            `INSERT INTO Reporte (tipo, id_facultad, disponible, id_creador, fecha_inicio, fecha_fin, descripcion, fecha_creacion, archivo_nombre) 
-             VALUES (?, ?, ?, ?, ?, ?, ?, CURDATE(), ?)`,
-            [tipoPub, globalFacultadId, 1, userId, fInicio, fFin, descPub, fileName || 'archivo_desconocido.xlsx']
-        );
+        // Si se llegó a este punto, todas las consultas fueron exitosas
+        await connection.commit();
 
         // Si se llegó a este punto, todas las consultas fueron exitosas
         await connection.commit();
@@ -247,7 +255,7 @@ exports.uploadExcelData = async (req, res) => {
 };
 
 exports.getHorarios = async (req, res) => {
-    const { facultad } = req.query; // se espera el texto o el id
+    const { facultad, tipo } = req.query; 
     try {
         let query = `
             SELECT 
@@ -259,19 +267,27 @@ exports.getHorarios = async (req, res) => {
                 m.dia,
                 m.hora_inicio,
                 m.hora_fin,
-                m.salon
+                m.salon,
+                m.fecha_exacta,
+                r.tipo as reporte_tipo
             FROM Publicacion p
             JOIN Asignatura a ON p.id_asignatura = a.id_asignatura
             JOIN Facultad f ON p.id_facultad = f.id_facultad
             JOIN Publicacion_Materia pm ON p.id_publicacion = pm.id_publicacion
             JOIN Materia m ON pm.id_materia = m.id_materia
+            LEFT JOIN Reporte r ON p.id_reporte = r.id_reporte
+            WHERE 1=1
         `;
         let params = [];
         if (facultad) {
-            query += ` WHERE f.nombre = ? OR f.nombre LIKE ?`;
-            // Un pequeño truco para permitir el slug
+            query += ` AND (f.nombre = ? OR f.nombre LIKE ?)`;
             const queryFacultad = '%' + facultad.replace(/-/g, ' ') + '%';
             params.push(facultad, queryFacultad);
+        }
+
+        if (tipo) {
+            query += ` AND r.tipo = ?`;
+            params.push(tipo);
         }
 
         const [rows] = await db.execute(query, params);
@@ -287,6 +303,7 @@ exports.getHorarios = async (req, res) => {
                     creditos: r.creditos,
                     profesor: "Asignado", // Pendiente tabla Profesor
                     aula: r.salon || "Por asignar",
+                    fecha: r.fecha_exacta ? r.fecha_exacta.toISOString().split('T')[0] : "Pendiente",
                     cupos: 40,
                     lunes: "--",
                     martes: "--",
