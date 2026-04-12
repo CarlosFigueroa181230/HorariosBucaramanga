@@ -1,6 +1,7 @@
 const express = require('express');
 const cors = require('cors');
 const ldap = require('ldapjs');
+const path = require('path');
 require('dotenv').config();
 
 const db = require('./db');
@@ -98,6 +99,15 @@ app.post('/api/login', async (req, res) => {
 app.use('/api/horarios', horariosRoutes);
 app.use('/api/facultades', facultadesRoutes);
 app.use('/api/reportes', reportesRoutes);
+
+// Servir el frontend UPB-BETA como archivos estáticos
+const frontendPath = path.join(__dirname, '..', 'UPB-BETA');
+app.use(express.static(frontendPath));
+
+// Fallback: cualquier ruta no reconocida redirige al index del frontend
+app.get('*', (req, res) => {
+    res.sendFile(path.join(frontendPath, 'index.html'));
+});
 
 // Start the server
 app.listen(PORT, () => {
