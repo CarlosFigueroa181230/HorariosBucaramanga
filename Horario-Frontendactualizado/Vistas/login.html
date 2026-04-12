@@ -1,4 +1,4 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="es">
 <head>
     <meta charset="UTF-8">
@@ -66,23 +66,48 @@
             window.location.href = './admin.html';
         }
 
-        /* Función para ir a la página de administración */
-        function irAAdmin(event) {
+        /* Función para ir a la página de administración via API */
+        async function irAAdmin(event) {
             event.preventDefault();
             
             // Validar que los campos no estén vacíos
             const username = document.getElementById('username').value;
             const password = document.getElementById('password').value;
+            const btn = document.querySelector('.login-btn');
             
             if (username.trim() === '' || password.trim() === '') {
                 alert('Por favor ingrese usuario y contraseña');
                 return;
             }
 
-            window.setAdminSession(username.trim());
-            
-            // Redirigir a la página de administración
-            window.location.href = './admin.html';
+            try {
+                btn.textContent = 'Verificando...';
+                btn.disabled = true;
+
+                const response = await fetch('http://localhost:3000/api/login', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ username: username.trim(), password: password.trim() })
+                });
+
+                const data = await response.json();
+
+                if (data.success) {
+                    // Iniciar sesión con datos provenientes de la base de datos
+                    window.setAdminSession(data.user);
+                    
+                    // Redirigir a la página de administración
+                    window.location.href = './admin.html';
+                } else {
+                    alert(data.message || 'Usuario o contraseña incorrectos');
+                }
+            } catch (error) {
+                console.error('Error de login:', error);
+                alert('No se pudo conectar con el servidor backend. Asegúrate de que el servidor esté corriendo en el puerto 3000.');
+            } finally {
+                btn.textContent = 'Ingresar';
+                btn.disabled = false;
+            }
         }
     </script>
 

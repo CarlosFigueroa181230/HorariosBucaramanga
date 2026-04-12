@@ -1,4 +1,4 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="es">
 <head>
     <meta charset="UTF-8">
@@ -148,42 +148,9 @@
                             <th>FECHA DE CREACION</th>
                         </tr>
                     </thead>
-                    <tbody>
+                    <tbody id="reportsTableBody">
                         <tr>
-                            <td><a href="ver-publicaciones-edicion.html?id=1" class="table-link">1</a></td>
-                            <td>Horarios de Clases</td>
-                            <td>Ingeniería</td>
-                            <td>Sí</td>
-                            <td>horarios_ing.xlsx</td>
-                            <td>Admin</td>
-                            <td>2026-02-15</td>
-                            <td>2026-05-30</td>
-                            <td>Horarios semestre 2026-I</td>
-                            <td>2026-02-10</td>
-                        </tr>
-                        <tr>
-                            <td><a href="ver-publicaciones-edicion.html?id=2" class="table-link">2</a></td>
-                            <td>Exámenes Parciales</td>
-                            <td>Derecho</td>
-                            <td>Sí</td>
-                            <td>examenes_der.xlsx</td>
-                            <td>Admin</td>
-                            <td>2026-03-01</td>
-                            <td>2026-04-15</td>
-                            <td>Exámenes primer parcial</td>
-                            <td>2026-02-09</td>
-                        </tr>
-                        <tr>
-                            <td><a href="ver-publicaciones-edicion.html?id=3" class="table-link">3</a></td>
-                            <td>Supletorios</td>
-                            <td>Medicina</td>
-                            <td>No</td>
-                            <td>supletorios_med.xlsx</td>
-                            <td>Admin</td>
-                            <td>2026-05-15</td>
-                            <td>2026-06-10</td>
-                            <td>Exámenes supletorios</td>
-                            <td>2026-02-08</td>
+                            <td colspan="10" style="text-align: center;">Cargando reportes...</td>
                         </tr>
                     </tbody>
                 </table>
@@ -278,6 +245,58 @@
         function exportarPDF() {
             alert('Exportando a PDF...');
         }
+
+        /* Función para cargar reportes desde la API */
+        async function cargarReportes() {
+            const tableBody = document.getElementById('reportsTableBody');
+            
+            try {
+                const response = await fetch('http://localhost:3000/api/reportes');
+                const result = await response.json();
+
+                if (result.success && result.reportes) {
+                    tableBody.innerHTML = '';
+                    
+                    if (result.reportes.length === 0) {
+                        tableBody.innerHTML = '<tr><td colspan="10" style="text-align: center;">No se encontraron reportes en la base de datos.</td></tr>';
+                        return;
+                    }
+
+                    result.reportes.forEach(reporte => {
+                        const row = document.createElement('tr');
+                        
+                        // El controlador ya devuelve las fechas formateadas como string YYYY-MM-DD
+                        const fechaCreacion = reporte.fechaCreacion || '--';
+                        const fechaInicio = reporte.fechaInicio || '--';
+                        const fechaFin = reporte.fechaFin || '--';
+
+                        row.innerHTML = `
+                            <td><a href="ver-publicaciones-edicion.html?id=${reporte.id}" class="table-link">${reporte.id}</a></td>
+                            <td>${reporte.tipo || '--'}</td>
+                            <td>${reporte.facultad || '--'}</td>
+                            <td>${reporte.disponible || 'No'}</td>
+                            <td>${reporte.archivo || '--'}</td>
+                            <td>${reporte.creador || 'Admin'}</td>
+                            <td>${fechaInicio}</td>
+                            <td>${fechaFin}</td>
+                            <td>${reporte.descripcion || '--'}</td>
+                            <td>${fechaCreacion}</td>
+                        `;
+                        tableBody.appendChild(row);
+                    });
+                } else {
+                    tableBody.innerHTML = '<tr><td colspan="10" style="text-align: center; color: red;">Error al obtener reportes del servidor.</td></tr>';
+                }
+            } catch (error) {
+                console.error('Error cargando reportes:', error);
+                tableBody.innerHTML = '<tr><td colspan="10" style="text-align: center; color: red;">No se pudo conectar con el servidor backend.</td></tr>';
+            }
+        }
+
+        /* Inicialización al cargar la página */
+        document.addEventListener('DOMContentLoaded', function() {
+            cargarReportes();
+        });
 
         /* Función para cambiar página */
         function cambiarPagina(direccion) {

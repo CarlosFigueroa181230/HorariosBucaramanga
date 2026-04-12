@@ -1,4 +1,4 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="es">
 <head>
     <meta charset="UTF-8">
@@ -9,6 +9,8 @@
     <link rel="stylesheet" href="publicaciones-styles.css">
     <script src="https://unpkg.com/lucide@0.469.0/dist/umd/lucide.min.js"></script>
     <script src="lucide-icons.js"></script>
+    <!-- XLSX library for Excel parsing -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
     <script src="ux-dynamic.js"></script>
     <script src="facultades-store.js"></script>
     <script src="facultades-sync.js"></script>
@@ -228,11 +230,84 @@
             }
         }
 
-        /* Validación del formulario */
-        document.querySelector('.publication-form').addEventListener('submit', function(e) {
+        /* Validación y envío del formulario a la API */
+        document.querySelector('.publication-form').addEventListener('submit', async function(e) {
             e.preventDefault();
-            alert('Formulario enviado correctamente');
-            // Aquí iría la lógica para enviar los datos al servidor
+            
+            const btn = document.querySelector('.btn-guardar');
+            const fileInput = document.getElementById('archivoExcel');
+            const session = window.getAdminSession ? window.getAdminSession() : null;
+
+            if (!fileInput.files || fileInput.files.length === 0) {
+                alert('Por favor selecciona un archivo Excel');
+                return;
+            }
+
+            try {
+                btn.textContent = 'Procesando...';
+                btn.disabled = true;
+
+                const file = fileInput.files[0];
+                const reader = new FileReader();
+
+                reader.onload = async function(event) {
+                    try {
+                        const data = new Uint8Array(event.target.result);
+                        const workbook = XLSX.read(data, { type: 'array' });
+                        
+                        // Estructura de "sheets" esperada por el backend
+                        const convertedSheets = {};
+                        workbook.SheetNames.forEach(sheetName => {
+                            const sheet = workbook.Sheets[sheetName];
+                            const sheetData = XLSX.utils.sheet_to_json(sheet, { defval: '' });
+                            convertedSheets[sheetName] = {
+                                name: sheetName,
+                                data: sheetData
+                            };
+                        });
+
+                        const payload = {
+                            sheets: convertedSheets,
+                            fileName: file.name,
+                            creadorId: session ? session.userId : 1,
+                            fechaInicio: document.getElementById('fechaInicio').value,
+                            fechaFin: document.getElementById('fechaFinalizacion').value,
+                            descripcion: document.getElementById('descripcion').value,
+                            tipo: document.getElementById('tipoPublicacion').value,
+                            facultadFormulario: document.getElementById('facultad').options[document.getElementById('facultad').selectedIndex].text
+                        };
+
+                        const response = await fetch('http://localhost:3000/api/horarios/upload', {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify(payload)
+                        });
+
+                        const result = await response.json();
+
+                        if (result.success) {
+                            alert('Publicación creada y datos guardados en MySQL exitosamente.');
+                            window.location.href = './admin.html';
+                        } else {
+                            alert('Error: ' + result.message);
+                        }
+                    } catch (err) {
+                        console.error('Error procesando excel:', err);
+                        alert('Error al leer el archivo Excel.');
+                    } finally {
+                        btn.textContent = 'Guardar';
+                        btn.disabled = false;
+                    }
+                };
+
+                reader.readAsArrayBuffer(file);
+
+            } catch (error) {
+                console.error('Error en el envío:', error);
+                alert('Ocurrió un error al intentar conectar con el servidor.');
+                btn.textContent = 'Guardar';
+                btn.disabled = false;
+            }
         });
 
         document.addEventListener('DOMContentLoaded', function () {

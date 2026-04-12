@@ -14,9 +14,11 @@ function isAdminAuthenticated() {
     return !!(session && session.isLoggedIn);
 }
 
-function setAdminSession(username) {
+function setAdminSession(userData) {
     const session = {
-        username: username,
+        username: userData.username || userData,
+        role: userData.role || 'admin',
+        userId: userData.id || null,
         isLoggedIn: true,
         loginAt: new Date().toISOString()
     };
