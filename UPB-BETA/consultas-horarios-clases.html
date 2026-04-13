@@ -174,21 +174,7 @@
                                 <input type="text" data-col="4" list="creditos-list" oninput="aplicarFiltros()" placeholder="Buscar creditos">
                                 <datalist id="creditos-list"></datalist>
                             </div>
-                            <div>
-                                <label>Profesor</label>
-                                <input type="text" data-col="5" list="profesor-list" oninput="aplicarFiltros()" placeholder="Buscar profesor">
-                                <datalist id="profesor-list"></datalist>
-                            </div>
-                            <div>
-                                <label>Aula</label>
-                                <input type="text" data-col="6" list="aula-list" oninput="aplicarFiltros()" placeholder="Buscar aula">
-                                <datalist id="aula-list"></datalist>
-                            </div>
-                            <div>
-                                <label>Cupos</label>
-                                <input type="text" data-col="7" list="cupos-list" oninput="aplicarFiltros()" placeholder="Buscar cupos">
-                                <datalist id="cupos-list"></datalist>
-                            </div>
+
                         </div>
 
                         <div id="filters-actions" class="filters-actions" style="display: none;">
@@ -277,14 +263,17 @@
         }
 
         function normalizarSemestre(valor, fallback) {
+            if (!valor) return fallback;
             const numero = Number(valor);
             if (Number.isFinite(numero) && numero > 0) {
                 return Math.trunc(numero);
             }
-            return fallback;
+            return valor; // Retornar el texto original si no es número (ej. "SEGUNDO SEMESTRE")
         }
 
         function formatearTextoSemestre(semestre) {
+            if (typeof semestre === 'string') return semestre.toUpperCase();
+
             const etiquetas = {
                 1: 'PRIMER SEMESTRE',
                 2: 'SEGUNDO SEMESTRE',
@@ -300,7 +289,7 @@
 
             const numero = Number(semestre);
             if (!Number.isFinite(numero) || numero <= 0) {
-                return 'TODOS LOS SEMESTRES';
+                return 'SIN SEMESTRE DEFINIDO';
             }
 
             return etiquetas[numero] || `SEMESTRE ${numero}`;
@@ -308,23 +297,25 @@
 
         function poblarFiltroSemestre(datos) {
             const select = document.getElementById('semester-filter');
-            if (!select) {
-                return;
-            }
+            if (!select) return;
 
             const semestres = Array.from(
                 new Set(
                     datos
-                        .map(item => normalizarSemestre(item.semestre, null))
+                        .filter(item => item.nrc !== 'HEADER')
+                        .map(item => normalizarSemestre(item.nivel, null))
                         .filter(value => value !== null)
                 )
-            ).sort((a, b) => a - b);
+            ).sort((a, b) => {
+                if (typeof a === 'number' && typeof b === 'number') return a - b;
+                return String(a).localeCompare(String(b));
+            });
 
             select.innerHTML = '<option value="">Todos</option>';
             semestres.forEach(semestre => {
                 const option = document.createElement('option');
                 option.value = String(semestre);
-                option.textContent = `Semestre ${semestre}`;
+                option.textContent = typeof semestre === 'number' ? `Semestre ${semestre}` : semestre;
                 select.appendChild(option);
             });
         }
@@ -347,16 +338,20 @@
 
             const grupos = new Map();
             datos.forEach(function (item) {
-                const semestre = normalizarSemestre(item.semestre, 1);
+                if (item.nrc === 'HEADER') return; // Saltamos los headers en la agrupación principal de datos
+                const semestre = normalizarSemestre(item.nivel, 'GENERAL');
                 if (!grupos.has(semestre)) {
                     grupos.set(semestre, []);
                 }
                 grupos.get(semestre).push(item);
             });
 
-            Array.from(grupos.keys()).sort(function (a, b) {
-                return a - b;
-            }).forEach(function (semestre) {
+            const keys = Array.from(grupos.keys()).sort(function (a, b) {
+                if (typeof a === 'number' && typeof b === 'number') return a - b;
+                return String(a).localeCompare(String(b));
+            });
+
+            keys.forEach(function (semestre) {
                 const panel = document.createElement('section');
                 panel.className = 'semester-panel';
                 panel.dataset.semester = String(semestre);
@@ -372,20 +367,18 @@
                 tabla.innerHTML = `
                     <thead>
                         <tr>
+                            <th>Facultad</th>
                             <th>Asignatura</th>
                             <th>Materia</th>
-                            <th>Semestre</th>
+                            <th>Curso</th>
                             <th>NRC</th>
-                            <th>Creditos</th>
-                            <th>Profesor</th>
-                            <th>Aula</th>
-                            <th>Cupos</th>
+                            <th>Créditos</th>
                             <th>Lunes</th>
                             <th>Martes</th>
-                            <th>Miercoles</th>
+                            <th>Miércoles</th>
                             <th>Jueves</th>
                             <th>Viernes</th>
-                            <th>Sabado</th>
+                            <th>Sábado</th>
                         </tr>
                     </thead>
                     <tbody></tbody>
@@ -397,14 +390,12 @@
                     fila.dataset.rowType = 'data';
                     fila.dataset.semester = String(semestre);
                     fila.innerHTML = `
+                        <td>${item.facultad || ''}</td>
                         <td>${item.asignatura || ''}</td>
                         <td>${item.materia || ''}</td>
-                        <td>${semestre}</td>
+                        <td>${item.curso || ''}</td>
                         <td>${item.nrc || ''}</td>
                         <td>${item.creditos ?? ''}</td>
-                        <td>${item.profesor || ''}</td>
-                        <td>${item.aula || ''}</td>
-                        <td>${item.cupos ?? ''}</td>
                         <td>${item.lunes || '--'}</td>
                         <td>${item.martes || '--'}</td>
                         <td>${item.miercoles || '--'}</td>

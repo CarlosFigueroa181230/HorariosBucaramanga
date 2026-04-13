@@ -118,8 +118,8 @@
 
                         <div id="table-filters" class="table-filters" style="display: none;">
                             <div>
-                                <label>Asignatura</label>
-                                <input type="text" data-col="0" list="asignatura-list" oninput="aplicarFiltros()" placeholder="Buscar asignatura">
+                                <label>Nombre del Curso</label>
+                                <input type="text" data-col="0" list="asignatura-list" oninput="aplicarFiltros()" placeholder="Buscar curso">
                                 <datalist id="asignatura-list"></datalist>
                             </div>
                             <div>
@@ -128,24 +128,14 @@
                                 <datalist id="nrc-list"></datalist>
                             </div>
                             <div>
+                                <label>Aula</label>
+                                <input type="text" data-col="8" list="aula-list" oninput="aplicarFiltros()" placeholder="Buscar aula">
+                                <datalist id="aula-list"></datalist>
+                            </div>
+                            <div>
                                 <label>Instructor</label>
-                                <input type="text" data-col="2" list="instructor-list" oninput="aplicarFiltros()" placeholder="Buscar instructor">
+                                <input type="text" data-col="9" list="instructor-list" oninput="aplicarFiltros()" placeholder="Buscar instructor">
                                 <datalist id="instructor-list"></datalist>
-                            </div>
-                            <div>
-                                <label>Cupos</label>
-                                <input type="text" data-col="3" list="cupos-list" oninput="aplicarFiltros()" placeholder="Buscar cupos">
-                                <datalist id="cupos-list"></datalist>
-                            </div>
-                            <div>
-                                <label>Horario semanal</label>
-                                <input type="text" data-col="4" list="horario-semanal-list" oninput="aplicarFiltros()" placeholder="Buscar horario semanal">
-                                <datalist id="horario-semanal-list"></datalist>
-                            </div>
-                            <div>
-                                <label>Salón</label>
-                                <input type="text" data-col="5" list="salon-list" oninput="aplicarFiltros()" placeholder="Buscar salón">
-                                <datalist id="salon-list"></datalist>
                             </div>
                         </div>
 
@@ -159,12 +149,16 @@
                             <table id="tabla-resultados" class="results-table" style="display: none;">
                                 <thead>
                                     <tr>
-                                        <th>Asignatura</th>
+                                        <th>Nombre del Curso o Actividad</th>
                                         <th>NRC</th>
-                                        <th>Instructor</th>
-                                        <th>Cupos</th>
-                                        <th>Horario semanal</th>
-                                        <th>Salón</th>
+                                        <th>LUNES</th>
+                                        <th>MARTES</th>
+                                        <th>MIÉRCOLES</th>
+                                        <th>JUEVES</th>
+                                        <th>VIERNES</th>
+                                        <th>SÁBADO</th>
+                                        <th>AULA</th>
+                                        <th>Nombre y ID del Instructor</th>
                                     </tr>
                                 </thead>
                                 <tbody id="tabla-body"></tbody>
@@ -247,10 +241,8 @@
         function actualizarDatalists() {
             poblarDatalistPorColumna(0, 'asignatura-list');
             poblarDatalistPorColumna(1, 'nrc-list');
-            poblarDatalistPorColumna(2, 'instructor-list');
-            poblarDatalistPorColumna(3, 'cupos-list');
-            poblarDatalistPorColumna(4, 'horario-semanal-list');
-            poblarDatalistPorColumna(5, 'salon-list');
+            poblarDatalistPorColumna(8, 'aula-list');
+            poblarDatalistPorColumna(9, 'instructor-list');
         }
 
         async function buscarDatos() {
@@ -290,10 +282,14 @@
                         fila.innerHTML = `
                             <td>${item.asignatura || '-'}</td>
                             <td>${item.nrc || '-'}</td>
-                            <td>${item.profesor || '-'}</td>
-                            <td>${item.cupos || '-'}</td>
-                            <td>${item.lunes || (item.martes || (item.miercoles || (item.jueves || (item.viernes || (item.sabado || 'Pendiente')))))}</td>
+                            <td>${item.lunes || '--'}</td>
+                            <td>${item.martes || '--'}</td>
+                            <td>${item.miercoles || '--'}</td>
+                            <td>${item.jueves || '--'}</td>
+                            <td>${item.viernes || '--'}</td>
+                            <td>${item.sabado || '--'}</td>
                             <td>${item.aula || '-'}</td>
+                            <td>${item.profesor || '-'}</td>
                         `;
                         tbody.appendChild(fila);
                     });

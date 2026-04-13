@@ -148,34 +148,24 @@
 
                         <div id="table-filters" class="table-filters" style="display: none;">
                             <div>
-                                <label>Curso</label>
-                                <input type="text" data-col="0" list="curso-list" oninput="aplicarFiltros()" placeholder="Buscar curso">
-                                <datalist id="curso-list"></datalist>
+                                <label>Asignatura</label>
+                                <input type="text" data-col="0" list="asignatura-list" oninput="aplicarFiltros()" placeholder="Buscar asignatura">
+                                <datalist id="asignatura-list"></datalist>
                             </div>
                             <div>
-                                <label>Fechas</label>
-                                <input type="text" data-col="1" list="fechas-list" oninput="aplicarFiltros()" placeholder="Buscar fechas">
-                                <datalist id="fechas-list"></datalist>
+                                <label>Materia</label>
+                                <input type="text" data-col="1" list="materia-list" oninput="aplicarFiltros()" placeholder="Buscar materia">
+                                <datalist id="materia-list"></datalist>
                             </div>
                             <div>
-                                <label>Horario</label>
-                                <input type="text" data-col="2" list="horario-list" oninput="aplicarFiltros()" placeholder="Buscar horario">
-                                <datalist id="horario-list"></datalist>
+                                <label>NRC</label>
+                                <input type="text" data-col="2" list="nrc-list" oninput="aplicarFiltros()" placeholder="Buscar NRC">
+                                <datalist id="nrc-list"></datalist>
                             </div>
                             <div>
-                                <label>Salon</label>
-                                <input type="text" data-col="3" list="salon-list" oninput="aplicarFiltros()" placeholder="Buscar salon">
-                                <datalist id="salon-list"></datalist>
-                            </div>
-                            <div>
-                                <label>Docente</label>
-                                <input type="text" data-col="4" list="docente-list" oninput="aplicarFiltros()" placeholder="Buscar docente">
-                                <datalist id="docente-list"></datalist>
-                            </div>
-                            <div>
-                                <label>Cupos</label>
-                                <input type="text" data-col="5" list="cupos-list" oninput="aplicarFiltros()" placeholder="Buscar cupos">
-                                <datalist id="cupos-list"></datalist>
+                                <label>Creditos</label>
+                                <input type="text" data-col="3" list="creditos-list" oninput="aplicarFiltros()" placeholder="Buscar creditos">
+                                <datalist id="creditos-list"></datalist>
                             </div>
                         </div>
 
@@ -192,12 +182,18 @@
                             <table id="tabla-resultados" class="results-table" style="display: none;">
                                 <thead>
                                     <tr>
+                                        <th>Facultad</th>
+                                        <th>Asignatura</th>
+                                        <th>Materia</th>
                                         <th>Curso</th>
-                                        <th>Fechas</th>
-                                        <th>Horario</th>
-                                        <th>Salon</th>
-                                        <th>Docente</th>
-                                        <th>Cupos</th>
+                                        <th>NRC</th>
+                                        <th>Créditos</th>
+                                        <th>Lunes</th>
+                                        <th>Martes</th>
+                                        <th>Miércoles</th>
+                                        <th>Jueves</th>
+                                        <th>Viernes</th>
+                                        <th>Sábado</th>
                                     </tr>
                                 </thead>
                                 <tbody id="tabla-body">
@@ -301,16 +297,31 @@
                     tbody.innerHTML = '';
                     
                     result.horarios.forEach(dato => {
-                        const fila = `
-                            <tr>
-                                <td>${dato.asignatura}</td>
-                                <td>${dato.fecha || 'Pendiente'}</td>
-                                <td>${dato.lunes || (dato.martes || (dato.miercoles || (dato.jueves || (dato.viernes || (dato.sabado || 'Pendiente')))))}</td>
-                                <td>${dato.aula}</td>
-                                <td>${dato.profesor}</td>
-                                <td>${dato.cupos}</td>
-                            </tr>
-                        `;
+                        let fila = '';
+                        if (dato.nrc === 'HEADER') {
+                            fila = `
+                                <tr class="header-row">
+                                    <td colspan="12">${dato.nivel || 'ENCABEZADO'}</td>
+                                </tr>
+                            `;
+                        } else {
+                            fila = `
+                                <tr>
+                                    <td>${dato.facultad || ''}</td>
+                                    <td>${dato.asignatura || '-'}</td>
+                                    <td>${dato.materia || '-'}</td>
+                                    <td>${dato.curso || '-'}</td>
+                                    <td>${dato.nrc || '-'}</td>
+                                    <td>${dato.creditos || '0'}</td>
+                                    <td>${dato.lunes || '--'}</td>
+                                    <td>${dato.martes || '--'}</td>
+                                    <td>${dato.miercoles || '--'}</td>
+                                    <td>${dato.jueves || '--'}</td>
+                                    <td>${dato.viernes || '--'}</td>
+                                    <td>${dato.sabado || '--'}</td>
+                                </tr>
+                            `;
+                        }
                         tbody.innerHTML += fila;
                     });
 
@@ -417,6 +428,11 @@
             const filas = document.querySelectorAll('#tabla-body tr');
 
             filas.forEach(fila => {
+                if (fila.classList.contains('header-row')) {
+                    fila.style.display = ''; // Siempre visible para contexto
+                    return;
+                }
+                
                 let visible = true;
                 filtros.forEach(input => {
                     const valor = input.value.trim().toLowerCase();

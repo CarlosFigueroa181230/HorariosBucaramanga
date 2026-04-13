@@ -148,34 +148,39 @@
 
                         <div id="table-filters" class="table-filters" style="display: none;">
                             <div>
+                                <label>FAC</label>
+                                <input type="text" data-col="0" list="fac-list" oninput="aplicarFiltros()" placeholder="Buscar facultad">
+                                <datalist id="fac-list"></datalist>
+                            </div>
+                            <div>
+                                <label>NIV</label>
+                                <input type="text" data-col="1" list="niv-list" oninput="aplicarFiltros()" placeholder="Buscar nivel">
+                                <datalist id="niv-list"></datalist>
+                            </div>
+                            <div>
                                 <label>Asignatura</label>
-                                <input type="text" data-col="0" list="asignatura-list" oninput="aplicarFiltros()" placeholder="Buscar asignatura">
+                                <input type="text" data-col="2" list="asignatura-list" oninput="aplicarFiltros()" placeholder="Buscar asignatura">
                                 <datalist id="asignatura-list"></datalist>
                             </div>
                             <div>
-                                <label>Fecha Examen</label>
-                                <input type="text" data-col="1" list="fecha-list" oninput="aplicarFiltros()" placeholder="Buscar fecha">
+                                <label>NRC</label>
+                                <input type="text" data-col="3" list="nrc-list" oninput="aplicarFiltros()" placeholder="Buscar NRC">
+                                <datalist id="nrc-list"></datalist>
+                            </div>
+                            <div>
+                                <label>Fecha</label>
+                                <input type="text" data-col="4" list="fecha-list" oninput="aplicarFiltros()" placeholder="Buscar fecha">
                                 <datalist id="fecha-list"></datalist>
                             </div>
                             <div>
-                                <label>Hora Inicio</label>
-                                <input type="text" data-col="2" list="hora-inicio-list" oninput="aplicarFiltros()" placeholder="Buscar hora inicio">
-                                <datalist id="hora-inicio-list"></datalist>
+                                <label>Horario</label>
+                                <input type="text" data-col="5" list="horario-list" oninput="aplicarFiltros()" placeholder="Buscar horario">
+                                <datalist id="horario-list"></datalist>
                             </div>
                             <div>
-                                <label>Hora Fin</label>
-                                <input type="text" data-col="3" list="hora-fin-list" oninput="aplicarFiltros()" placeholder="Buscar hora fin">
-                                <datalist id="hora-fin-list"></datalist>
-                            </div>
-                            <div>
-                                <label>Salon</label>
-                                <input type="text" data-col="4" list="salon-list" oninput="aplicarFiltros()" placeholder="Buscar salon">
+                                <label>Salón</label>
+                                <input type="text" data-col="6" list="salon-list" oninput="aplicarFiltros()" placeholder="Buscar salón">
                                 <datalist id="salon-list"></datalist>
-                            </div>
-                            <div>
-                                <label>Docente</label>
-                                <input type="text" data-col="5" list="docente-list" oninput="aplicarFiltros()" placeholder="Buscar docente">
-                                <datalist id="docente-list"></datalist>
                             </div>
                         </div>
 
@@ -192,12 +197,13 @@
                             <table id="tabla-resultados" class="results-table" style="display: none;">
                                 <thead>
                                     <tr>
-                                        <th>Asignatura</th>
-                                        <th>Fecha Examen</th>
-                                        <th>Hora Inicio</th>
-                                        <th>Hora Fin</th>
-                                        <th>Salon</th>
-                                        <th>Docente</th>
+                                        <th>FAC</th>
+                                        <th>NIV</th>
+                                        <th>ASIGNATURA</th>
+                                        <th>NRC</th>
+                                        <th>FECHA</th>
+                                        <th>HORARIO</th>
+                                        <th>SALÓN</th>
                                     </tr>
                                 </thead>
                                 <tbody id="tabla-body">
@@ -301,16 +307,26 @@
                     tbody.innerHTML = '';
                     
                     result.horarios.forEach(dato => {
-                        const fila = `
-                            <tr>
-                                <td>${dato.asignatura}</td>
-                                <td>${dato.fecha || 'Pendiente'}</td>
-                                <td>${dato.lunes || (dato.martes || (dato.miercoles || (dato.jueves || (dato.viernes || (dato.sabado || 'Pendiente')))))}</td>
-                                <td>--</td> <!-- Hora Fin separada pendiente en mapeo simplificado -->
-                                <td>${dato.aula}</td>
-                                <td>${dato.profesor}</td>
-                            </tr>
-                        `;
+                        let fila = '';
+                        if (dato.nrc === 'HEADER') {
+                            fila = `
+                                <tr class="header-row">
+                                    <td colspan="7">${dato.nivel || 'ENCABEZADO'}</td>
+                                </tr>
+                            `;
+                        } else {
+                            fila = `
+                                <tr>
+                                    <td>${dato.facultad || ''}</td>
+                                    <td>${dato.nivel || ''}</td>
+                                    <td>${dato.asignatura || '-'}</td>
+                                    <td>${dato.nrc || '-'}</td>
+                                    <td>${dato.fecha || 'Pendiente'}</td>
+                                    <td>${dato.lunes || (dato.martes || (dato.miercoles || (dato.jueves || (dato.viernes || (dato.sabado || 'Pendiente')))))}</td>
+                                    <td>${dato.aula || '-'}</td>
+                                </tr>
+                            `;
+                        }
                         tbody.innerHTML += fila;
                     });
 
@@ -417,6 +433,11 @@
             const filas = document.querySelectorAll('#tabla-body tr');
 
             filas.forEach(fila => {
+                if (fila.classList.contains('header-row')) {
+                    fila.style.display = ''; // Siempre visible para contexto
+                    return;
+                }
+                
                 let visible = true;
                 filtros.forEach(input => {
                     const valor = input.value.trim().toLowerCase();

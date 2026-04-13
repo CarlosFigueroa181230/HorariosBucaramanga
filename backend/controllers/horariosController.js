@@ -87,155 +87,147 @@ exports.uploadExcelData = async (req, res) => {
         const keysSheets = Object.keys(sheets);
         for (const sheetName of keysSheets) {
             const data = sheets[sheetName].data;
-            for (const row of data) {
-                const facField = row.FACULTAD ? row.FACULTAD.toString().trim() : '';
+            let currentNivel = null;
+
+                const isExamen = tipoPub.toLowerCase().includes('examen') || tipoPub.toLowerCase().includes('supletorio');
+                const isExtracurricular = tipoPub.toLowerCase().includes('extracurricular');
+
+                // DETECCIÓN DINÁMICA DE ENCABEZADO DE SEMESTRE (NO para extracurriculares)
+                let foundSemestre = false;
+                let semestreText = "";
                 
-                // ES UNA FILA CABECERA DE SEMESTRE (Ej. "TERCER SEMESTRE - OPCIÓN 1")
-                if (facField.toLowerCase().includes('semestre') && !row.ASIGNATURA && !row.MATERIA) {
-                    let semestreName = facField;
-                    let opcionName = "ÚNICA"; 
-
-                    // Verificamos si tiene " - OPCIÓN X"
-                    if (facField.includes('-')) {
-                        const parts = facField.split('-');
-                        semestreName = parts[0].trim();
-                        opcionName = parts[1].trim();
+                if (!isExtracurricular) {
+                    for (const key of Object.keys(row)) {
+                        const value = (row[key] || "").toString();
+                        if (value.toLowerCase().includes('semestre')) {
+                            foundSemestre = true;
+                            semestreText = value.trim();
+                            break;
+                        }
                     }
-
-                    // Encontrar/Crear Semestre
-                    currentSemestreId = await findOrCreate(connection, 'Semestre', 'nombre', semestreName);
-                    
-                    // Encontrar/Crear Opción (Como el Semestre ya se buscó, buscamos la opción ligada)
-                    let [opcRows] = await connection.execute('SELECT id_opcion FROM Opcion WHERE nombre = ? AND id_semestre = ?', [opcionName, currentSemestreId]);
-                    if (opcRows.length > 0) {
-                        currentOpcionId = opcRows[0].id_opcion;
-                    } else {
-                        const [insOpc] = await connection.execute('INSERT INTO Opcion (id_semestre, nombre) VALUES (?, ?)', [currentSemestreId, opcionName]);
-                        currentOpcionId = insOpc.insertId;
-                    }
-                    continue; // Pasa a revisar la siguiente fila porque esta sólo era un título
                 }
 
-                // ES UNA FILA DE MATERIA NORMAL (Tiene NRC o Nombre de Asignatura)
-                if (row.ASIGNATURA || row.NRC) {
-                    // Mapeo rudimentario de las abreviaciones del Excel
-                    const mapFacultades = {
-                        'SIST': 'Ingeniería De Sistemas E Informática',
-                        'AMBI': 'Ingeniería Ambiental',
-                        'CIVIL': 'Ingeniería Civil',
-                        'CIVI': 'Ingeniería Civil',
-                        'ELEC': 'Ingeniería Eléctrica',
-                        'ELECTRONICA': 'Ingeniería Electrónica',
-                        'MEC': 'Ingeniería Mecánica',
-                        'MACA': 'Ingeniería Mecánica',
-                        'IND': 'Ingenieria Industrial',
-                        'ADM': 'Administración De Empresas',
-                    };
-                    const facFieldMapped = mapFacultades[facField.toUpperCase()] || facField;
+                if (foundSemestre) {
+                    currentNivel = semestreText;
+                    // Guardamos una fila "Header" para que el frontend la renderice como divisor
+                    const facNameHeader = row.FACULTAD || row.FAC || facultadFormulario || null;
+                    const facultadIdHeader = await findOrCreate(connection, 'Facultad', 'nombre', facNameHeader || 'FACULTAD GENERAL', { id_escuela: escuelaId, fecha_creacion: new Date() });
 
-                    // Si el usuario especificó la facultad en el formulario, tiene prioridad sobre el Excel
-                    let finalFacultadName = facFieldMapped;
-                    if (facultadFormulario) {
-                        finalFacultadName = facultadFormulario;
-                    }
+                    await connection.execute(
+                        'INSERT INTO Publicacion (nrc, id_facultad, id_reporte, nivel) VALUES (?, ?, ?, ?)',
+                        ['HEADER', facultadIdHeader, currentReporteId, currentNivel]
+                    );
+                    continue; 
+                }
 
-                    // Facultad
-                    const facultadId = await findOrCreate(connection, 'Facultad', 'nombre', finalFacultadName, { id_escuela: escuelaId, fecha_creacion: new Date() });
-                    
-                    // Asignatura
-                    const asigName = row.ASIGNATURA ? row.ASIGNATURA.toString().trim() : 'Desconocida';
-                    let codigoMateriaStr = row.MATERIA ? parseInt(row.MATERIA, 10) : null;
-                    let asigId;
+                const facField = row.FACULTAD ? row.FACULTAD.toString().trim() : '';
 
-                    let [asigRows] = await connection.execute('SELECT id_asignatura, codigo_materia FROM Asignatura WHERE nombre = ?', [asigName]);
-                    if (asigRows.length > 0) {
-                        asigId = asigRows[0].id_asignatura;
-                        // Si nos pasan un nuevo código y antes estaba null, actualizamos
-                        if (codigoMateriaStr && !asigRows[0].codigo_materia) {
-                             await connection.execute('UPDATE Asignatura SET codigo_materia = ? WHERE id_asignatura = ?', [codigoMateriaStr, asigId]);
-                        }
-                    } else {
-                        const [insAsig] = await connection.execute('INSERT INTO Asignatura (nombre, codigo_materia) VALUES (?, ?)', [asigName, codigoMateriaStr]);
-                        asigId = insAsig.insertId;
-                    }
+                if (isExamen) {
+                    if (row.ASIGNATURA || row.NRC) {
+                        const facName = row.FAC || row.FACULTAD || facultadFormulario || (isExtracurricular ? 'General' : 'Sin Facultad');
+                        const facultadId = await findOrCreate(connection, 'Facultad', 'nombre', facName, { id_escuela: escuelaId, fecha_creacion: new Date() });
+                        
+                        const asigName = row.ASIGNATURA ? row.ASIGNATURA.toString().trim() : 'Sin Nombre';
+                        await connection.execute('INSERT IGNORE INTO Asignatura (nombre) VALUES (?)', [asigName]);
+                        let [asigRows] = await connection.execute('SELECT id_asignatura FROM Asignatura WHERE nombre = ?', [asigName]);
+                        const asigId = asigRows[0].id_asignatura;
 
-                    // Curso (el grupo)
-                    const cursoName = row.CURSO ? row.CURSO.toString().trim() : 'N/A';
-                    const cursoId = await findOrCreate(connection, 'Curso', 'nombre', cursoName);
-
-                    // Publicación (NRC, Creditos y llaves foráneas)
-                    const nrc = row.NRC ? row.NRC.toString().trim() : '00000';
-                    const creditos = row.CRÉDITOS ? parseInt(row.CRÉDITOS, 10) : 0;
-                    
-                    let pubId;
-                    // Verificamos si existe un registro con este NRC para no duplicarlo enteramente.
-                    let [pubRows] = await connection.execute('SELECT id_publicacion FROM Publicacion WHERE nrc = ?', [nrc]);
-                    if (pubRows.length > 0) {
-                        pubId = pubRows[0].id_publicacion;
-                        // Opcionalmente, aquí podríamos borrar viejas sesiones de Materia de esta Publicación 
-                        // asumiendo que el Excel provee la fuente de datos actualizada 
-                        // (Pero temporalmente solo reusaremos el id_publicacion y crearemos nuevos bloques si no existen)
-                    } else {
-                        // Opcion ID fallback si llegara a subirse sin un titulo previo
-                        let safeOpcionId = currentOpcionId;
-                        if(!safeOpcionId){
-                            // Crear un semestre por defecto
-                            const defSemId = await findOrCreate(connection, 'Semestre', 'nombre', 'Semestre Generico');
-                            const [insDefOpc] = await connection.execute('INSERT INTO Opcion (id_semestre, nombre) VALUES (?, ?)', [defSemId, 'UNICA']);
-                            safeOpcionId = insDefOpc.insertId;
-                        }
+                        const nrcKey = Object.keys(row).find(k => k.toUpperCase().includes('NRC')) || 'NRC';
+                        const nrc = row[nrcKey] ? row[nrcKey].toString().trim() : '00000';
+                        const nivel = row.NIV ? row.NIV.toString().trim() : null;
 
                         const [insPub] = await connection.execute(
-                            'INSERT INTO Publicacion (nrc, id_facultad, id_asignatura, id_curso, id_opcion, creditos, id_reporte) VALUES (?, ?, ?, ?, ?, ?, ?)',
-                            [nrc, facultadId, asigId, cursoId, safeOpcionId, creditos, currentReporteId]
+                            'INSERT INTO Publicacion (nrc, id_facultad, id_asignatura, id_reporte, nivel) VALUES (?, ?, ?, ?, ?)',
+                            [nrc, facultadId, asigId, currentReporteId, nivel || currentNivel]
                         );
-                        pubId = insPub.insertId;
+                        const pubId = insPub.insertId;
+
+                        const fechaKey = Object.keys(row).find(k => k.toUpperCase().includes('FECHA')) || 'FECHA';
+                        const horarioKey = Object.keys(row).find(k => k.toUpperCase().includes('HORARIO')) || 'HORARIO';
+                        const salonKey = Object.keys(row).find(k => k.toUpperCase().includes('SALÓN') || k.toUpperCase().includes('SALON')) || 'SALÓN';
+
+                        const fechaVal = row[fechaKey];
+                        const horarioVal = row[horarioKey];
+                        const salonVal = row[salonKey];
+
+                        if (horarioVal) {
+                            const parsed = parseScheduleStr(horarioVal);
+                            const h_inicio = parsed ? parsed.hora_inicio : null;
+                            const h_fin = parsed ? parsed.hora_fin : null;
+
+                            const [insMat] = await connection.execute(
+                                'INSERT INTO Materia (nombre, dia, hora_inicio, hora_fin, salon, fecha_exacta) VALUES (?, ?, ?, ?, ?, ?)',
+                                [asigName, null, h_inicio, h_fin, salonVal, fechaVal]
+                            );
+                            await connection.execute('INSERT INTO Publicacion_Materia (id_publicacion, id_materia) VALUES (?, ?)', [pubId, insMat.insertId]);
+                        }
                     }
+                } else if (isExtracurricular) {
+                    const nombreKey = Object.keys(row).find(k => k.toLowerCase().includes('nombre del curso')) || 'ASIGNATURA';
+                    if (row[nombreKey] || row.NRC) {
+                        const asigName = row[nombreKey] ? row[nombreKey].toString().trim() : 'Curso Extracurricular';
+                        await connection.execute('INSERT IGNORE INTO Asignatura (nombre) VALUES (?)', [asigName]);
+                        let [asigRows] = await connection.execute('SELECT id_asignatura FROM Asignatura WHERE nombre = ?', [asigName]);
+                        const asigId = asigRows[0].id_asignatura;
 
-                    // Procesamiento de celdas de Día en la semana
-                    const mapDays = {
-                        'LUN': 'Lunes', 
-                        'MAR': 'Martes', 
-                        'MIER': 'Miércoles', 
-                        'JUEV': 'Jueves', 
-                        'VIER': 'Viernes'
-                        // SAB se omitirá temporalmente porque en el JSON las keys del excel son muy sueltas y 'Sábado' no esta en las cols generadas ahorita pero agreguémoslo en caso de que lo necesiten.
-                    };
-                    
-                    // Asegurar que 'SÁB' o 'SAB' no crashee
-                    const validDayKeys = Object.keys(row).filter(key => mapDays[key] || key.startsWith('S') && key.includes('B'));
-                    
-                    // Soporte para Fecha Exacta (Exámenes, etc.)
-                    const dateKey = Object.keys(row).find(k => k.toUpperCase().includes('FECHA'));
-                    const fechaVal = dateKey ? row[dateKey] : null;
+                        const nrc = row.NRC ? row.NRC.toString().trim() : '00000';
+                        const instructorKey = Object.keys(row).find(k => k.toLowerCase().includes('instructor')) || 'Instructor';
+                        const docente = row[instructorKey] || null;
 
-                    for (const col of validDayKeys) {
-                        if (row[col] && row[col].toString().trim() !== '') {
-                            const dbDay = mapDays[col] || 'Sábado'; // LUN -> Lunes, SAB -> Sábado
-                            const parsedMateriaBlock = parseScheduleStr(row[col]);
-                            if (parsedMateriaBlock) {
-                                const { hora_inicio, hora_fin, salon } = parsedMateriaBlock;
-                                
-                                // Creamos la "Materia" (Que sabemos que es el bloque de clase)
-                                const [insMat] = await connection.execute(
-                                    'INSERT INTO Materia (nombre, dia, hora_inicio, hora_fin, salon) VALUES (?, ?, ?, ?, ?)',
-                                    [asigName, dbDay, hora_inicio, hora_fin, salon]
-                                );
-                                const matId = insMat.insertId;
+                        const [insPub] = await connection.execute(
+                            'INSERT INTO Publicacion (nrc, id_asignatura, id_reporte, docente) VALUES (?, ?, ?, ?)',
+                            [nrc, asigId, currentReporteId, docente]
+                        );
+                        const pubId = insPub.insertId;
 
-                                // Link en la tabla intermedia
-                                await connection.execute(
-                                    'INSERT IGNORE INTO Publicacion_Materia (id_publicacion, id_materia) VALUES (?, ?)',
-                                    [pubId, matId]
-                                );
+                        const mapDaysExt = {
+                            'LUNES': 'Lunes', 'MARTES': 'Martes', 'MIÉRCOLES': 'Miércoles', 'MIERCOLES': 'Miércoles',
+                            'JUEVES': 'Jueves', 'VIERNES': 'Viernes', 'SÁBADO': 'Sábado', 'SABADO': 'Sábado'
+                        };
+                        const aulaKey = Object.keys(row).find(k => k.toLowerCase().includes('aula')) || 'AULA';
+
+                        for (const key of Object.keys(row)) {
+                            const dayName = mapDaysExt[key.toUpperCase()];
+                            if (dayName && row[key] && row[key].toString().trim() !== '') {
+                                const parsed = parseScheduleStr(row[key]);
+                                if (parsed) {
+                                    const [insMat] = await connection.execute(
+                                        'INSERT INTO Materia (nombre, dia, hora_inicio, hora_fin, salon) VALUES (?, ?, ?, ?, ?)',
+                                        [asigName, dayName, parsed.hora_inicio, parsed.hora_fin, row[aulaKey]]
+                                    );
+                                    await connection.execute('INSERT INTO Publicacion_Materia (id_publicacion, id_materia) VALUES (?, ?)', [pubId, insMat.insertId]);
+                                }
                             }
                         }
                     }
-                }
-            }
-        }
+                } else {
+                    if (row.ASIGNATURA || row.NRC) {
+                        const mapFacultades = {
+                            'SIST': 'Ingeniería De Sistemas E Informática', 'AMBI': 'Ingeniería Ambiental', 'CIVIL': 'Ingeniería Civil',
+                            'CIVI': 'Ingeniería Civil', 'ELEC': 'Ingeniería Eléctrica', 'ELECTRONICA': 'Ingeniería Electrónica',
+                            'MEC': 'Ingeniería Mecánica', 'MACA': 'Ingeniería Mecánica', 'IND': 'Ingenieria Industrial', 'ADM': 'Administración De Empresas',
+                        };
+                        const facFieldMapped = mapFacultades[facField.toUpperCase()] || facField;
+                        let finalFacultadName = facultadFormulario || facFieldMapped;
 
-        // Si se llegó a este punto, todas las consultas fueron exitosas
+                        const facultadId = await findOrCreate(connection, 'Facultad', 'nombre', finalFacultadName, { id_escuela: escuelaId, fecha_creacion: new Date() });
+                        
+                        const asigName = row.ASIGNATURA ? row.ASIGNATURA.toString().trim() : 'Desconocida';
+                        let codigoMateriaStr = row.MATERIA ? parseInt(row.MATERIA, 10) : null;
+                        await connection.execute('INSERT IGNORE INTO Asignatura (nombre, codigo_materia) VALUES (?, ?)', [asigName, codigoMateriaStr]);
+                        let [asigRows] = await connection.execute('SELECT id_asignatura FROM Asignatura WHERE nombre = ?', [asigName]);
+                        const asigId = asigRows[0].id_asignatura;
+
+                        const cursoName = row.CURSO ? row.CURSO.toString().trim() : 'N/A';
+                        const cursoId = await findOrCreate(connection, 'Curso', 'nombre', cursoName);
+
+                        const nrc = row.NRC ? row.NRC.toString().trim() : '00000';
+                        const creditos = row.CRÉDITOS ? parseInt(row.CRÉDITOS, 10) : 0;
+                        
+                        const [insPub] = await connection.execute(
+                            'INSERT INTO Publicacion (nrc, id_facultad, id_asignatura, id_curso, id_opcion, creditos, id_reporte, nivel) VALUES (?, ?, ?, ?, ?, ?, ?, ?)',
+                            [nrc, facultadId, asigId, cursoId, currentOpcionId, creditos, currentReporteId, currentNivel]
+                        );
         await connection.commit();
 
         // Si se llegó a este punto, todas las consultas fueron exitosas
@@ -279,13 +271,18 @@ exports.getHorarios = async (req, res) => {
                 m.hora_fin,
                 m.salon,
                 m.fecha_exacta,
-                r.tipo as reporte_tipo
+                p.docente,
+                p.nivel,
+                r.tipo as reporte_tipo,
+                c.nombre as curso_nombre,
+                a.codigo_materia
             FROM Publicacion p
             JOIN Asignatura a ON p.id_asignatura = a.id_asignatura
             JOIN Facultad f ON p.id_facultad = f.id_facultad
             JOIN Publicacion_Materia pm ON p.id_publicacion = pm.id_publicacion
             JOIN Materia m ON pm.id_materia = m.id_materia
             LEFT JOIN Reporte r ON p.id_reporte = r.id_reporte
+            LEFT JOIN Curso c ON p.id_curso = c.id_curso
             WHERE 1=1
         `;
         let params = [];
@@ -311,12 +308,16 @@ exports.getHorarios = async (req, res) => {
             if (!map[r.id_publicacion]) {
                 map[r.id_publicacion] = {
                     asignatura: r.asignatura,
-                    materia: r.asignatura,
+                    materia: r.codigo_materia || r.asignatura,
+                    curso: r.curso_nombre || 'N/A',
                     nrc: r.nrc,
                     creditos: r.creditos,
-                    profesor: "Asignado", // Pendiente tabla Profesor
+                    profesor: r.docente || "Asignado",
                     aula: r.salon || "Por asignar",
-                    fecha: r.fecha_exacta ? r.fecha_exacta.toISOString().split('T')[0] : "Pendiente",
+                    fecha: r.fecha_exacta ? (typeof r.fecha_exacta === 'string' ? r.fecha_exacta : r.fecha_exacta.toISOString().split('T')[0]) : "Pendiente",
+                    nivel: r.nivel || "N/A",
+                    facultad: r.facultad_nombre,
+                    reporte_tipo: r.reporte_tipo,
                     cupos: 40,
                     lunes: "--",
                     martes: "--",
