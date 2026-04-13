@@ -256,6 +256,16 @@ exports.uploadExcelData = async (req, res) => {
 
 exports.getHorarios = async (req, res) => {
     const { facultad, tipo } = req.query; 
+
+    const tipoMap = {
+        'horarios': 'Horarios de Clases',
+        'examenes': 'Exámenes Parciales',
+        'intersemestrales': 'Cursos Intersemestrales',
+        'supletorios': 'Exámenes Supletorios',
+        'extracurriculares': 'Cursos Extracurriculares'
+    };
+    const tipoFinal = tipoMap[tipo] || tipo;
+
     try {
         let query = `
             SELECT 
@@ -287,10 +297,13 @@ exports.getHorarios = async (req, res) => {
 
         if (tipo) {
             query += ` AND r.tipo = ?`;
-            params.push(tipo);
+            params.push(tipoFinal);
         }
 
+        console.log('🔍 Ejecutando Query:', query);
+        console.log('📦 Con parámetros:', params);
         const [rows] = await db.execute(query, params);
+        console.log('✅ Filas encontradas:', rows.length);
 
         // Agrupar por id_publicacion para construir los días
         const map = {};

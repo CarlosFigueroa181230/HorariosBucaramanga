@@ -1,5 +1,8 @@
 const express = require('express');
 const cors = require('cors');
+const https = require('https');
+const fs = require('fs');
+const path = require('path');
 require('dotenv').config();
 
 const db = require('./db');
@@ -62,9 +65,13 @@ app.use('/api/horarios', horariosRoutes);
 app.use('/api/facultades', facultadesRoutes);
 app.use('/api/reportes', reportesRoutes);
 
-const https = require('https');
-const fs = require('fs');
-const path = require('path');
+// Servir archivos estáticos del frontend (UPB-BETA)
+app.use('/UPB-BETA', express.static(path.join(__dirname, '../UPB-BETA')));
+
+// Redirección opcional de la raíz a la página de inicio
+app.get('/', (req, res) => {
+    res.redirect('/UPB-BETA/index.html');
+});
 
 // Cargar certificados SSL
 const privateKey = fs.readFileSync(path.join(__dirname, 'security', 'server.key'), 'utf8');
@@ -74,6 +81,6 @@ const credentials = { key: privateKey, cert: certificate };
 // Start the server
 const httpsServer = https.createServer(credentials, app);
 
-httpsServer.listen(PORT, () => {
-    console.log(`🚀 Backend server is running on https://localhost:${PORT}`);
+httpsServer.listen(PORT, '0.0.0.0', () => {
+    console.log(`🚀 Backend server is running on https://0.0.0.0:${PORT}`);
 });

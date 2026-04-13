@@ -288,7 +288,7 @@
                 header.style.display = 'none';
                 tabla.style.display = 'none';
 
-                const response = await fetch(`https://localhost:3000/api/horarios?tipo=supletorios&facultad=${encodeURIComponent(facultadTexto)}`);
+                const response = await fetch(`/api/horarios?tipo=supletorios&facultad=${encodeURIComponent(facultadTexto)}`);
                 const result = await response.json();
 
                 if (result.success && result.horarios && result.horarios.length > 0) {
@@ -329,6 +329,8 @@
                 alert('Error al conectar con el servidor.');
             }
         }
+
+        function renderizarTabla(datos) {
             if (datos.length === 0) {
                 resultados.style.display = 'block';
                 tabla.style.display = 'none';

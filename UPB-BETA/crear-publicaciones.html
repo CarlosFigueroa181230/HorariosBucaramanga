@@ -278,7 +278,7 @@
                             facultadFormulario: document.getElementById('facultad').options[document.getElementById('facultad').selectedIndex].text
                         };
 
-                        const response = await fetch('https://localhost:3000/api/horarios/upload', {
+                        const response = await fetch('/api/horarios/upload', {
                             method: 'POST',
                             headers: { 'Content-Type': 'application/json' },
                             body: JSON.stringify(payload)

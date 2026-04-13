@@ -274,7 +274,7 @@
                 tabla.style.display = 'none';
 
                 // Usamos tipo=extracurriculares y pasamos el subtipo (Deportivas, etc.) en el campo facultad para filtrar
-                const response = await fetch(`https://localhost:3000/api/horarios?tipo=extracurriculares&facultad=${encodeURIComponent(tipoValue)}`);
+                const response = await fetch(`/api/horarios?tipo=extracurriculares&facultad=${encodeURIComponent(tipoValue)}`);
                 const result = await response.json();
 
                 tbody.innerHTML = '';
