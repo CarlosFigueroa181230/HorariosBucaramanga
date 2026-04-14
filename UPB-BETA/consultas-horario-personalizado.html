@@ -1,4 +1,4 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="es">
 <head>
     <meta charset="UTF-8">
@@ -509,82 +509,58 @@
             return { inicio: partes[0], fin: partes[1] };
         }
 
-        function obtenerDatosBaseHorarios() {
-            return {
-                'administracion-empresas': [
-                    { asignatura: 'Contabilidad General', nrc: '10001', profesor: 'Msc. López', aula: 'B201', lunes: '08:00-10:00', martes: '08:00-10:00', miercoles: '--', jueves: '08:00-10:00', viernes: '08:00-10:00', sabado: '--' },
-                    { asignatura: 'Administración Financiera', nrc: '10002', profesor: 'Dra. Martínez', aula: 'B202', lunes: '10:00-12:00', martes: '--', miercoles: '10:00-12:00', jueves: '--', viernes: '10:00-12:00', sabado: '--' },
-                    { asignatura: 'Recursos Humanos', nrc: '10003', profesor: 'Ing. Torres', aula: 'B203', lunes: '14:00-16:00', martes: '14:00-16:00', miercoles: '14:00-16:00', jueves: '--', viernes: '--', sabado: '--' }
-                ],
-                'centro-lenguas': [
-                    { asignatura: 'Inglés I', nrc: '20001', profesor: 'Prof. Anderson', aula: 'C101', lunes: '09:00-10:30', martes: '--', miercoles: '09:00-10:30', jueves: '--', viernes: '09:00-10:30', sabado: '--' },
-                    { asignatura: 'Francés Intermedio', nrc: '20002', profesor: 'Prof. Dupont', aula: 'C102', lunes: '--', martes: '10:00-11:30', miercoles: '--', jueves: '10:00-11:30', viernes: '--', sabado: '10:00-12:00' }
-                ],
-                'ciencias-politicas': [
-                    { asignatura: 'Teoría Política', nrc: '30001', profesor: 'Dr. Hernández', aula: 'D101', lunes: '07:00-09:00', martes: '--', miercoles: '07:00-09:00', jueves: '--', viernes: '07:00-09:00', sabado: '--' },
-                    { asignatura: 'Derecho Constitucional', nrc: '30002', profesor: 'Dra. González', aula: 'D102', lunes: '--', martes: '09:00-11:00', miercoles: '--', jueves: '09:00-11:00', viernes: '--', sabado: '09:00-11:00' }
-                ],
-                'comunicacion-social': [
-                    { asignatura: 'Redacción Periodística', nrc: '40001', profesor: 'Msc. Rodríguez', aula: 'E101', lunes: '10:00-12:00', martes: '10:00-12:00', miercoles: '--', jueves: '10:00-12:00', viernes: '--', sabado: '--' },
-                    { asignatura: 'Producción Audiovisual', nrc: '40002', profesor: 'Dra. Silva', aula: 'E102', lunes: '--', martes: '14:00-16:00', miercoles: '14:00-16:00', jueves: '--', viernes: '14:00-16:00', sabado: '--' }
-                ],
-                'ciencias-basicas': [
-                    { asignatura: 'Cálculo I', nrc: '50001', profesor: 'Dr. García', aula: 'F101', lunes: '07:00-09:00', martes: '07:00-09:00', miercoles: '--', jueves: '07:00-09:00', viernes: '--', sabado: '08:00-10:00' },
-                    { asignatura: 'Física General', nrc: '50002', profesor: 'Dr. Pérez', aula: 'F102', lunes: '--', martes: '09:00-11:00', miercoles: '09:00-11:00', jueves: '--', viernes: '09:00-11:00', sabado: '--' }
-                ],
-                'formacion-humanistica': [
-                    { asignatura: 'Filosofía Moderna', nrc: '60001', profesor: 'Dr. Domínguez', aula: 'G101', lunes: '15:00-17:00', martes: '--', miercoles: '15:00-17:00', jueves: '--', viernes: '15:00-17:00', sabado: '--' },
-                    { asignatura: 'Historia de América Latina', nrc: '60002', profesor: 'Dra. Moreno', aula: 'G102', lunes: '--', martes: '16:00-18:00', miercoles: '--', jueves: '16:00-18:00', viernes: '--', sabado: '16:00-18:00' }
-                ],
-                'derecho': [
-                    { asignatura: 'Derecho Penal I', nrc: '70001', profesor: 'Dr. Reyes', aula: 'H101', lunes: '08:00-10:00', martes: '--', miercoles: '08:00-10:00', jueves: '--', viernes: '08:00-10:00', sabado: '09:00-11:00' },
-                    { asignatura: 'Derecho Civil I', nrc: '70002', profesor: 'Dra. Vargas', aula: 'H102', lunes: '--', martes: '10:00-12:00', miercoles: '--', jueves: '10:00-12:00', viernes: '--', sabado: '11:00-13:00' }
-                ],
-                'diseno-grafico': [
-                    { asignatura: 'Teoría del Color', nrc: '80001', profesor: 'Dra. López', aula: 'I101', lunes: '09:00-11:00', martes: '09:00-11:00', miercoles: '--', jueves: '09:00-11:00', viernes: '--', sabado: '--' },
-                    { asignatura: 'Diseño Gráfico Digital', nrc: '80002', profesor: 'Prof. Martínez', aula: 'I102', lunes: '--', martes: '14:00-17:00', miercoles: '14:00-17:00', jueves: '--', viernes: '14:00-17:00', sabado: '--' }
-                ],
-                electivas: [
-                    { asignatura: 'Emprendimiento', nrc: '90001', profesor: 'Msc. Sánchez', aula: 'J101', lunes: '17:00-19:00', martes: '--', miercoles: '17:00-19:00', jueves: '--', viernes: '17:00-19:00', sabado: '--' }
-                ],
-                'ingenieria-industrial': [
-                    { asignatura: 'Ingeniería de Procesos', nrc: '100001', profesor: 'Ing. Ortiz', aula: 'K101', lunes: '07:00-09:00', martes: '07:00-09:00', miercoles: '--', jueves: '07:00-09:00', viernes: '--', sabado: '08:00-10:00' },
-                    { asignatura: 'Producción', nrc: '100002', profesor: 'Ing. Ruiz', aula: 'K102', lunes: '--', martes: '10:00-12:00', miercoles: '10:00-12:00', jueves: '--', viernes: '10:00-12:00', sabado: '--' }
-                ],
-                'ingenieria-ambiental': [
-                    { asignatura: 'Evaluación de Impacto Ambiental', nrc: '110001', profesor: 'Dra. Arias', aula: 'L101', lunes: '09:00-11:00', martes: '--', miercoles: '09:00-11:00', jueves: '--', viernes: '09:00-11:00', sabado: '--' },
-                    { asignatura: 'Tratamiento de Aguas', nrc: '110002', profesor: 'Ing. Castro', aula: 'L102', lunes: '--', martes: '14:00-16:00', miercoles: '--', jueves: '14:00-16:00', viernes: '14:00-16:00', sabado: '--' }
-                ],
-                'ingenieria-civil': [
-                    { asignatura: 'Resistencia de Materiales', nrc: '120001', profesor: 'Dr. Huerta', aula: 'M101', lunes: '08:00-10:00', martes: '08:00-10:00', miercoles: '--', jueves: '08:00-10:00', viernes: '--', sabado: '09:00-11:00' },
-                    { asignatura: 'Diseño de Estructuras', nrc: '120002', profesor: 'Ing. Fuentes', aula: 'M102', lunes: '--', martes: '10:00-12:00', miercoles: '10:00-12:00', jueves: '--', viernes: '10:00-12:00', sabado: '11:00-13:00' }
-                ],
-                'ingenieria-electronica': [
-                    { asignatura: 'Circuitos Digitales', nrc: '130001', profesor: 'Dr. Quiroga', aula: 'N101', lunes: '09:00-11:00', martes: '--', miercoles: '09:00-11:00', jueves: '--', viernes: '09:00-11:00', sabado: '10:00-12:00' },
-                    { asignatura: 'Microcontroladores', nrc: '130002', profesor: 'Ing. Navarro', aula: 'N102', lunes: '--', martes: '14:00-16:00', miercoles: '--', jueves: '14:00-16:00', viernes: '14:00-16:00', sabado: '--' }
-                ],
-                'ingenieria-electrica': [
-                    { asignatura: 'Máquinas Eléctricas', nrc: '140001', profesor: 'Dr. Montes', aula: 'O101', lunes: '07:00-09:00', martes: '07:00-09:00', miercoles: '--', jueves: '07:00-09:00', viernes: '--', sabado: '08:00-10:00' },
-                    { asignatura: 'Sistemas de Potencia', nrc: '140002', profesor: 'Ing. Vera', aula: 'O102', lunes: '--', martes: '10:00-12:00', miercoles: '10:00-12:00', jueves: '--', viernes: '10:00-12:00', sabado: '--' }
-                ],
-                'ingenieria-mecanica': [
-                    { asignatura: 'Termodinámica', nrc: '150001', profesor: 'Dr. Espinoza', aula: 'P101', lunes: '08:00-10:00', martes: '--', miercoles: '08:00-10:00', jueves: '--', viernes: '08:00-10:00', sabado: '09:00-11:00' },
-                    { asignatura: 'Mecánica de Fluidos', nrc: '150002', profesor: 'Ing. Botero', aula: 'P102', lunes: '--', martes: '10:00-12:00', miercoles: '--', jueves: '10:00-12:00', viernes: '10:00-12:00', sabado: '11:00-13:00' }
-                ],
-                'ingenieria-sistemas': [
-                    { asignatura: 'Programación Avanzada', nrc: '160001', profesor: 'Msc. Gómez', aula: 'Q101', lunes: '07:00-09:00', martes: '07:00-09:00', miercoles: '--', jueves: '07:00-09:00', viernes: '--', sabado: '08:00-10:00' },
-                    { asignatura: 'Bases de Datos', nrc: '160002', profesor: 'Dr. Puentes', aula: 'Q102', lunes: '--', martes: '10:00-12:00', miercoles: '10:00-12:00', jueves: '--', viernes: '10:00-12:00', sabado: '--' },
-                    { asignatura: 'Análisis de Sistemas', nrc: '160003', profesor: 'Ing. Giraldo', aula: 'Q103', lunes: '14:00-16:00', martes: '--', miercoles: '14:00-16:00', jueves: '14:00-16:00', viernes: '--', sabado: '--' }
-                ],
-                'negocios-internacionales': [
-                    { asignatura: 'Comercio Internacional', nrc: '170001', profesor: 'Dra. Cardona', aula: 'R101', lunes: '09:00-11:00', martes: '09:00-11:00', miercoles: '--', jueves: '09:00-11:00', viernes: '--', sabado: '--' },
-                    { asignatura: 'Negociación Internacional', nrc: '170002', profesor: 'Prof. Rivera', aula: 'R102', lunes: '--', martes: '14:00-16:00', miercoles: '14:00-16:00', jueves: '--', viernes: '14:00-16:00', sabado: '14:00-16:00' }
-                ],
-                psicologia: [
-                    { asignatura: 'Psicología General', nrc: '180001', profesor: 'Dra. Flores', aula: 'S101', lunes: '08:00-10:00', martes: '--', miercoles: '08:00-10:00', jueves: '--', viernes: '08:00-10:00', sabado: '--' },
-                    { asignatura: 'Psicopatología', nrc: '180002', profesor: 'Dr. Campos', aula: 'S102', lunes: '--', martes: '10:00-12:00', miercoles: '--', jueves: '10:00-12:00', viernes: '10:00-12:00', sabado: '10:00-12:00' }
-                ]
-            };
+        async function cargarCatalogo() {
+            setMensaje('Cargando base de datos de horarios...');
+            catalogoNrc.clear();
+            try {
+                const response = await fetch('/api/horarios?tipo=horarios');
+                const result = await response.json();
+                
+                if (!result.success || !result.horarios) {
+                    throw new Error('No se pudieron obtener los datos.');
+                }
+
+                result.horarios.forEach(item => {
+                    if (item.nrc === 'HEADER') return;
+
+                    const nrc = normalizarNrc(item.nrc);
+                    const sesiones = [];
+                    const mapaDias = {
+                        lunes: 'LU',
+                        martes: 'MA',
+                        miercoles: 'MI',
+                        jueves: 'JU',
+                        viernes: 'VI',
+                        sabado: 'SA'
+                    };
+
+                    Object.keys(mapaDias).forEach(campo => {
+                        const rango = parseRango(item[campo]);
+                        if (rango) {
+                            sesiones.push({ dia: mapaDias[campo], inicio: rango.inicio, fin: rango.fin });
+                        }
+                    });
+
+                    catalogoNrc.set(nrc, {
+                        nrc,
+                        asignatura: item.asignatura || item.materia || '-',
+                        profesor: item.profesor || '-',
+                        aula: item.aula || '-',
+                        facultad: item.facultad || '-',
+                        sesiones
+                    });
+                });
+
+                setMensaje('Base de datos cargada. Puedes agregar NRCs.');
+                
+                // Re-cargar selección después de que el catálogo esté listo
+                cargarSeleccion();
+                renderSeleccionados();
+                renderGrilla();
+            } catch (error) {
+                console.error('Error cargando catálogo:', error);
+                setMensaje('Error al cargar los horarios desde el servidor.');
+            }
         }
 
         function agregarEntradaCatalogo(base) {
@@ -618,55 +594,7 @@
             });
         }
 
-        function cargarCatalogo() {
-            catalogoNrc.clear();
-            const base = obtenerDatosBaseHorarios();
 
-            Object.keys(base).forEach(function(facultadKey) {
-                (base[facultadKey] || []).forEach(function(item) {
-                    const sesiones = [];
-                    const mapa = {
-                        lunes: 'LU',
-                        martes: 'MA',
-                        miercoles: 'MI',
-                        jueves: 'JU',
-                        viernes: 'VI',
-                        sabado: 'SA'
-                    };
-
-                    Object.keys(mapa).forEach(function(campo) {
-                        const rango = parseRango(item[campo]);
-                        if (!rango) {
-                            return;
-                        }
-                        sesiones.push({ dia: mapa[campo], inicio: rango.inicio, fin: rango.fin });
-                    });
-
-                    agregarEntradaCatalogo({
-                        nrc: item.nrc,
-                        asignatura: item.asignatura,
-                        profesor: item.profesor,
-                        aula: item.aula,
-                        facultad: facultadKey,
-                        sesiones
-                    });
-                });
-            });
-
-            if (window.PlantillasStore && typeof window.PlantillasStore.getAll === 'function') {
-                window.PlantillasStore.getAll().forEach(function(item) {
-                    agregarEntradaCatalogo({
-                        nrc: item.nrc,
-                        asignatura: item.asignatura,
-                        profesor: item.profesor,
-                        aula: item.aula,
-                        facultad: item.facultad,
-                        sesiones: []
-                    });
-                });
-            }
-
-        }
 
         function hayChoqueSesion(a, b) {
             if (a.dia !== b.dia) {
@@ -1046,13 +974,10 @@
             window.location.href = './login.html';
         }
 
-        document.addEventListener('DOMContentLoaded', function() {
+        document.addEventListener('DOMContentLoaded', async function() {
             document.body.classList.remove('mobile-sidebar-open');
             aplicarVistaSesionAdmin();
-            cargarCatalogo();
-            cargarSeleccion();
-            renderSeleccionados();
-            renderGrilla();
+            await cargarCatalogo();
         });
     </script>
 </body>

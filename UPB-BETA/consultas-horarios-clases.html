@@ -156,25 +156,29 @@
                             </div>
                             <div>
                                 <label>Asignatura</label>
-                                <input type="text" data-col="0" list="asignatura-list" oninput="aplicarFiltros()" placeholder="Buscar asignatura">
+                                <input type="text" data-col="1" list="asignatura-list" oninput="aplicarFiltros()" placeholder="Buscar asignatura">
                                 <datalist id="asignatura-list"></datalist>
                             </div>
                             <div>
                                 <label>Materia</label>
-                                <input type="text" data-col="1" list="materia-list" oninput="aplicarFiltros()" placeholder="Buscar materia">
+                                <input type="text" data-col="2" list="materia-list" oninput="aplicarFiltros()" placeholder="Buscar materia">
                                 <datalist id="materia-list"></datalist>
                             </div>
                             <div>
+                                <label>Curso</label>
+                                <input type="text" data-col="3" list="curso-list" oninput="aplicarFiltros()" placeholder="Buscar curso">
+                                <datalist id="curso-list"></datalist>
+                            </div>
+                            <div>
                                 <label>NRC</label>
-                                <input type="text" data-col="3" list="nrc-list" oninput="aplicarFiltros()" placeholder="Buscar NRC">
+                                <input type="text" data-col="4" list="nrc-list" oninput="aplicarFiltros()" placeholder="Buscar NRC">
                                 <datalist id="nrc-list"></datalist>
                             </div>
                             <div>
-                                <label>Creditos</label>
-                                <input type="text" data-col="4" list="creditos-list" oninput="aplicarFiltros()" placeholder="Buscar creditos">
+                                <label>Créditos</label>
+                                <input type="text" data-col="5" list="creditos-list" oninput="aplicarFiltros()" placeholder="Buscar créditos">
                                 <datalist id="creditos-list"></datalist>
                             </div>
-
                         </div>
 
                         <div id="filters-actions" class="filters-actions" style="display: none;">
@@ -263,16 +267,26 @@
         }
 
         function normalizarSemestre(valor, fallback) {
-            if (!valor) return fallback;
+            if (!valor) return fallback || 1;
+            
+            const texto = valor.toString().toUpperCase();
+            // Si el texto tiene la palabra "OPCIÓN", lo usamos como identificador único
+            if (texto.includes('OPCIÓN') || texto.includes('OPCION')) {
+                return valor.trim();
+            }
+
             const numero = Number(valor);
             if (Number.isFinite(numero) && numero > 0) {
                 return Math.trunc(numero);
             }
-            return valor; // Retornar el texto original si no es número (ej. "SEGUNDO SEMESTRE")
+            return fallback || 1;
         }
 
         function formatearTextoSemestre(semestre) {
-            if (typeof semestre === 'string') return semestre.toUpperCase();
+            // Si ya es un texto descriptivo (como el caso de las Opciones), lo devolvemos tal cual
+            if (typeof semestre === 'string' && semestre.toUpperCase().includes('SEMESTRE')) {
+                return semestre.toUpperCase();
+            }
 
             const etiquetas = {
                 1: 'PRIMER SEMESTRE',
@@ -289,10 +303,34 @@
 
             const numero = Number(semestre);
             if (!Number.isFinite(numero) || numero <= 0) {
-                return 'SIN SEMESTRE DEFINIDO';
+                return 'TODOS LOS SEMESTRES';
             }
 
             return etiquetas[numero] || `SEMESTRE ${numero}`;
+        }
+
+        function actualizarEncabezadoHorarios(datos) {
+            const titulo = document.getElementById('results-title');
+            if (!titulo) return;
+
+            const semestres = Array.from(new Set(
+                datos
+                    .filter(item => item.nrc !== 'HEADER')
+                    .map(item => normalizarSemestre(item.nivel, null))
+                    .filter(value => value !== null)
+            )).sort((a, b) => a - b);
+
+            if (!semestres.length) {
+                titulo.textContent = 'HORARIOS DE CLASE POR SEMESTRE';
+                return;
+            }
+
+            if (semestres.length === 1) {
+                titulo.textContent = `HORARIOS DE CLASE ${formatearTextoSemestre(semestres[0])}`;
+                return;
+            }
+
+            titulo.textContent = 'HORARIOS DE CLASE POR SEMESTRE';
         }
 
         function poblarFiltroSemestre(datos) {
@@ -347,7 +385,16 @@
             });
 
             const keys = Array.from(grupos.keys()).sort(function (a, b) {
-                if (typeof a === 'number' && typeof b === 'number') return a - b;
+                // Intentamos extraer el número del semestre para el ordenamiento
+                const getNum = (val) => {
+                    const match = String(val).match(/\d+/);
+                    return match ? parseInt(match[0], 10) : 99;
+                };
+                const numA = typeof a === 'number' ? a : getNum(a);
+                const numB = typeof b === 'number' ? b : getNum(b);
+
+                if (numA !== numB) return numA - numB;
+                // Si son del mismo nivel, ordenamos alfabéticamente (por Opción 1, Opción 2...)
                 return String(a).localeCompare(String(b));
             });
 
@@ -447,6 +494,7 @@
                     resultadosMostrados.style.display = 'none';
 
                     mostrarFiltros(true);
+                    actualizarEncabezadoHorarios(result.horarios);
                     poblarFiltroSemestre(result.horarios);
                     renderizarTablaHorarios(result.horarios);
                     poblarListasFiltros();

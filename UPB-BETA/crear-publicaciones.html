@@ -256,11 +256,17 @@
                         const data = new Uint8Array(event.target.result);
                         const workbook = XLSX.read(data, { type: 'array' });
                         
-                        // Estructura de "sheets" esperada por el backend
+                        // Estructura de "sheets" mejorada para capturar divisores
                         const convertedSheets = {};
                         workbook.SheetNames.forEach(sheetName => {
                             const sheet = workbook.Sheets[sheetName];
-                            const sheetData = XLSX.utils.sheet_to_json(sheet, { defval: '' });
+                            
+                            // Usamos range: 0 para empezar desde la fila 1 y defval para no saltar celdas
+                            const sheetData = XLSX.utils.sheet_to_json(sheet, { 
+                                defval: '',
+                                blankrows: true // No saltar filas que parezcan vacías pero tengan divisores
+                            });
+                            
                             convertedSheets[sheetName] = {
                                 name: sheetName,
                                 data: sheetData
@@ -290,7 +296,9 @@
                             alert('Publicación creada y datos guardados en MySQL exitosamente.');
                             window.location.href = './admin.html';
                         } else {
-                            alert('Error: ' + result.message);
+                            // Mostrar mensaje detallado del error si existe
+                            let detailedError = result.error ? `\n\nDetalle: ${result.error}` : '';
+                            alert('Error: ' + result.message + detailedError);
                         }
                     } catch (err) {
                         console.error('Error procesando excel:', err);
