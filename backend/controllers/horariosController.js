@@ -89,6 +89,7 @@ exports.uploadExcelData = async (req, res) => {
             const data = sheets[sheetName].data;
             let currentNivel = null;
 
+            for (const row of data) {
                 const isExamen = tipoPub.toLowerCase().includes('examen') || tipoPub.toLowerCase().includes('supletorio');
                 const isExtracurricular = tipoPub.toLowerCase().includes('extracurricular');
 
@@ -228,7 +229,10 @@ exports.uploadExcelData = async (req, res) => {
                             'INSERT INTO Publicacion (nrc, id_facultad, id_asignatura, id_curso, id_opcion, creditos, id_reporte, nivel) VALUES (?, ?, ?, ?, ?, ?, ?, ?)',
                             [nrc, facultadId, asigId, cursoId, currentOpcionId, creditos, currentReporteId, currentNivel]
                         );
-        await connection.commit();
+                    }
+                }
+            }
+        }
 
         // Si se llegó a este punto, todas las consultas fueron exitosas
         await connection.commit();
