@@ -1,7 +1,6 @@
 const express = require('express');
 const cors = require('cors');
-const https = require('https');
-const fs = require('fs');
+const ldap = require('ldapjs');
 const path = require('path');
 require('dotenv').config();
 
@@ -24,7 +23,38 @@ app.get('/api/status', (req, res) => {
     res.json({ status: 'API is running successfully' });
 });
 
-// POST /api/login endpoint
+// ─── Helper: autenticar usuario contra el LDAP de la UPB ─────────────────────
+function authenticateWithLDAP(username, password) {
+    return new Promise((resolve, reject) => {
+        const client = ldap.createClient({
+            url: process.env.LDAP_URL,          // ldap://10.146.36.100:389
+            timeout: 5000,
+            connectTimeout: 5000,
+        });
+
+        // Manejar errores de conexión (servidor inaccesible, etc.)
+        client.on('error', (err) => {
+            client.destroy();
+            reject(err);
+        });
+
+        // El bind usa el formato usuario@dominio (UPN style)
+        const userPrincipal = `${username}@${process.env.LDAP_DOMAIN}`; // e.g. juan@bga.upb
+
+        client.bind(userPrincipal, password, (err) => {
+            client.unbind(); // Siempre liberar la conexión
+
+            if (err) {
+                // InvalidCredentialsError => usuario o clave incorrectos
+                reject(err);
+            } else {
+                resolve(true);
+            }
+        });
+    });
+}
+
+// POST /api/login endpoint — autenticación LDAP UPB
 app.post('/api/login', async (req, res) => {
     const { username, password } = req.body;
 
@@ -33,31 +63,36 @@ app.post('/api/login', async (req, res) => {
     }
 
     try {
-        // Query the database securely using prepared statements to prevent SQL Injection
-        const [rows] = await db.execute(
-            'SELECT id_usuario, usuario, rol FROM Usuario WHERE usuario = ? AND contrasena = ?',
-            [username, password]
-        );
+        await authenticateWithLDAP(username, password);
 
-        if (rows.length > 0) {
-            // Un usuario coincide
-            const userData = rows[0];
-            res.json({
-                success: true,
-                message: 'Login exitoso',
-                user: {
-                    id: userData.id_usuario,
-                    username: userData.usuario,
-                    role: userData.rol
-                }
+        // Bind exitoso: el usuario existe en el Active Directory de la UPB
+        res.json({
+            success: true,
+            message: 'Login exitoso',
+            user: {
+                username: username,
+                role: 'admin'   // Todos los que pasen el LDAP son admins UPB
+            }
+        });
+
+    } catch (err) {
+        const isInvalidCredentials =
+            err.name === 'InvalidCredentialsError' ||
+            (err.code !== undefined && err.code === 49);
+
+        if (isInvalidCredentials) {
+            return res.status(401).json({
+                success: false,
+                message: 'Credenciales inválidas: usuario o contraseña incorrectos'
             });
-        } else {
-            // Nadie coincide con el usuario y contraseña
-            res.status(401).json({ success: false, message: 'Credenciales inválidas, usuario o contraseña incorrectos' });
         }
-    } catch (error) {
-        console.error('Error ejecutando login query:', error);
-        res.status(500).json({ success: false, message: 'Error interno del servidor al procesar el login' });
+
+        // Error de red / servidor LDAP no disponible
+        console.error('Error de conexión LDAP:', err.message);
+        return res.status(503).json({
+            success: false,
+            message: 'No se pudo conectar al servidor LDAP de la UPB. Verifica la red institucional.'
+        });
     }
 });
 
@@ -66,22 +101,18 @@ app.use('/api/horarios', horariosRoutes);
 app.use('/api/facultades', facultadesRoutes);
 app.use('/api/reportes', reportesRoutes);
 
-// Servir archivos estáticos del frontend (UPB-BETA)
-app.use('/UPB-BETA', express.static(path.join(__dirname, '../UPB-BETA')));
+// Servir el frontend UPB-BETA como archivos estáticos
+const frontendPath = path.join(__dirname, '..', 'UPB-BETA');
+app.use(express.static(frontendPath));
 
-// Redirección opcional de la raíz a la página de inicio
-app.get('/', (req, res) => {
-    res.redirect('/UPB-BETA/index.html');
+// Fallback: cualquier ruta no reconocida redirige al index del frontend
+app.get('*', (req, res) => {
+    res.sendFile(path.join(frontendPath, 'index.html'));
 });
-
-// Cargar certificados SSL
-const privateKey = fs.readFileSync(path.join(__dirname, 'security', 'server.key'), 'utf8');
-const certificate = fs.readFileSync(path.join(__dirname, 'security', 'server.cert'), 'utf8');
-const credentials = { key: privateKey, cert: certificate };
 
 // Start the server
-const httpsServer = https.createServer(credentials, app);
-
-httpsServer.listen(PORT, '0.0.0.0', () => {
-    console.log(`🚀 Backend server is running on https://0.0.0.0:${PORT}`);
+app.listen(PORT, () => {
+    console.log(`🚀 Backend server is running on http://localhost:${PORT}`);
+    console.log(`🔐 LDAP auth → ${process.env.LDAP_URL} (dominio: ${process.env.LDAP_DOMAIN})`);
 });
+
