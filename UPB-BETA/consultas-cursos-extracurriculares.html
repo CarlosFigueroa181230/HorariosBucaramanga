@@ -8,6 +8,8 @@
     <link rel="stylesheet" href="consultas-styles.css">
     <script src="https://unpkg.com/lucide@0.469.0/dist/umd/lucide.min.js"></script>
     <script src="lucide-icons.js"></script>
+    <link rel="stylesheet" href="shared-ui.css">
+    <script src="shared-ui.js"></script>
     <script src="ux-dynamic.js"></script>
     <script src="facultades-store.js"></script>
     <script src="facultades-sync.js"></script>
@@ -260,18 +262,20 @@
             }
 
             try {
-                resultadosMostrados.textContent = 'Buscando cursos en la base de datos...';
-                resultadosMostrados.style.display = 'block';
+                UIManager.showLoader(`Buscando cursos de tipo ${tipoValue}...`);
+                resultadosMostrados.style.display = 'none';
                 header.style.display = 'none';
                 tabla.style.display = 'none';
 
                 // Usamos tipo=extracurriculares y pasamos el subtipo (Deportivas, etc.) en el campo facultad para filtrar
-                const response = await fetch(`/api/horarios?tipo=extracurriculares&facultad=${encodeURIComponent(tipoValue)}`);
-                const result = await response.json();
+                const url = `/api/horarios?tipo=extracurriculares&facultad=${encodeURIComponent(tipoValue)}`;
+                const result = await UIManager.apiFetch(url);
 
+                UIManager.hideLoader();
                 tbody.innerHTML = '';
 
                 if (result.success && result.horarios && result.horarios.length > 0) {
+                    console.log(`✅ [Frontend] Renderizando ${result.horarios.length} cursos extracurriculares.`);
                     resultadosMostrados.style.display = 'none';
                     tabla.style.display = 'table';
                     header.style.display = 'block';
@@ -298,6 +302,7 @@
                     limpiarFiltrosTabla();
                     actualizarDatalists();
                 } else {
+                    console.warn('⚠️ [Frontend] La API respondió con éxito pero 0 cursos.');
                     resultadosMostrados.textContent = 'No hay cursos registrados para este tipo en MySQL!';
                     resultadosMostrados.style.display = 'block';
                     header.style.display = 'none';
@@ -305,8 +310,11 @@
                     mostrarFiltros(false);
                 }
             } catch (error) {
-                console.error('Error al buscar cursos extracurriculares:', error);
-                alert('Error al conectar con el servidor.');
+                UIManager.hideLoader();
+                console.error('🔥 Error al buscar cursos extracurriculares:', error);
+                alert('Error al conectar con el servidor: ' + error.message);
+                resultadosMostrados.textContent = 'Error de conexión con el servidor.';
+                resultadosMostrados.style.display = 'block';
             }
         }
 

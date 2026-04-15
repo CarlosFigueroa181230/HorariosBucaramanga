@@ -8,6 +8,8 @@
     <link rel="stylesheet" href="consultas-styles.css">
     <script src="https://unpkg.com/lucide@0.469.0/dist/umd/lucide.min.js"></script>
     <script src="lucide-icons.js"></script>
+    <link rel="stylesheet" href="shared-ui.css">
+    <script src="shared-ui.js"></script>
     <script src="ux-dynamic.js"></script>
     <script src="facultades-store.js"></script>
     <script src="plantillas-store.js"></script>
@@ -289,15 +291,18 @@
             }
 
             try {
-                resultadosMostrados.textContent = 'Buscando exámenes en la base de datos...';
-                resultadosMostrados.style.display = 'block';
+                UIManager.showLoader(`Buscando exámenes para ${facultadTexto}...`);
+                resultadosMostrados.style.display = 'none';
                 header.style.display = 'none';
                 tabla.style.display = 'none';
 
-                const response = await fetch(`/api/horarios?tipo=examenes&facultad=${encodeURIComponent(facultadTexto)}`);
-                const result = await response.json();
+                const url = `/api/horarios?tipo=examenes&facultad=${encodeURIComponent(facultadTexto)}`;
+                const result = await UIManager.apiFetch(url);
+
+                UIManager.hideLoader();
 
                 if (result.success && result.horarios && result.horarios.length > 0) {
+                    console.log(`✅ [Frontend] Renderizando ${result.horarios.length} exámenes.`);
                     carreraNombre.textContent = facultadTexto;
                     header.style.display = 'block';
                     resultadosMostrados.style.display = 'none';
@@ -334,6 +339,7 @@
                     poblarListasFiltros();
                     limpiarFiltrosTabla();
                 } else {
+                    console.warn('⚠️ [Frontend] La API respondió con éxito pero 0 exámenes.');
                     resultadosMostrados.textContent = 'No hay exámenes registrados para esta facultad en MySQL!';
                     resultadosMostrados.style.display = 'block';
                     header.style.display = 'none';
@@ -341,8 +347,11 @@
                     mostrarFiltros(false);
                 }
             } catch (error) {
-                console.error('Error al buscar exámenes:', error);
-                alert('Error al conectar con el servidor.');
+                UIManager.hideLoader();
+                console.error('🔥 Error al buscar exámenes:', error);
+                alert('Error al conectar con el servidor: ' + error.message);
+                resultadosMostrados.textContent = 'Error de conexión con el servidor.';
+                resultadosMostrados.style.display = 'block';
             }
         }
 

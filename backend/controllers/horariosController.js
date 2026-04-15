@@ -13,21 +13,15 @@ function convertTo24Hour(timeStr) {
 }
 
 // Función para normalizar nombres de días (quitar tildes y asegurar formato DB)
-function normalizeDayName(dayStr) {
-    if (!dayStr) return null;
-    const days = {
-        'lunes': 'Lunes',
-        'martes': 'Martes',
-        'miercoles': 'Miercoles', // DB ENUM sin tilde
-        'miércoles': 'Miercoles',
-        'jueves': 'Jueves',
-        'viernes': 'Viernes',
-        'sabado': 'Sabado', // DB ENUM sin tilde
-        'sábado': 'Sabado'
-    };
-    const key = dayStr.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "");
-    // Intentar match con mapa o devolver normalizado
-    return days[key] || days[dayStr.toLowerCase()] || null;
+function normalizeDayName(day) {
+    const upper = (day || "").toUpperCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "");
+    if (upper.includes('LUN')) return 'Lunes';
+    if (upper.includes('MAR')) return 'Martes';
+    if (upper.includes('MIER')) return 'Miercoles';
+    if (upper.includes('JUEV')) return 'Jueves';
+    if (upper.includes('VIER')) return 'Viernes';
+    if (upper.includes('SAB')) return 'Sabado';
+    return null;
 }
 
 // Función de ayuda para parsear celdas completas como "4:00 PM - 5:40 PM K520"
@@ -47,11 +41,11 @@ function parseScheduleStr(str) {
 function getValByPattern(row, pattern) {
     const keys = Object.keys(row);
     const normalizedPattern = pattern.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "");
-    
+
     // Prioridad 1: Match exacto (sin tildes)
     const bestMatch = keys.find(k => k.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "") === normalizedPattern);
     if (bestMatch) return row[bestMatch];
-    
+
     // Prioridad 2: Contiene el patrón
     const partialMatch = keys.find(k => k.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "").includes(normalizedPattern));
     return partialMatch ? row[partialMatch] : null;
@@ -60,26 +54,26 @@ function getValByPattern(row, pattern) {
 
 // Mapa de abreviaciones de facultad -> nombre completo en la BD
 const FACULTAD_ABBREV_MAP = {
-    'sist':    'Ingeniería De Sistemas E Informática',
-    'ind':     'Ingeniería Industrial',
-    'civil':   'Ingeniería Civil',
-    'elec':    'Ingeniería Electrónica',
-    'elect':   'Ingeniería Eléctrica',
-    'mec':     'Ingeniería Mecánica',
-    'amb':     'Ingeniería Ambiental',
-    'der':     'Derecho',
-    'psic':    'Psicología',
-    'adm':     'Administración De Empresas',
-    'neg':     'Negocios Internacionales',
-    'com':     'Comunicación Social - Periodismo',
-    'dis':     'Diseño Gráfico',
-    'bas':     'Departamento De Ciencias Básicas',
-    'hum':     'Departamento De Formación Humanística',
-    'lng':     'Centro De Lenguas',
-    'ext':     'Electivas',
-    'cpyg':    'Ciencias Políticas Y Gobierno',
-    'cpyg-n':  'Ciencias Políticas Y Gobierno',
-    'cpyg-d':  'Ciencias Políticas Y Gobierno',
+    'sist': 'Ingeniería De Sistemas E Informática',
+    'ind': 'Ingeniería Industrial',
+    'civil': 'Ingeniería Civil',
+    'elec': 'Ingeniería Electrónica',
+    'elect': 'Ingeniería Eléctrica',
+    'mec': 'Ingeniería Mecánica',
+    'amb': 'Ingeniería Ambiental',
+    'der': 'Derecho',
+    'psic': 'Psicología',
+    'adm': 'Administración De Empresas',
+    'neg': 'Negocios Internacionales',
+    'com': 'Comunicación Social - Periodismo',
+    'dis': 'Diseño Gráfico',
+    'bas': 'Departamento De Ciencias Básicas',
+    'hum': 'Departamento De Formación Humanística',
+    'lng': 'Centro De Lenguas',
+    'ext': 'Electivas',
+    'cpyg': 'Ciencias Políticas Y Gobierno',
+    'cpyg-n': 'Ciencias Políticas Y Gobierno',
+    'cpyg-d': 'Ciencias Políticas Y Gobierno',
 };
 
 /**
@@ -122,9 +116,17 @@ exports.uploadExcelData = async (req, res) => {
         connection = await db.getConnection();
         await connection.beginTransaction();
 
+        const tipoMapStandard = {
+            'horarios': 'Horarios de Clases',
+            'examenes': 'Exámenes Parciales',
+            'intersemestrales': 'Cursos Intersemestrales',
+            'supletorios': 'Exámenes Supletorios',
+            'extracurriculares': 'Cursos Extracurriculares'
+        };
+
         // 1. Registrar la acción en Reporte PRIMERO
         let userId = creadorId ? parseInt(creadorId) : 1;
-        let tipoPub = tipo || 'Horarios de Clases';
+        let tipoPub = tipoMapStandard[tipo] || tipo || 'Horarios de Clases';
         let descPub = descripcion || 'Cargados mediante archivo Excel';
         let fInicio = fechaInicio || null;
         let fFin = fechaFin || null;
@@ -171,7 +173,7 @@ exports.uploadExcelData = async (req, res) => {
 
                     if (foundSemestre) {
                         const facNameHeaderRaw = getValByPattern(row, 'FACULTAD') || getValByPattern(row, 'FAC') || facultadFormulario || 'FACULTAD GENERAL';
-                        const facNameHeader = resolverNombreFacultad(facNameHeaderRaw);
+                        const facNameHeader = facultadFormulario || 'FACULTAD GENERAL';
                         const facultadIdHeader = await findOrCreate(connection, 'Facultad', 'nombre', facNameHeader, { id_escuela: escuelaId, fecha_creacion: new Date() });
 
                         await connection.execute(
@@ -187,9 +189,7 @@ exports.uploadExcelData = async (req, res) => {
                     if (isExamen) {
                         asigName = getValByPattern(row, 'ASIGNATURA');
                         nrc = getValByPattern(row, 'NRC');
-                        facultadName = resolverNombreFacultad(
-                            getValByPattern(row, 'FAC') || getValByPattern(row, 'FACULTAD') || facultadFormulario || 'General'
-                        );
+                        facultadName = facultadFormulario || 'General';
                         nivelRow = getValByPattern(row, 'NIV') || currentNivel;
                     } else if (isExtracurricular) {
                         asigName = getValByPattern(row, 'Nombre del Curso') || getValByPattern(row, 'Actividad') || getValByPattern(row, 'ASIGNATURA');
@@ -211,16 +211,20 @@ exports.uploadExcelData = async (req, res) => {
 
                     // --- INSERCIÓN Y OBTENCIÓN DE IDs RELACIONALES ---
                     const facultadId = await findOrCreate(connection, 'Facultad', 'nombre', facultadName, { id_escuela: escuelaId, fecha_creacion: new Date() });
-                    
+
                     const codigoMateriaObj = getValByPattern(row, 'MATERIA');
                     const codigoMateriaStr = (codigoMateriaObj && !isNaN(parseInt(codigoMateriaObj))) ? parseInt(codigoMateriaObj, 10) : null;
-                    
+
                     await connection.execute(`
                         INSERT INTO Asignatura (nombre, codigo_materia) 
                         VALUES (?, ?) 
-                        ON DUPLICATE KEY UPDATE codigo_materia = COALESCE(VALUES(codigo_materia), codigo_materia)
+                        ON DUPLICATE KEY UPDATE 
+                            codigo_materia = CASE 
+                                WHEN VALUES(codigo_materia) IS NOT NULL THEN VALUES(codigo_materia) 
+                                ELSE codigo_materia 
+                            END
                     `, [asigName || 'Sin Nombre', codigoMateriaStr]);
-                    
+
                     let [asigRows] = await connection.execute('SELECT id_asignatura FROM Asignatura WHERE nombre = ?', [asigName || 'Sin Nombre']);
                     const asigId = asigRows[0].id_asignatura;
 
@@ -232,13 +236,14 @@ exports.uploadExcelData = async (req, res) => {
                         [nrc || '00000', facultadId, asigId, cursoId, currentReporteId, creditos, nivelRow, docente]
                     );
                     const pubId = insPub.insertId;
+                    let firstMateriaId = null;
 
                     // --- PROCESAMIENTO DE HORARIOS ---
                     if (isExamen) {
                         const fechaEx = getValByPattern(row, 'FECHA');
                         const horarioEx = getValByPattern(row, 'HORARIO') || getValByPattern(row, 'HORA');
                         const salonEx = getValByPattern(row, 'SALON') || getValByPattern(row, 'SALÓN') || getValByPattern(row, 'AULA') || 'Por asignar';
-                        
+
                         // Parsear Date Object si proviene crudo de Excel
                         let finalFecha = fechaEx;
                         if (fechaEx instanceof Date) finalFecha = fechaEx.toISOString().split('T')[0];
@@ -252,11 +257,11 @@ exports.uploadExcelData = async (req, res) => {
                         let parsedHora = horarioEx ? parseScheduleStr(horarioEx.toString()) : null;
                         // Soporte para columnas separadas HORA_INICIO / HORA_FIN
                         const horaInicioCol = getValByPattern(row, 'HORA_INICIO') || getValByPattern(row, 'HORA INICIO') || getValByPattern(row, 'INICIO');
-                        const horaFinCol    = getValByPattern(row, 'HORA_FIN')   || getValByPattern(row, 'HORA FIN')   || getValByPattern(row, 'FIN');
+                        const horaFinCol = getValByPattern(row, 'HORA_FIN') || getValByPattern(row, 'HORA FIN') || getValByPattern(row, 'FIN');
                         if (!parsedHora && (horaInicioCol || horaFinCol)) {
                             parsedHora = {
                                 hora_inicio: horaInicioCol ? convertTo24Hour(horaInicioCol.toString()) : null,
-                                hora_fin:    horaFinCol    ? convertTo24Hour(horaFinCol.toString())    : null,
+                                hora_fin: horaFinCol ? convertTo24Hour(horaFinCol.toString()) : null,
                                 salon: ''
                             };
                         }
@@ -265,17 +270,18 @@ exports.uploadExcelData = async (req, res) => {
                         const [insMat] = await connection.execute(
                             'INSERT INTO Materia (nombre, dia, hora_inicio, hora_fin, salon, fecha_exacta) VALUES (?, ?, ?, ?, ?, ?)',
                             [
-                                asigName,
+                                codigoMateriaStr || asigName,
                                 null,
                                 parsedHora ? parsedHora.hora_inicio : null,
-                                parsedHora ? parsedHora.hora_fin    : null,
+                                parsedHora ? parsedHora.hora_fin : null,
                                 parsedHora?.salon || salonEx,
                                 finalFecha || null
                             ]
                         );
+                        firstMateriaId = insMat.insertId;
                         await connection.execute(
                             'INSERT INTO Publicacion_Materia (id_publicacion, id_materia) VALUES (?, ?)',
-                            [pubId, insMat.insertId]
+                            [pubId, firstMateriaId]
                         );
                     } else {
                         // Horarios Clases y Extracurriculares
@@ -292,20 +298,21 @@ exports.uploadExcelData = async (req, res) => {
                         for (const key of rowKeys) {
                             const upperK = key.toUpperCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "");
                             const isDayColumn = dayKeys.some(dk => dk.normalize("NFD").replace(/[\u0300-\u036f]/g, "") === upperK);
-                            
+
                             if (isDayColumn && row[key] && row[key].toString().trim() !== '') {
                                 const dayName = normalizeDayName(key);
                                 if (!dayName) continue;
 
                                 const scheduleStr = row[key].toString().trim();
                                 const parsed = parseScheduleStr(scheduleStr);
-                                
+
                                 if (parsed) {
                                     const finalSalon = parsed.salon || fallbackSalon;
                                     const [insMat] = await connection.execute(
                                         'INSERT INTO Materia (nombre, dia, hora_inicio, hora_fin, salon) VALUES (?, ?, ?, ?, ?)',
-                                        [asigName, dayName, parsed.hora_inicio, parsed.hora_fin, finalSalon]
+                                        [codigoMateriaStr || asigName, dayName, parsed.hora_inicio, parsed.hora_fin, finalSalon]
                                     );
+                                    if (!firstMateriaId) firstMateriaId = insMat.insertId;
                                     await connection.execute(
                                         'INSERT INTO Publicacion_Materia (id_publicacion, id_materia) VALUES (?, ?)',
                                         [pubId, insMat.insertId]
@@ -315,8 +322,9 @@ exports.uploadExcelData = async (req, res) => {
                                     // Horario en formato no estándar: insertar fila con solo el día y texto raw en salon
                                     const [insMat] = await connection.execute(
                                         'INSERT INTO Materia (nombre, dia, hora_inicio, hora_fin, salon) VALUES (?, ?, ?, ?, ?)',
-                                        [asigName, dayName, null, null, scheduleStr]
+                                        [codigoMateriaStr || asigName, dayName, null, null, scheduleStr]
                                     );
+                                    if (!firstMateriaId) firstMateriaId = insMat.insertId;
                                     await connection.execute(
                                         'INSERT INTO Publicacion_Materia (id_publicacion, id_materia) VALUES (?, ?)',
                                         [pubId, insMat.insertId]
@@ -331,11 +339,20 @@ exports.uploadExcelData = async (req, res) => {
                         if (!insertedAnyMateria) {
                             const [insMat] = await connection.execute(
                                 'INSERT INTO Materia (nombre, dia, hora_inicio, hora_fin, salon) VALUES (?, ?, ?, ?, ?)',
-                                [asigName, null, null, null, fallbackSalon]
+                                [codigoMateriaStr || asigName, null, null, null, fallbackSalon]
                             );
+                            firstMateriaId = insMat.insertId;
                             await connection.execute(
                                 'INSERT INTO Publicacion_Materia (id_publicacion, id_materia) VALUES (?, ?)',
                                 [pubId, insMat.insertId]
+                            );
+                        }
+
+                        // Finalmente, si logramos crear al menos una materia, vinculamos el id_materia en Publicacion
+                        if (firstMateriaId) {
+                            await connection.execute(
+                                'UPDATE Publicacion SET id_materia = ? WHERE id_publicacion = ?',
+                                [firstMateriaId, pubId]
                             );
                         }
                     }
@@ -365,22 +382,22 @@ exports.uploadExcelData = async (req, res) => {
     }
 };
 
-    exports.getHorarios = async (req, res) => {
-        const { facultad, tipo } = req.query;
+exports.getHorarios = async (req, res) => {
+    const { facultad, tipo } = req.query;
 
-        const tipoMap = {
-            'horarios': 'Horarios de Clases',
-            'examenes': 'Exámenes Parciales',
-            'intersemestrales': 'Cursos Intersemestrales',
-            'supletorios': 'Exámenes Supletorios',
-            'extracurriculares': 'Cursos Extracurriculares'
-        };
+    const tipoMap = {
+        'horarios': 'Horarios de Clases',
+        'examenes': 'Exámenes Parciales',
+        'intersemestrales': 'Cursos Intersemestrales',
+        'supletorios': 'Exámenes Supletorios',
+        'extracurriculares': 'Cursos Extracurriculares'
+    };
 
-        // Si viene 'horarios' o 'Horarios de Clases', ambos deben funcionar
-        const tipoFinal = tipoMap[tipo] || (tipo === 'horarios' ? 'Horarios de Clases' : tipo);
+    // Si viene 'horarios' o 'Horarios de Clases', ambos deben funcionar
+    const tipoFinal = tipoMap[tipo] || (tipo === 'horarios' ? 'Horarios de Clases' : tipo);
 
-        try {
-            let query = `
+    try {
+        let query = `
             SELECT 
                 p.id_publicacion,
                 p.nrc,
@@ -404,63 +421,74 @@ exports.uploadExcelData = async (req, res) => {
             LEFT JOIN Materia m ON pm.id_materia = m.id_materia
             LEFT JOIN Reporte r ON p.id_reporte = r.id_reporte
             LEFT JOIN Curso c ON p.id_curso = c.id_curso
-            WHERE 1=1
+            WHERE p.nrc != 'HEADER'
         `;
-            let params = [];
-            if (facultad) {
-                query += ` AND (f.nombre = ? OR f.nombre LIKE ?)`;
-                const queryFacultad = '%' + facultad.replace(/-/g, ' ') + '%';
-                params.push(facultad, queryFacultad);
-            }
-
-            if (tipo) {
-                query += ` AND (r.tipo = ? OR r.tipo LIKE ?)`;
-                params.push(tipoFinal, `%${tipoFinal}%`);
-            }
-
-            console.log('🔍 Ejecutando Query:', query);
-            const [rows] = await db.execute(query, params);
-
-            // Agrupar por id_publicacion para construir los días
-            const map = {};
-            for (const r of rows) {
-                if (!map[r.id_publicacion]) {
-                    map[r.id_publicacion] = {
-                        asignatura: r.asignatura,
-                        materia: r.codigo_materia || r.asignatura,
-                        curso: r.curso_nombre || 'N/A',
-                        nrc: r.nrc,
-                        creditos: r.creditos,
-                        profesor: r.docente || "Asignado",
-                        aula: r.salon || "Por asignar",
-                        fecha: r.fecha_exacta ? (typeof r.fecha_exacta === 'string' ? r.fecha_exacta : r.fecha_exacta.toISOString().split('T')[0]) : "Pendiente",
-                        nivel: r.nivel || "N/A",
-                        facultad: r.facultad_nombre,
-                        reporte_tipo: r.reporte_tipo,
-                        cupos: 40,
-                        lunes: "--",
-                        martes: "--",
-                        miercoles: "--",
-                        jueves: "--",
-                        viernes: "--",
-                        sabado: "--"
-                    };
-                }
-                // Parse schedule block
-                if (r.dia) {
-                    const diaNormalizado = r.dia.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, ""); // miércoles -> miercoles
-                    const horaInicio = r.hora_inicio ? r.hora_inicio.substring(0, 5) : "";
-                    const horaFin = r.hora_fin ? r.hora_fin.substring(0, 5) : "";
-                    if (horaInicio && horaFin) {
-                        map[r.id_publicacion][diaNormalizado] = `${horaInicio}-${horaFin}`;
-                    }
-                }
-            }
-
-            const data = Object.values(map);
-            res.json({ success: true, horarios: data });
-        } catch (error) {
-            console.error('🔥 Error Detallado al obtener horarios:', error.message);
-            res.status(500).json({ success: false, message: 'Error del servidor al obtener horarios', error: error.message });
+        let params = [];
+        if (facultad) {
+            // Buscamos ignorando tildes de manera básica con un patrón flexible
+            query += ` AND (f.nombre = ? OR f.nombre LIKE ? OR f.nombre LIKE ? OR f.nombre LIKE ?)`;
+            const simplified = facultad.normalize("NFD").replace(/[\u0300-\u036f]/g, ""); // Ingenieria
+            const queryPartial = '%' + simplified.split(' ')[0] + '%'; // Toma la primera palabra (ej. "Ingenieria")
+            const queryFacultad = '%' + facultad.replace(/-/g, ' ') + '%';
+            params.push(facultad, queryFacultad, `%${simplified}%`, queryPartial);
         }
-    };
+
+        if (tipo) {
+            query += ` AND (r.tipo = ? OR r.tipo LIKE ?)`;
+            params.push(tipoFinal, `%${tipoFinal}%`);
+        }
+
+        console.log('🔍 Ejecutando Query:', query);
+        console.log('📦 Params:', JSON.stringify(params));
+        const [rows] = await db.execute(query, params);
+        console.log(`✅ Resultado: ${rows.length} filas encontradas.`);
+
+        if (rows.length === 0 && facultad) {
+            console.log('⚠️ Alerta: No se encontraron filas. Verificando facultades similares...');
+            const [similar] = await db.execute('SELECT nombre FROM Facultad WHERE nombre LIKE ? LIMIT 3', [`%${facultad.split(' ')[0]}%`]);
+            console.log('Facultades similares en BD:', similar.map(s => s.nombre).join(', '));
+        }
+
+        // Agrupar por id_publicacion para construir los días
+        const map = {};
+        for (const r of rows) {
+            if (!map[r.id_publicacion]) {
+                map[r.id_publicacion] = {
+                    asignatura: r.asignatura,
+                    materia: r.codigo_materia || r.asignatura,
+                    curso: r.curso_nombre || 'N/A',
+                    nrc: r.nrc,
+                    creditos: r.creditos,
+                    profesor: r.docente || "Asignado",
+                    aula: r.salon || "Por asignar",
+                    fecha: r.fecha_exacta ? (typeof r.fecha_exacta === 'string' ? r.fecha_exacta : r.fecha_exacta.toISOString().split('T')[0]) : "Pendiente",
+                    nivel: r.nivel || "N/A",
+                    facultad: r.facultad_nombre,
+                    reporte_tipo: r.reporte_tipo,
+                    cupos: 40,
+                    lunes: "--",
+                    martes: "--",
+                    miercoles: "--",
+                    jueves: "--",
+                    viernes: "--",
+                    sabado: "--"
+                };
+            }
+            // Parse schedule block
+            if (r.dia) {
+                const diaNormalizado = r.dia.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, ""); // miércoles -> miercoles
+                const horaInicio = r.hora_inicio ? r.hora_inicio.substring(0, 5) : "";
+                const horaFin = r.hora_fin ? r.hora_fin.substring(0, 5) : "";
+                if (horaInicio && horaFin) {
+                    map[r.id_publicacion][diaNormalizado] = `${horaInicio}-${horaFin}`;
+                }
+            }
+        }
+
+        const data = Object.values(map);
+        res.json({ success: true, horarios: data });
+    } catch (error) {
+        console.error('🔥 Error Detallado al obtener horarios:', error.message);
+        res.status(500).json({ success: false, message: 'Error del servidor al obtener horarios', error: error.message });
+    }
+};

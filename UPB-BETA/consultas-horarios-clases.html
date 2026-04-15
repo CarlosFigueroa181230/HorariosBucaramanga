@@ -9,6 +9,8 @@
     <link rel="stylesheet" href="consultas-styles.css">
     <script src="https://unpkg.com/lucide@0.469.0/dist/umd/lucide.min.js"></script>
     <script src="lucide-icons.js"></script>
+    <link rel="stylesheet" href="shared-ui.css">
+    <script src="shared-ui.js"></script>
     <script src="ux-dynamic.js"></script>
     <script src="facultades-store.js"></script>
     <script src="plantillas-store.js"></script>
@@ -422,7 +424,10 @@
                 const panel = document.createElement('section');
                 panel.className = 'semester-panel';
                 panel.dataset.semester = String(semestre);
-                panel.classList.add(`semester-panel-${semestre}`);
+                
+                // Usamos slugify para evitar errores con espacios en classList.add
+                const safeClassName = UIManager.slugify(semestre);
+                panel.classList.add(`semester-panel-${safeClassName}`);
 
                 const encabezado = document.createElement('div');
                 encabezado.className = 'semester-panel-header';
@@ -498,21 +503,22 @@
             }
 
             try {
-                // Mostrar estado de carga (opcionalmente podrías agregar un spinner)
-                resultadosMostrados.textContent = 'Buscando horarios en la base de datos...';
-                resultadosMostrados.style.display = 'block';
+                UIManager.showLoader(`Buscando horarios para ${facultadTexto}...`);
+                resultadosMostrados.style.display = 'none';
                 header.style.display = 'none';
 
-                const response = await fetch(`/api/horarios?tipo=horarios&facultad=${encodeURIComponent(facultadTexto)}`);
-                const result = await response.json();
+                const url = `/api/horarios?tipo=horarios&facultad=${encodeURIComponent(facultadTexto)}`;
+                const result = await UIManager.apiFetch(url);
+
+                UIManager.hideLoader();
 
                 if (result.success && result.horarios && result.horarios.length > 0) {
+                    console.log(`✅ [Frontend] Renderizando ${result.horarios.length} horarios.`);
                     estadoConsultaHorarios.datos = result.horarios;
 
                     carreraNombre.textContent = facultadTexto;
                     header.style.display = 'block';
-                    resultadosMostrados.style.display = 'none';
-
+                    
                     mostrarFiltros(true);
                     actualizarEncabezadoHorarios(result.horarios);
                     poblarFiltroSemestre(result.horarios);
@@ -520,6 +526,7 @@
                     poblarListasFiltros();
                     limpiarFiltrosTabla();
                 } else {
+                    console.warn('⚠️ [Frontend] La API respondió con éxito pero 0 resultados.');
                     estadoConsultaHorarios.datos = [];
                     resultadosMostrados.textContent = 'No hay datos para la facultad seleccionada en la base de datos MySQL!';
                     resultadosMostrados.style.display = 'block';
@@ -529,9 +536,11 @@
                     mostrarFiltros(false);
                 }
             } catch (error) {
-                console.error('Error al buscar horarios:', error);
-                alert('Error al conectar con el servidor backend.');
+                UIManager.hideLoader();
+                console.error('🔥 Error al buscar horarios:', error);
+                alert('Error al conectar con el servidor backend: ' + error.message);
                 resultadosMostrados.textContent = 'Error de conexión con el servidor.';
+                resultadosMostrados.style.display = 'block';
             }
         }
 

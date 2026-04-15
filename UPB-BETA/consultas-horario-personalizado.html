@@ -10,6 +10,8 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
     <script src="lucide-icons.js"></script>
+    <link rel="stylesheet" href="shared-ui.css">
+    <script src="shared-ui.js"></script>
     <script src="ux-dynamic.js"></script>
     <script src="admin-auth.js"></script>
     <script src="admin-local-modals.js"></script>
@@ -513,12 +515,15 @@
             setMensaje('Cargando base de datos de horarios...');
             catalogoNrc.clear();
             try {
-                const response = await fetch('/api/horarios?tipo=horarios');
-                const result = await response.json();
+                UIManager.showLoader('Cargando base de datos de horarios para simulación...');
+                const result = await UIManager.apiFetch('/api/horarios?tipo=horarios');
+                UIManager.hideLoader();
                 
                 if (!result.success || !result.horarios) {
                     throw new Error('No se pudieron obtener los datos.');
                 }
+
+                console.log(`✅ [Simulación] Cargando ${result.horarios.length} NRCs al catálogo.`);
 
                 result.horarios.forEach(item => {
                     if (item.nrc === 'HEADER') return;
@@ -558,8 +563,10 @@
                 renderSeleccionados();
                 renderGrilla();
             } catch (error) {
-                console.error('Error cargando catálogo:', error);
+                UIManager.hideLoader();
+                console.error('🔥 Error cargando catálogo:', error);
                 setMensaje('Error al cargar los horarios desde el servidor.');
+                alert('No se pudo cargar el catálogo de horarios: ' + error.message);
             }
         }
 
