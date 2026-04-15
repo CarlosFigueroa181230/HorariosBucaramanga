@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="es">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -15,12 +16,14 @@
     <script src="admin-auth.js"></script>
     <script src="admin-local-modals.js"></script>
 </head>
+
 <body>
     <!-- Contenedor principal -->
     <div class="main-container">
         <!-- Menú lateral -->
         <aside class="sidebar">
-            <button class="mobile-close-btn" type="button" onclick="toggleMobileSidebar(false)" aria-label="Cerrar menu">&lt;</button>
+            <button class="mobile-close-btn" type="button" onclick="toggleMobileSidebar(false)"
+                aria-label="Cerrar menu">&lt;</button>
             <!-- Título del sidebar -->
             <div class="sidebar-title">HORARIOS UPB</div>
 
@@ -33,11 +36,16 @@
                         <span>MENU</span>
                     </li>
                     <div class="submenu" style="display: none;">
-                        <li onclick="irA('consultas-horarios-clases.html')"><span class="submenu-icon">📅</span> Horarios Clases</li>
-                        <li onclick="irA('consultas-examenes.html')"><span class="submenu-icon">📋</span> Exámenes Parciales</li>
-                        <li onclick="irA('consultas-supletorios.html')"><span class="submenu-icon">📋</span> Supletorios</li>
-                        <li onclick="irA('consultas-intersemestrales.html')"><span class="submenu-icon">📋</span> Cursos Intersemestrales</li>
-                        <li onclick="irA('consultas-cursos-extracurriculares.html')"><span class="submenu-icon">📋</span> Cursos Extracurriculares</li>
+                        <li onclick="irA('consultas-horarios-clases.html')"><span class="submenu-icon">📅</span>
+                            Horarios Clases</li>
+                        <li onclick="irA('consultas-examenes.html')"><span class="submenu-icon">📋</span> Exámenes
+                            Parciales</li>
+                        <li onclick="irA('consultas-supletorios.html')"><span class="submenu-icon">📋</span> Supletorios
+                        </li>
+                        <li onclick="irA('consultas-intersemestrales.html')"><span class="submenu-icon">📋</span> Cursos
+                            Intersemestrales</li>
+                        <li onclick="irA('consultas-cursos-extracurriculares.html')"><span
+                                class="submenu-icon">📋</span> Cursos Extracurriculares</li>
                     </div>
                 </ul>
             </div>
@@ -47,8 +55,10 @@
                 <div class="menu-header">MENU ADMINISTRACION</div>
                 <div class="menu-title" id="adminSectionTitle" style="display: none;"></div>
                 <ul class="menu-list">
-                    <li id="adminAccessItem" onclick="abrirAccesoAdmin()" class="login-link"><span class="submenu-icon">🚪</span> <span id="adminAccessText">Login</span></li>
-                    <li id="adminLogoutItem" onclick="cerrarSesion()" style="display: none;"><span class="submenu-icon">🚪</span> Logout</li>
+                    <li id="adminAccessItem" onclick="abrirAccesoAdmin()" class="login-link"><span
+                            class="submenu-icon">🚪</span> <span id="adminAccessText">Login</span></li>
+                    <li id="adminLogoutItem" onclick="cerrarSesion()" style="display: none;"><span
+                            class="submenu-icon">🚪</span> Logout</li>
                 </ul>
             </div>
         </aside>
@@ -59,9 +69,11 @@
         <main class="content">
             <!-- Header -->
             <div class="header">
-            <button class="mobile-menu-btn" type="button" onclick="toggleMobileSidebar()" aria-label="Abrir o cerrar menu">☰</button>
+                <button class="mobile-menu-btn" type="button" onclick="toggleMobileSidebar()"
+                    aria-label="Abrir o cerrar menu">☰</button>
                 <h1>HORARIOS UPB V.3</h1>
-                <img id="adminIcon" src="Assets/ICONO-ADMIN.png" alt="Admin" class="btn-prueba" style="display: none;" onclick="toggleDropdownMenu()">
+                <img id="adminIcon" src="Assets/ICONO-ADMIN.png" alt="Admin" class="btn-prueba" style="display: none;"
+                    onclick="toggleDropdownMenu()">
                 <div class="dropdown-menu" id="dropdownMenu">
                     <div class="dropdown-header">
                         <img src="Assets/upb-logo.png" alt="Logo UPB" class="dropdown-logo">
@@ -72,13 +84,16 @@
                         <a href="consultas-horarios-clases.html"><span class="icon">📅</span> Horarios Clases</a>
                         <a href="consultas-examenes.html"><span class="icon">📋</span> Exámenes Parciales</a>
                         <a href="consultas-supletorios.html"><span class="icon">📋</span> Supletorios</a>
-                        <a href="consultas-intersemestrales.html"><span class="icon">📋</span> Cursos Intersemestrales</a>
-                <a href="consultas-cursos-extracurriculares.html"><span class="icon">📋</span> Cursos Extracurriculares</a>
+                        <a href="consultas-intersemestrales.html"><span class="icon">📋</span> Cursos
+                            Intersemestrales</a>
+                        <a href="consultas-cursos-extracurriculares.html"><span class="icon">📋</span> Cursos
+                            Extracurriculares</a>
                     </div>
                     <div class="dropdown-divider"></div>
                     <div class="dropdown-admin">
                         <a href="#" onclick="abrirModalInfoAdmin(event)"><span class="icon">👤</span> Mi Información</a>
-                        <a href="#" onclick="abrirModalCambiarContraseña(event)"><span class="icon">🔑</span> Cambiar contraseña</a>
+                        <a href="#" onclick="abrirModalCambiarContraseña(event)"><span class="icon">🔑</span> Cambiar
+                            contraseña</a>
                         <a href="admin.html"><span class="icon">🔍</span> Administración</a>
                         <a href="login.html" onclick="cerrarSesion()"><span class="icon">🚪</span> Logout</a>
                     </div>
@@ -156,27 +171,32 @@
                             </div>
                             <div>
                                 <label>Asignatura</label>
-                                <input type="text" data-col="1" list="asignatura-list" oninput="aplicarFiltros()" placeholder="Buscar asignatura">
+                                <input type="text" data-col="1" list="asignatura-list" oninput="aplicarFiltros()"
+                                    placeholder="Buscar asignatura">
                                 <datalist id="asignatura-list"></datalist>
                             </div>
                             <div>
                                 <label>Materia</label>
-                                <input type="text" data-col="2" list="materia-list" oninput="aplicarFiltros()" placeholder="Buscar materia">
+                                <input type="text" data-col="2" list="materia-list" oninput="aplicarFiltros()"
+                                    placeholder="Buscar materia">
                                 <datalist id="materia-list"></datalist>
                             </div>
                             <div>
                                 <label>Curso</label>
-                                <input type="text" data-col="3" list="curso-list" oninput="aplicarFiltros()" placeholder="Buscar curso">
+                                <input type="text" data-col="3" list="curso-list" oninput="aplicarFiltros()"
+                                    placeholder="Buscar curso">
                                 <datalist id="curso-list"></datalist>
                             </div>
                             <div>
                                 <label>NRC</label>
-                                <input type="text" data-col="4" list="nrc-list" oninput="aplicarFiltros()" placeholder="Buscar NRC">
+                                <input type="text" data-col="4" list="nrc-list" oninput="aplicarFiltros()"
+                                    placeholder="Buscar NRC">
                                 <datalist id="nrc-list"></datalist>
                             </div>
                             <div>
                                 <label>Créditos</label>
-                                <input type="text" data-col="5" list="creditos-list" oninput="aplicarFiltros()" placeholder="Buscar créditos">
+                                <input type="text" data-col="5" list="creditos-list" oninput="aplicarFiltros()"
+                                    placeholder="Buscar créditos">
                                 <datalist id="creditos-list"></datalist>
                             </div>
                         </div>
@@ -230,7 +250,7 @@
             document.body.classList.toggle('mobile-sidebar-open', shouldOpen);
         }
 
-        window.addEventListener('resize', function() {
+        window.addEventListener('resize', function () {
             if (window.innerWidth > 768) {
                 document.body.classList.remove('mobile-sidebar-open');
             }
@@ -268,7 +288,7 @@
 
         function normalizarSemestre(valor, fallback) {
             if (!valor) return fallback || 1;
-            
+
             const texto = valor.toString().toUpperCase();
             // Si el texto tiene la palabra "OPCIÓN", lo usamos como identificador único
             if (texto.includes('OPCIÓN') || texto.includes('OPCION')) {
@@ -467,7 +487,7 @@
             const facultadSelect = document.getElementById('facultad');
             const facultadValue = facultadSelect.value;
             const facultadTexto = facultadSelect.options[facultadSelect.selectedIndex].text;
-            
+
             const resultadosMostrados = document.getElementById('resultados');
             const header = document.getElementById('results-header');
             const carreraNombre = document.getElementById('carrera-nombre');
@@ -488,7 +508,7 @@
 
                 if (result.success && result.horarios && result.horarios.length > 0) {
                     estadoConsultaHorarios.datos = result.horarios;
-                    
+
                     carreraNombre.textContent = facultadTexto;
                     header.style.display = 'block';
                     resultadosMostrados.style.display = 'none';
@@ -643,7 +663,7 @@
             menu.classList.toggle('active');
         }
 
-        document.addEventListener('click', function(event) {
+        document.addEventListener('click', function (event) {
             const menu = document.getElementById('dropdownMenu');
             const btn = document.getElementById('adminIcon');
 
@@ -727,7 +747,7 @@
             window.location.href = './login.html';
         }
 
-        document.addEventListener('DOMContentLoaded', function() {
+        document.addEventListener('DOMContentLoaded', function () {
             document.body.classList.remove('mobile-sidebar-open');
             aplicarVistaSesionAdmin();
             if (window.aplicarFacultadesEnSelect) {
@@ -736,8 +756,5 @@
         });
     </script>
 </body>
+
 </html>
-
-
-
-

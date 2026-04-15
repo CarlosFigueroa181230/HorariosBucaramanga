@@ -54,7 +54,7 @@ function authenticateWithLDAP(username, password) {
     });
 }
 
-// POST /api/login endpoint — autenticación LDAP UPB
+// POST /api/login endpoint — autenticación temporal por DB
 app.post('/api/login', async (req, res) => {
     const { username, password } = req.body;
 
@@ -63,35 +63,34 @@ app.post('/api/login', async (req, res) => {
     }
 
     try {
-        await authenticateWithLDAP(username, password);
+        // await authenticateWithLDAP(username, password);
+        // Autenticación por Base de Datos - Fallback temporal
+        const [rows] = await db.execute('SELECT * FROM Usuario WHERE usuario = ? AND contrasena = ?', [username, password]);
 
-        // Bind exitoso: el usuario existe en el Active Directory de la UPB
-        res.json({
-            success: true,
-            message: 'Login exitoso',
-            user: {
-                username: username,
-                role: 'admin'   // Todos los que pasen el LDAP son admins UPB
-            }
-        });
-
-    } catch (err) {
-        const isInvalidCredentials =
-            err.name === 'InvalidCredentialsError' ||
-            (err.code !== undefined && err.code === 49);
-
-        if (isInvalidCredentials) {
+        if (rows.length === 0) {
             return res.status(401).json({
                 success: false,
                 message: 'Credenciales inválidas: usuario o contraseña incorrectos'
             });
         }
 
-        // Error de red / servidor LDAP no disponible
-        console.error('Error de conexión LDAP:', err.message);
-        return res.status(503).json({
+        const dbUser = rows[0];
+
+        // Bind exitoso en DB
+        res.json({
+            success: true,
+            message: 'Login exitoso (DB)',
+            user: {
+                username: dbUser.usuario,
+                role: dbUser.rol || 'admin'
+            }
+        });
+
+    } catch (err) {
+        console.error('Error de login (DB):', err.message);
+        return res.status(500).json({
             success: false,
-            message: 'No se pudo conectar al servidor LDAP de la UPB. Verifica la red institucional.'
+            message: 'No se pudo verificar el usuario en la base de datos.'
         });
     }
 });
