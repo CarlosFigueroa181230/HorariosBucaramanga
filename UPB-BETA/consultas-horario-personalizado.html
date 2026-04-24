@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Horarios UPB V3</title>
-    <link rel="icon" type="image/png" href="../Assets/upb-logo.png">
+    <link rel="icon" type="image/png" href="Assets/upb-logo.png">
     <link rel="stylesheet" href="consultas-styles.css">
     <script src="https://unpkg.com/lucide@0.469.0/dist/umd/lucide.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
@@ -13,9 +13,7 @@
     <link rel="stylesheet" href="shared-ui.css">
     <script src="shared-ui.js"></script>
     <script src="ux-dynamic.js"></script>
-    <script src="admin-auth.js"></script>
-    <script src="admin-local-modals.js"></script>
-    <script src="plantillas-store.js"></script>
+    <script src="facultades-store.js"></script>
     <style>
         .sim-card {
             border: 1px solid #e0e0e0;
@@ -383,11 +381,11 @@
         <main class="content">
             <div class="header">
             <button class="mobile-menu-btn" type="button" onclick="toggleMobileSidebar()" aria-label="Abrir o cerrar menu">☰</button>
-                <h1>HORARIOS UPB VERSION 3.0</h1>
-                <img id="adminIcon" src="../Assets/ICONO-ADMIN.png" alt="Admin" class="btn-prueba" style="display: none;" onclick="toggleDropdownMenu()">
+                <h1>HORARIO UPB V.3</h1>
+                <img id="adminIcon" src="Assets/ICONO-ADMIN.png" alt="Admin" class="btn-prueba" style="display: none;" onclick="toggleDropdownMenu()">
                 <div class="dropdown-menu" id="dropdownMenu">
                     <div class="dropdown-header">
-                        <img src="../Assets/upb-logo.png" alt="Logo UPB" class="dropdown-logo">
+                        <img src="Assets/upb-logo.png" alt="Logo UPB" class="dropdown-logo">
                         <span>Horarios</span>
                         <span class="dropdown-subtitle">Menu</span>
                     </div>
@@ -511,70 +509,9 @@
             return { inicio: partes[0], fin: partes[1] };
         }
 
-        async function cargarCatalogo() {
-            setMensaje('Cargando base de datos de horarios...');
-            catalogoNrc.clear();
-            try {
-                UIManager.showLoader('Cargando base de datos de horarios para simulación...');
-                const result = await UIManager.apiFetch('/api/horarios?tipo=horarios');
-                UIManager.hideLoader();
-                
-                if (!result.success || !result.horarios) {
-                    throw new Error('No se pudieron obtener los datos.');
-                }
-
-                console.log(`✅ [Simulación] Cargando ${result.horarios.length} NRCs al catálogo.`);
-
-                result.horarios.forEach(item => {
-                    if (item.nrc === 'HEADER') return;
-
-                    const nrc = normalizarNrc(item.nrc);
-                    const sesiones = [];
-                    const mapaDias = {
-                        lunes: 'LU',
-                        martes: 'MA',
-                        miercoles: 'MI',
-                        jueves: 'JU',
-                        viernes: 'VI',
-                        sabado: 'SA'
-                    };
-
-                    Object.keys(mapaDias).forEach(campo => {
-                        const rango = parseRango(item[campo]);
-                        if (rango) {
-                            sesiones.push({ dia: mapaDias[campo], inicio: rango.inicio, fin: rango.fin });
-                        }
-                    });
-
-                    catalogoNrc.set(nrc, {
-                        nrc,
-                        asignatura: item.asignatura || item.materia || '-',
-                        profesor: item.profesor || '-',
-                        aula: item.aula || '-',
-                        facultad: item.facultad || '-',
-                        sesiones
-                    });
-                });
-
-                setMensaje('Base de datos cargada. Puedes agregar NRCs.');
-                
-                // Re-cargar selección después de que el catálogo esté listo
-                cargarSeleccion();
-                renderSeleccionados();
-                renderGrilla();
-            } catch (error) {
-                UIManager.hideLoader();
-                console.error('🔥 Error cargando catálogo:', error);
-                setMensaje('Error al cargar los horarios desde el servidor.');
-                alert('No se pudo cargar el catálogo de horarios: ' + error.message);
-            }
-        }
-
         function agregarEntradaCatalogo(base) {
             const nrc = normalizarNrc(base.nrc);
-            if (!nrc) {
-                return;
-            }
+            if (!nrc) return;
 
             if (!catalogoNrc.has(nrc)) {
                 catalogoNrc.set(nrc, {
@@ -601,7 +538,61 @@
             });
         }
 
+        /**
+         * Carga el catálogo de NRC desde la API real (Horarios de Clases)
+         */
+        async function cargarCatalogo() {
+            catalogoNrc.clear();
+            
+            try {
+                UIManager.showLoader("Cargando catálogo de NRC...");
+                const url = '/api/horarios?tipo=horarios'; // Traer todos los horarios de clases
+                const result = await UIManager.apiFetch(url);
+                UIManager.hideLoader();
 
+                if (result.success && result.horarios) {
+                    console.log(`✅ [Catálogo] Cargados ${result.horarios.length} registros del backend.`);
+                    
+                    result.horarios.forEach(item => {
+                        const sesiones = [];
+                        const mapa = {
+                            lunes: 'LU',
+                            martes: 'MA',
+                            miercoles: 'MI',
+                            jueves: 'JU',
+                            viernes: 'VI',
+                            sabado: 'SA'
+                        };
+
+                        Object.keys(mapa).forEach(diaKey => {
+                            if (item[diaKey] && item[diaKey] !== '--') {
+                                const rango = parseRango(item[diaKey]);
+                                if (rango) {
+                                    sesiones.push({ 
+                                        dia: mapa[diaKey], 
+                                        inicio: rango.inicio, 
+                                        fin: rango.fin 
+                                    });
+                                }
+                            }
+                        });
+
+                        agregarEntradaCatalogo({
+                            nrc: item.nrc,
+                            asignatura: item.asignatura,
+                            profesor: item.profesor,
+                            aula: item.aula,
+                            facultad: item.facultad,
+                            sesiones
+                        });
+                    });
+                }
+            } catch (error) {
+                UIManager.hideLoader();
+                console.error("🔥 Error al cargar catálogo:", error);
+                setMensaje("Error conectando con el catálogo de NRC.");
+            }
+        }
 
         function hayChoqueSesion(a, b) {
             if (a.dia !== b.dia) {
@@ -981,11 +972,15 @@
             window.location.href = './login.html';
         }
 
-        document.addEventListener('DOMContentLoaded', async function() {
+        document.addEventListener('DOMContentLoaded', function() {
             document.body.classList.remove('mobile-sidebar-open');
             aplicarVistaSesionAdmin();
-            await cargarCatalogo();
+            cargarCatalogo();
+            cargarSeleccion();
+            renderSeleccionados();
+            renderGrilla();
         });
     </script>
 </body>
 </html>
+

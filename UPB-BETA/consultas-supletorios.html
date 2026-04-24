@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="es">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -17,12 +18,14 @@
     <script src="admin-auth.js"></script>
     <script src="admin-local-modals.js"></script>
 </head>
+
 <body>
     <!-- Contenedor principal -->
     <div class="main-container">
         <!-- Menú lateral -->
         <aside class="sidebar">
-            <button class="mobile-close-btn" type="button" onclick="toggleMobileSidebar(false)" aria-label="Cerrar menu">&lt;</button>
+            <button class="mobile-close-btn" type="button" onclick="toggleMobileSidebar(false)"
+                aria-label="Cerrar menu">&lt;</button>
             <!-- Título del sidebar -->
             <div class="sidebar-title">HORARIOS UPB</div>
 
@@ -35,11 +38,16 @@
                         <span>MENU</span>
                     </li>
                     <div class="submenu" style="display: none;">
-                        <li onclick="irA('consultas-horarios-clases.html')"><span class="submenu-icon">📅</span> Horarios Clases</li>
-                        <li onclick="irA('consultas-examenes.html')"><span class="submenu-icon">📋</span> Exámenes Parciales</li>
-                        <li onclick="irA('consultas-supletorios.html')"><span class="submenu-icon">📋</span> Supletorios</li>
-                        <li onclick="irA('consultas-intersemestrales.html')"><span class="submenu-icon">📋</span> Cursos Intersemestrales</li>
-                        <li onclick="irA('consultas-cursos-extracurriculares.html')"><span class="submenu-icon">📋</span> Cursos Extracurriculares</li>
+                        <li onclick="irA('consultas-horarios-clases.html')"><span class="submenu-icon">📅</span>
+                            Horarios Clases</li>
+                        <li onclick="irA('consultas-examenes.html')"><span class="submenu-icon">📋</span> Exámenes
+                            Parciales</li>
+                        <li onclick="irA('consultas-supletorios.html')"><span class="submenu-icon">📋</span> Supletorios
+                        </li>
+                        <li onclick="irA('consultas-intersemestrales.html')"><span class="submenu-icon">📋</span> Cursos
+                            Intersemestrales</li>
+                        <li onclick="irA('consultas-cursos-extracurriculares.html')"><span
+                                class="submenu-icon">📋</span> Cursos Extracurriculares</li>
                     </div>
                 </ul>
             </div>
@@ -49,8 +57,10 @@
                 <div class="menu-header">MENU ADMINISTRACION</div>
                 <div class="menu-title" id="adminSectionTitle" style="display: none;"></div>
                 <ul class="menu-list">
-                    <li id="adminAccessItem" onclick="abrirAccesoAdmin()" class="login-link"><span class="submenu-icon">🚪</span> <span id="adminAccessText">Login</span></li>
-                    <li id="adminLogoutItem" onclick="cerrarSesion()" style="display: none;"><span class="submenu-icon">🚪</span> Logout</li>
+                    <li id="adminAccessItem" onclick="abrirAccesoAdmin()" class="login-link"><span
+                            class="submenu-icon">🚪</span> <span id="adminAccessText">Login</span></li>
+                    <li id="adminLogoutItem" onclick="cerrarSesion()" style="display: none;"><span
+                            class="submenu-icon">🚪</span> Logout</li>
                 </ul>
             </div>
         </aside>
@@ -61,9 +71,11 @@
         <main class="content">
             <!-- Header -->
             <div class="header">
-            <button class="mobile-menu-btn" type="button" onclick="toggleMobileSidebar()" aria-label="Abrir o cerrar menu">☰</button>
-                <h1>HORARIOS UPB V.3</h1>
-                <img id="adminIcon" src="Assets/ICONO-ADMIN.png" alt="Admin" class="btn-prueba" style="display: none;" onclick="toggleDropdownMenu()">
+                <button class="mobile-menu-btn" type="button" onclick="toggleMobileSidebar()"
+                    aria-label="Abrir o cerrar menu">☰</button>
+                <h1>HORARIO UPB V.3</h1>
+                <img id="adminIcon" src="Assets/ICONO-ADMIN.png" alt="Admin" class="btn-prueba"
+                    style="display: none;" onclick="toggleDropdownMenu()">
                 <div class="dropdown-menu" id="dropdownMenu">
                     <div class="dropdown-header">
                         <img src="Assets/upb-logo.png" alt="Logo UPB" class="dropdown-logo">
@@ -74,13 +86,16 @@
                         <a href="consultas-horarios-clases.html"><span class="icon">📅</span> Horarios Clases</a>
                         <a href="consultas-examenes.html"><span class="icon">📋</span> Exámenes Parciales</a>
                         <a href="consultas-supletorios.html"><span class="icon">📋</span> Supletorios</a>
-                        <a href="consultas-intersemestrales.html"><span class="icon">📋</span> Cursos Intersemestrales</a>
-                <a href="consultas-cursos-extracurriculares.html"><span class="icon">📋</span> Cursos Extracurriculares</a>
+                        <a href="consultas-intersemestrales.html"><span class="icon">📋</span> Cursos
+                            Intersemestrales</a>
+                        <a href="consultas-cursos-extracurriculares.html"><span class="icon">📋</span> Cursos
+                            Extracurriculares</a>
                     </div>
                     <div class="dropdown-divider"></div>
                     <div class="dropdown-admin">
                         <a href="#" onclick="abrirModalInfoAdmin(event)"><span class="icon">👤</span> Mi Información</a>
-                        <a href="#" onclick="abrirModalCambiarContraseña(event)"><span class="icon">🔑</span> Cambiar contraseña</a>
+                        <a href="#" onclick="abrirModalCambiarContraseña(event)"><span class="icon">🔑</span> Cambiar
+                            contraseña</a>
                         <a href="admin.html"><span class="icon">🔍</span> Administración</a>
                         <a href="login.html" onclick="cerrarSesion()"><span class="icon">🚪</span> Logout</a>
                     </div>
@@ -150,46 +165,47 @@
 
                         <div id="table-filters" class="table-filters" style="display: none;">
                             <div>
-                                <label>FAC</label>
-                                <input type="text" data-col="0" list="fac-list" oninput="aplicarFiltros()" placeholder="Buscar facultad">
-                                <datalist id="fac-list"></datalist>
-                            </div>
-                            <div>
-                                <label>NIV</label>
-                                <input type="text" data-col="1" list="niv-list" oninput="aplicarFiltros()" placeholder="Buscar nivel">
-                                <datalist id="niv-list"></datalist>
-                            </div>
-                            <div>
                                 <label>Asignatura</label>
-                                <input type="text" data-col="2" list="asignatura-list" oninput="aplicarFiltros()" placeholder="Buscar asignatura">
+                                <input type="text" data-col="0" list="asignatura-list" oninput="aplicarFiltros()"
+                                    placeholder="Buscar asignatura">
                                 <datalist id="asignatura-list"></datalist>
                             </div>
                             <div>
-                                <label>NRC</label>
-                                <input type="text" data-col="3" list="nrc-list" oninput="aplicarFiltros()" placeholder="Buscar NRC">
-                                <datalist id="nrc-list"></datalist>
-                            </div>
-                            <div>
                                 <label>Fecha</label>
-                                <input type="text" data-col="4" list="fecha-list" oninput="aplicarFiltros()" placeholder="Buscar fecha">
+                                <input type="text" data-col="1" list="fecha-list" oninput="aplicarFiltros()"
+                                    placeholder="Buscar fecha">
                                 <datalist id="fecha-list"></datalist>
                             </div>
                             <div>
-                                <label>Horario</label>
-                                <input type="text" data-col="5" list="horario-list" oninput="aplicarFiltros()" placeholder="Buscar horario">
-                                <datalist id="horario-list"></datalist>
+                                <label>Hora Inicio</label>
+                                <input type="text" data-col="2" list="hora-inicio-list" oninput="aplicarFiltros()"
+                                    placeholder="Buscar hora inicio">
+                                <datalist id="hora-inicio-list"></datalist>
                             </div>
                             <div>
-                                <label>Salón</label>
-                                <input type="text" data-col="6" list="salon-list" oninput="aplicarFiltros()" placeholder="Buscar salón">
+                                <label>Hora Fin</label>
+                                <input type="text" data-col="3" list="hora-fin-list" oninput="aplicarFiltros()"
+                                    placeholder="Buscar hora fin">
+                                <datalist id="hora-fin-list"></datalist>
+                            </div>
+                            <div>
+                                <label>Salon</label>
+                                <input type="text" data-col="4" list="salon-list" oninput="aplicarFiltros()"
+                                    placeholder="Buscar salon">
                                 <datalist id="salon-list"></datalist>
+                            </div>
+                            <div>
+                                <label>Docente</label>
+                                <input type="text" data-col="5" list="docente-list" oninput="aplicarFiltros()"
+                                    placeholder="Buscar docente">
+                                <datalist id="docente-list"></datalist>
                             </div>
                         </div>
 
                         <div id="filters-actions" class="filters-actions" style="display: none;">
                             <button class="btn-limpiar-filtros" onclick="limpiarFiltrosTabla()">Limpiar filtros</button>
                         </div>
-                        
+
                         <div id="resultados" class="no-data">
                             No hay datos para la facultad seleccionada!
                         </div>
@@ -199,13 +215,12 @@
                             <table id="tabla-resultados" class="results-table" style="display: none;">
                                 <thead>
                                     <tr>
-                                        <th>FAC</th>
-                                        <th>NIV</th>
-                                        <th>ASIGNATURA</th>
-                                        <th>NRC</th>
-                                        <th>FECHA</th>
-                                        <th>HORARIO</th>
-                                        <th>SALÓN</th>
+                                        <th>Asignatura</th>
+                                        <th>Fecha</th>
+                                        <th>Hora Inicio</th>
+                                        <th>Hora Fin</th>
+                                        <th>Salon</th>
+                                        <th>Docente</th>
                                     </tr>
                                 </thead>
                                 <tbody id="tabla-body">
@@ -251,7 +266,7 @@
             document.body.classList.toggle('mobile-sidebar-open', shouldOpen);
         }
 
-        window.addEventListener('resize', function() {
+        window.addEventListener('resize', function () {
             if (window.innerWidth > 768) {
                 document.body.classList.remove('mobile-sidebar-open');
             }
@@ -264,37 +279,40 @@
 
             const clave = (nombreFacultad || '').trim().toLowerCase();
             return window.PlantillasStore.getAll()
-                .filter(item => (item.facultad || '').trim().toLowerCase() === clave)
+                .filter(item => (item.facultad || '').trim().toLowerCase() === clave && (item.tipo || 'Horarios') === 'Supletorios')
                 .map(item => ({
                     asignatura: item.asignatura,
-                    fecha: '2026-05-10',
-                    horaInicio: '09:00',
-                    horaFin: '11:00',
+                    fecha: item.lun || '2026-05-10',
+                    horaInicio: item.mar || '09:00',
+                    horaFin: item.mier || '11:00',
                     salon: item.aula,
                     docente: item.profesor
                 }));
         }
 
+        /* Función para buscar datos reales vía API */
         async function buscarDatos() {
             const facultadSelect = document.getElementById('facultad');
-            const facultadValue = facultadSelect.value;
-            const facultadTexto = facultadSelect.options[facultadSelect.selectedIndex].text;
-            
-            const resultadosMostrados = document.getElementById('resultados');
-            const header = document.getElementById('results-header');
-            const carreraNombre = document.getElementById('carrera-nombre');
-            const tabla = document.getElementById('tabla-resultados');
-
-            if (!facultadValue) {
+            if (!facultadSelect || !facultadSelect.value) {
                 alert('Por favor seleccione una facultad');
                 return;
             }
 
+            const facultadTexto = facultadSelect.options[facultadSelect.selectedIndex].text;
+            const resultados = document.getElementById('resultados');
+            const tabla = document.getElementById('tabla-resultados');
+            const header = document.getElementById('results-header');
+            const carreraNombre = document.getElementById('carrera-nombre');
+            const tbody = document.getElementById('tabla-body');
+
             try {
                 UIManager.showLoader(`Buscando supletorios para ${facultadTexto}...`);
-                resultadosMostrados.style.display = 'none';
-                header.style.display = 'none';
+                
+                // Limpiar vista previa
+                resultados.style.display = 'none';
                 tabla.style.display = 'none';
+                header.style.display = 'none';
+                tbody.innerHTML = '';
 
                 const url = `/api/horarios?tipo=supletorios&facultad=${encodeURIComponent(facultadTexto)}`;
                 const result = await UIManager.apiFetch(url);
@@ -302,36 +320,24 @@
                 UIManager.hideLoader();
 
                 if (result.success && result.horarios && result.horarios.length > 0) {
-                    console.log(`✅ [Frontend] Renderizando ${result.horarios.length} supletorios.`);
+                    console.log(`✅ [Supletorios] Recibidos ${result.horarios.length} registros.`);
+                    
                     carreraNombre.textContent = facultadTexto;
                     header.style.display = 'block';
-                    resultadosMostrados.style.display = 'none';
+                    resultados.style.display = 'none';
                     tabla.style.display = 'table';
 
-                    const tbody = document.getElementById('tabla-body');
-                    tbody.innerHTML = '';
-                    
                     result.horarios.forEach(dato => {
-                        let fila = '';
-                        if (dato.nrc === 'HEADER') {
-                            fila = `
-                                <tr class="header-row">
-                                    <td colspan="7">${dato.nivel || 'ENCABEZADO'}</td>
-                                </tr>
-                            `;
-                        } else {
-                            fila = `
-                                <tr>
-                                    <td>${dato.facultad || ''}</td>
-                                    <td>${dato.nivel || ''}</td>
-                                    <td>${dato.asignatura || '-'}</td>
-                                    <td>${dato.nrc || '-'}</td>
-                                    <td>${dato.fecha || 'Pendiente'}</td>
-                                    <td>${dato.lunes || (dato.martes || (dato.miercoles || (dato.jueves || (dato.viernes || (dato.sabado || 'Pendiente')))))}</td>
-                                    <td>${dato.aula || '-'}</td>
-                                </tr>
-                            `;
-                        }
+                        const fila = `
+                            <tr>
+                                <td>${dato.materia || dato.asignatura || ''}</td>
+                                <td>${dato.fecha_exacta || dato.fecha || ''}</td>
+                                <td>${dato.hora_inicio || dato.horaInicio || ''}</td>
+                                <td>${dato.hora_fin || dato.horaFin || ''}</td>
+                                <td>${dato.salon || ''}</td>
+                                <td>${dato.profesor || dato.docente || ''}</td>
+                            </tr>
+                        `;
                         tbody.innerHTML += fila;
                     });
 
@@ -339,48 +345,19 @@
                     poblarListasFiltros();
                     limpiarFiltrosTabla();
                 } else {
-                    console.warn('⚠️ [Frontend] La API respondió con éxito pero 0 supletorios.');
-                    resultadosMostrados.textContent = 'No hay supletorios registrados para esta facultad en MySQL!';
-                    resultadosMostrados.style.display = 'block';
-                    header.style.display = 'none';
+                    console.warn('⚠️ No se encontraron supletorios para esta facultad.');
+                    resultados.textContent = 'No hay supletorios programados para esta facultad en la base de datos.';
+                    resultados.style.display = 'block';
                     tabla.style.display = 'none';
+                    header.style.display = 'none';
                     mostrarFiltros(false);
                 }
             } catch (error) {
                 UIManager.hideLoader();
-                console.error('🔥 Error al buscar supletorios:', error);
-                alert('Error al conectar con el servidor: ' + error.message);
-                resultadosMostrados.textContent = 'Error de conexión con el servidor.';
-                resultadosMostrados.style.display = 'block';
-            }
-        }
-
-        function renderizarTabla(datos) {
-            if (datos.length === 0) {
+                console.error('🔥 Error:', error);
+                alert('Error al conectar con el servidor.');
+                resultados.textContent = 'Error de conexión con el servidor.';
                 resultados.style.display = 'block';
-                tabla.style.display = 'none';
-                header.style.display = 'none';
-                carreraNombre.textContent = '-';
-                mostrarFiltros(false);
-            } else {
-                header.style.display = 'block';
-                resultados.style.display = 'none';
-                datos.forEach(dato => {
-                    const fila = `
-                        <tr>
-                            <td>${dato.asignatura}</td>
-                            <td>${dato.fecha}</td>
-                            <td>${dato.horaInicio}</td>
-                            <td>${dato.horaFin}</td>
-                            <td>${dato.salon}</td>
-                            <td>${dato.docente}</td>
-                        </tr>
-                    `;
-                    tbody.innerHTML += fila;
-                });
-                mostrarFiltros(true);
-                poblarListasFiltros();
-                limpiarFiltrosTabla();
             }
         }
 
@@ -442,11 +419,6 @@
             const filas = document.querySelectorAll('#tabla-body tr');
 
             filas.forEach(fila => {
-                if (fila.classList.contains('header-row')) {
-                    fila.style.display = ''; // Siempre visible para contexto
-                    return;
-                }
-                
                 let visible = true;
                 filtros.forEach(input => {
                     const valor = input.value.trim().toLowerCase();
@@ -481,7 +453,7 @@
             menu.classList.toggle('active');
         }
 
-        document.addEventListener('click', function(event) {
+        document.addEventListener('click', function (event) {
             const menu = document.getElementById('dropdownMenu');
             const btn = document.getElementById('adminIcon');
 
@@ -565,7 +537,7 @@
             window.location.href = './login.html';
         }
 
-        document.addEventListener('DOMContentLoaded', function() {
+        document.addEventListener('DOMContentLoaded', function () {
             document.body.classList.remove('mobile-sidebar-open');
             aplicarVistaSesionAdmin();
             if (window.aplicarFacultadesEnSelect) {
@@ -574,8 +546,5 @@
         });
     </script>
 </body>
+
 </html>
-
-
-
-

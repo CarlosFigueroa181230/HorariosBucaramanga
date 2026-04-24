@@ -1,4 +1,6 @@
 const express = require('express');
+const https = require('https');
+const fs = require('fs');
 const cors = require('cors');
 const ldap = require('ldapjs');
 const path = require('path');
@@ -100,7 +102,8 @@ app.use('/api/horarios', horariosRoutes);
 app.use('/api/facultades', facultadesRoutes);
 app.use('/api/reportes', reportesRoutes);
 
-// Servir el frontend UPB-BETA como archivos estáticos
+// --- CONFIGURACIÓN VERSIÓN ACTUAL (UPB-BETA) ---
+// Servir el frontend UPB-BETA como archivos estáticos (Raíz)
 const frontendPath = path.join(__dirname, '..', 'UPB-BETA');
 app.use(express.static(frontendPath));
 
@@ -109,9 +112,15 @@ app.get('*', (req, res) => {
     res.sendFile(path.join(frontendPath, 'index.html'));
 });
 
+// HTTPS Configuration
+const sslOptions = {
+    key: fs.readFileSync(path.join(__dirname, 'security', 'server.key')),
+    cert: fs.readFileSync(path.join(__dirname, 'security', 'server.cert'))
+};
+
 // Start the server
-app.listen(PORT, () => {
-    console.log(`🚀 Backend server is running on http://localhost:${PORT}`);
+https.createServer(sslOptions, app).listen(PORT, () => {
+    console.log(`🚀 Backend server is running on https://localhost:${PORT}`);
     console.log(`🔐 LDAP auth → ${process.env.LDAP_URL} (dominio: ${process.env.LDAP_DOMAIN})`);
 });
 

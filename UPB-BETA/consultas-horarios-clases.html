@@ -1,6 +1,5 @@
 <!DOCTYPE html>
 <html lang="es">
-
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -13,19 +12,18 @@
     <script src="shared-ui.js"></script>
     <script src="ux-dynamic.js"></script>
     <script src="facultades-store.js"></script>
+    <script src="materias-store.js"></script>
     <script src="plantillas-store.js"></script>
     <script src="facultades-sync.js"></script>
     <script src="admin-auth.js"></script>
     <script src="admin-local-modals.js"></script>
 </head>
-
 <body>
     <!-- Contenedor principal -->
     <div class="main-container">
         <!-- Menú lateral -->
         <aside class="sidebar">
-            <button class="mobile-close-btn" type="button" onclick="toggleMobileSidebar(false)"
-                aria-label="Cerrar menu">&lt;</button>
+            <button class="mobile-close-btn" type="button" onclick="toggleMobileSidebar(false)" aria-label="Cerrar menu">&lt;</button>
             <!-- Título del sidebar -->
             <div class="sidebar-title">HORARIOS UPB</div>
 
@@ -38,16 +36,11 @@
                         <span>MENU</span>
                     </li>
                     <div class="submenu" style="display: none;">
-                        <li onclick="irA('consultas-horarios-clases.html')"><span class="submenu-icon">📅</span>
-                            Horarios Clases</li>
-                        <li onclick="irA('consultas-examenes.html')"><span class="submenu-icon">📋</span> Exámenes
-                            Parciales</li>
-                        <li onclick="irA('consultas-supletorios.html')"><span class="submenu-icon">📋</span> Supletorios
-                        </li>
-                        <li onclick="irA('consultas-intersemestrales.html')"><span class="submenu-icon">📋</span> Cursos
-                            Intersemestrales</li>
-                        <li onclick="irA('consultas-cursos-extracurriculares.html')"><span
-                                class="submenu-icon">📋</span> Cursos Extracurriculares</li>
+                        <li onclick="irA('consultas-horarios-clases.html')"><span class="submenu-icon">📅</span> Horarios Clases</li>
+                        <li onclick="irA('consultas-examenes.html')"><span class="submenu-icon">📋</span> Exámenes Parciales</li>
+                        <li onclick="irA('consultas-supletorios.html')"><span class="submenu-icon">📋</span> Supletorios</li>
+                        <li onclick="irA('consultas-intersemestrales.html')"><span class="submenu-icon">📋</span> Cursos Intersemestrales</li>
+                        <li onclick="irA('consultas-cursos-extracurriculares.html')"><span class="submenu-icon">📋</span> Cursos Extracurriculares</li>
                     </div>
                 </ul>
             </div>
@@ -57,10 +50,8 @@
                 <div class="menu-header">MENU ADMINISTRACION</div>
                 <div class="menu-title" id="adminSectionTitle" style="display: none;"></div>
                 <ul class="menu-list">
-                    <li id="adminAccessItem" onclick="abrirAccesoAdmin()" class="login-link"><span
-                            class="submenu-icon">🚪</span> <span id="adminAccessText">Login</span></li>
-                    <li id="adminLogoutItem" onclick="cerrarSesion()" style="display: none;"><span
-                            class="submenu-icon">🚪</span> Logout</li>
+                    <li id="adminAccessItem" onclick="abrirAccesoAdmin()" class="login-link"><span class="submenu-icon">🚪</span> <span id="adminAccessText">Login</span></li>
+                    <li id="adminLogoutItem" onclick="cerrarSesion()" style="display: none;"><span class="submenu-icon">🚪</span> Logout</li>
                 </ul>
             </div>
         </aside>
@@ -71,11 +62,9 @@
         <main class="content">
             <!-- Header -->
             <div class="header">
-                <button class="mobile-menu-btn" type="button" onclick="toggleMobileSidebar()"
-                    aria-label="Abrir o cerrar menu">☰</button>
-                <h1>HORARIOS UPB V.3</h1>
-                <img id="adminIcon" src="Assets/ICONO-ADMIN.png" alt="Admin" class="btn-prueba" style="display: none;"
-                    onclick="toggleDropdownMenu()">
+            <button class="mobile-menu-btn" type="button" onclick="toggleMobileSidebar()" aria-label="Abrir o cerrar menu">☰</button>
+                <h1>HORARIO UPB V.3</h1>
+                <img id="adminIcon" src="Assets/ICONO-ADMIN.png" alt="Admin" class="btn-prueba" style="display: none;" onclick="toggleDropdownMenu()">
                 <div class="dropdown-menu" id="dropdownMenu">
                     <div class="dropdown-header">
                         <img src="Assets/upb-logo.png" alt="Logo UPB" class="dropdown-logo">
@@ -86,16 +75,13 @@
                         <a href="consultas-horarios-clases.html"><span class="icon">📅</span> Horarios Clases</a>
                         <a href="consultas-examenes.html"><span class="icon">📋</span> Exámenes Parciales</a>
                         <a href="consultas-supletorios.html"><span class="icon">📋</span> Supletorios</a>
-                        <a href="consultas-intersemestrales.html"><span class="icon">📋</span> Cursos
-                            Intersemestrales</a>
-                        <a href="consultas-cursos-extracurriculares.html"><span class="icon">📋</span> Cursos
-                            Extracurriculares</a>
+                        <a href="consultas-intersemestrales.html"><span class="icon">📋</span> Cursos Intersemestrales</a>
+                <a href="consultas-cursos-extracurriculares.html"><span class="icon">📋</span> Cursos Extracurriculares</a>
                     </div>
                     <div class="dropdown-divider"></div>
                     <div class="dropdown-admin">
                         <a href="#" onclick="abrirModalInfoAdmin(event)"><span class="icon">👤</span> Mi Información</a>
-                        <a href="#" onclick="abrirModalCambiarContraseña(event)"><span class="icon">🔑</span> Cambiar
-                            contraseña</a>
+                        <a href="#" onclick="abrirModalCambiarContraseña(event)"><span class="icon">🔑</span> Cambiar contraseña</a>
                         <a href="admin.html"><span class="icon">🔍</span> Administración</a>
                         <a href="login.html" onclick="cerrarSesion()"><span class="icon">🚪</span> Logout</a>
                     </div>
@@ -159,7 +145,7 @@
 
                         <div id="results-header" class="results-header" style="display: none;">
                             <div class="results-line results-name"><span id="carrera-nombre">-</span></div>
-                            <div class="results-line results-title">HORARIOS DE CLASE PRIMER SEMESTRE (Año)</div>
+                            <div class="results-line results-title" id="results-title">HORARIOS DE CLASE POR SEMESTRE</div>
                             <div class="results-line results-availability">Disponible: 2024/01/15 -> 2024/06/15</div>
                         </div>
 
@@ -173,33 +159,28 @@
                             </div>
                             <div>
                                 <label>Asignatura</label>
-                                <input type="text" data-col="1" list="asignatura-list" oninput="aplicarFiltros()"
-                                    placeholder="Buscar asignatura">
+                                <input type="text" data-col="0" list="asignatura-list" oninput="aplicarFiltros()" placeholder="Buscar asignatura">
                                 <datalist id="asignatura-list"></datalist>
                             </div>
                             <div>
                                 <label>Materia</label>
-                                <input type="text" data-col="2" list="materia-list" oninput="aplicarFiltros()"
-                                    placeholder="Buscar materia">
+                                <input type="text" data-col="1" list="materia-list" oninput="aplicarFiltros()" placeholder="Buscar materia">
                                 <datalist id="materia-list"></datalist>
                             </div>
                             <div>
-                                <label>Curso</label>
-                                <input type="text" data-col="3" list="curso-list" oninput="aplicarFiltros()"
-                                    placeholder="Buscar curso">
-                                <datalist id="curso-list"></datalist>
-                            </div>
-                            <div>
                                 <label>NRC</label>
-                                <input type="text" data-col="4" list="nrc-list" oninput="aplicarFiltros()"
-                                    placeholder="Buscar NRC">
+                                <input type="text" data-col="3" list="nrc-list" oninput="aplicarFiltros()" placeholder="Buscar NRC">
                                 <datalist id="nrc-list"></datalist>
                             </div>
                             <div>
-                                <label>Créditos</label>
-                                <input type="text" data-col="5" list="creditos-list" oninput="aplicarFiltros()"
-                                    placeholder="Buscar créditos">
+                                <label>Creditos</label>
+                                <input type="text" data-col="4" list="creditos-list" oninput="aplicarFiltros()" placeholder="Buscar creditos">
                                 <datalist id="creditos-list"></datalist>
+                            </div>
+                            <div>
+                                <label>Cupos</label>
+                                <input type="text" data-col="5" list="cupos-list" oninput="aplicarFiltros()" placeholder="Buscar cupos">
+                                <datalist id="cupos-list"></datalist>
                             </div>
                         </div>
 
@@ -252,7 +233,7 @@
             document.body.classList.toggle('mobile-sidebar-open', shouldOpen);
         }
 
-        window.addEventListener('resize', function () {
+        window.addEventListener('resize', function() {
             if (window.innerWidth > 768) {
                 document.body.classList.remove('mobile-sidebar-open');
             }
@@ -269,7 +250,7 @@
 
             const clave = (nombreFacultad || '').trim().toLowerCase();
             return window.PlantillasStore.getAll()
-                .filter(item => (item.facultad || '').trim().toLowerCase() === clave)
+                .filter(item => (item.facultad || '').trim().toLowerCase() === clave && (item.tipo || 'Horarios') === 'Horarios')
                 .map(item => ({
                     asignatura: item.asignatura,
                     materia: item.materia,
@@ -288,67 +269,53 @@
                 }));
         }
 
-        function normalizarSemestre(valor, fallback) {
-            if (!valor) return fallback || 1;
-
-            const texto = valor.toString().toUpperCase();
-            // Si el texto tiene la palabra "OPCIÓN", lo usamos como identificador único
-            if (texto.includes('OPCIÓN') || texto.includes('OPCION')) {
-                return valor.trim();
+        function obtenerDatosMaterias(nombreFacultad) {
+            if (!window.MateriasStore || typeof window.MateriasStore.getAll !== 'function') {
+                return [];
             }
 
+            const clave = (nombreFacultad || '').trim().toLowerCase();
+            return window.MateriasStore.getAll()
+                .filter(item => (item.facultad || '').trim().toLowerCase() === clave)
+                .map(item => ({
+                    asignatura: item.materia,
+                    materia: item.materia,
+                    semestre: item.semestre,
+                    nrc: item.nrc,
+                    creditos: item.creditos,
+                    profesor: '--',
+                    aula: '--',
+                    cupos: '--',
+                    lunes: '--',
+                    martes: '--',
+                    miercoles: '--',
+                    jueves: '--',
+                    viernes: '--',
+                    sabado: '--'
+                }));
+        }
+
+        function normalizarSemestre(valor, fallback) {
             const numero = Number(valor);
             if (Number.isFinite(numero) && numero > 0) {
                 return Math.trunc(numero);
             }
-            return fallback || 1;
-        }
-
-        function formatearTextoSemestre(semestre) {
-            // Si ya es un texto descriptivo (como el caso de las Opciones), lo devolvemos tal cual
-            if (typeof semestre === 'string' && semestre.toUpperCase().includes('SEMESTRE')) {
-                return semestre.toUpperCase();
-            }
-
-            const etiquetas = {
-                1: 'PRIMER SEMESTRE',
-                2: 'SEGUNDO SEMESTRE',
-                3: 'TERCER SEMESTRE',
-                4: 'CUARTO SEMESTRE',
-                5: 'QUINTO SEMESTRE',
-                6: 'SEXTO SEMESTRE',
-                7: 'SEPTIMO SEMESTRE',
-                8: 'OCTAVO SEMESTRE',
-                9: 'NOVENO SEMESTRE',
-                10: 'DECIMO SEMESTRE'
-            };
-
-            const numero = Number(semestre);
-            if (!Number.isFinite(numero) || numero <= 0) {
-                return 'TODOS LOS SEMESTRES';
-            }
-
-            return etiquetas[numero] || `SEMESTRE ${numero}`;
+            return fallback;
         }
 
         function actualizarEncabezadoHorarios(datos) {
             const titulo = document.getElementById('results-title');
             if (!titulo) return;
 
-            const semestres = Array.from(new Set(
-                datos
-                    .filter(item => item.nrc !== 'HEADER')
-                    .map(item => normalizarSemestre(item.nivel, null))
-                    .filter(value => value !== null)
-            )).sort((a, b) => a - b);
-
-            if (!semestres.length) {
-                titulo.textContent = 'HORARIOS DE CLASE POR SEMESTRE';
+            const niveles = Array.from(new Set(datos.map(item => item.nivel || "OTROS"))).filter(v => !!v);
+            
+            if (!niveles.length) {
+                titulo.textContent = 'HORARIOS DE CLASE';
                 return;
             }
 
-            if (semestres.length === 1) {
-                titulo.textContent = `HORARIOS DE CLASE ${formatearTextoSemestre(semestres[0])}`;
+            if (niveles.length === 1) {
+                titulo.textContent = `HORARIOS DE CLASE - ${niveles[0]}`;
                 return;
             }
 
@@ -359,23 +326,20 @@
             const select = document.getElementById('semester-filter');
             if (!select) return;
 
-            const semestres = Array.from(
-                new Set(
-                    datos
-                        .filter(item => item.nrc !== 'HEADER')
-                        .map(item => normalizarSemestre(item.nivel, null))
-                        .filter(value => value !== null)
-                )
-            ).sort((a, b) => {
-                if (typeof a === 'number' && typeof b === 'number') return a - b;
-                return String(a).localeCompare(String(b));
+            // Extraer niveles únicos en el orden en que vienen (ya ordenados por backend)
+            const niveles = [];
+            datos.forEach(item => {
+                const n = item.nivel || "Otros";
+                if (!niveles.includes(n)) {
+                    niveles.push(n);
+                }
             });
 
             select.innerHTML = '<option value="">Todos</option>';
-            semestres.forEach(semestre => {
+            niveles.forEach(n => {
                 const option = document.createElement('option');
-                option.value = String(semestre);
-                option.textContent = typeof semestre === 'number' ? `Semestre ${semestre}` : semestre;
+                option.value = n;
+                option.textContent = n;
                 select.appendChild(option);
             });
         }
@@ -397,41 +361,45 @@
             }
 
             const grupos = new Map();
+            const ordenNiveles = []; // Para mantener el orden que envía el backend
+            
             datos.forEach(function (item) {
-                if (item.nrc === 'HEADER') return; // Saltamos los headers en la agrupación principal de datos
-                const semestre = normalizarSemestre(item.nivel, 'GENERAL');
-                if (!grupos.has(semestre)) {
-                    grupos.set(semestre, []);
+                const nivel = item.nivel || "Otros";
+                if (!grupos.has(nivel)) {
+                    grupos.set(nivel, []);
+                    ordenNiveles.push(nivel);
                 }
-                grupos.get(semestre).push(item);
+                grupos.get(nivel).push(item);
             });
 
-            const keys = Array.from(grupos.keys()).sort(function (a, b) {
-                // Intentamos extraer el número del semestre para el ordenamiento
-                const getNum = (val) => {
-                    const match = String(val).match(/\d+/);
-                    return match ? parseInt(match[0], 10) : 99;
-                };
-                const numA = typeof a === 'number' ? a : getNum(a);
-                const numB = typeof b === 'number' ? b : getNum(b);
-
-                if (numA !== numB) return numA - numB;
-                // Si son del mismo nivel, ordenamos alfabéticamente (por Opción 1, Opción 2...)
-                return String(a).localeCompare(String(b));
+            // Ordenamiento interno de cada nivel (por asignatura/materia)
+            ordenNiveles.forEach(function (nivel) {
+                const items = grupos.get(nivel);
+                items.sort(function (a, b) {
+                    const asigA = String(a.asignatura || "");
+                    const asigB = String(b.asignatura || "");
+                    const porAsignatura = asigA.localeCompare(asigB, 'es', { sensitivity: 'base' });
+                    if (porAsignatura !== 0) {
+                        return porAsignatura;
+                    }
+                    const matA = String(a.materia || "");
+                    const matB = String(b.materia || "");
+                    return matA.localeCompare(matB, 'es', { sensitivity: 'base' });
+                });
             });
 
-            keys.forEach(function (semestre) {
+            ordenNiveles.forEach(function (nivel, index) {
                 const panel = document.createElement('section');
                 panel.className = 'semester-panel';
-                panel.dataset.semester = String(semestre);
+                panel.dataset.semester = nivel; // Guardamos el nombre del nivel para el filtro
                 
-                // Usamos slugify para evitar errores con espacios en classList.add
-                const safeClassName = UIManager.slugify(semestre);
-                panel.classList.add(`semester-panel-${safeClassName}`);
+                // Usamos el index para la clase de color (1-10) o fallback
+                const colorIdx = (index % 10) + 1;
+                panel.classList.add(`semester-panel-${colorIdx}`);
 
                 const encabezado = document.createElement('div');
                 encabezado.className = 'semester-panel-header';
-                encabezado.textContent = formatearTextoSemestre(semestre);
+                encabezado.textContent = nivel;
 
                 const tabla = document.createElement('table');
                 tabla.className = 'semester-panel-table';
@@ -439,35 +407,36 @@
                 tabla.innerHTML = `
                     <thead>
                         <tr>
-                            <th>Facultad</th>
                             <th>Asignatura</th>
                             <th>Materia</th>
-                            <th>Curso</th>
+                            <th>Semestre</th>
                             <th>NRC</th>
-                            <th>Créditos</th>
+                            <th>Creditos</th>
+                            <th>Cupos</th>
                             <th>Lunes</th>
                             <th>Martes</th>
-                            <th>Miércoles</th>
+                            <th>Miercoles</th>
                             <th>Jueves</th>
                             <th>Viernes</th>
-                            <th>Sábado</th>
+                            <th>Sabado</th>
                         </tr>
                     </thead>
                     <tbody></tbody>
                 `;
 
                 const tbody = tabla.querySelector('tbody');
-                grupos.get(semestre).forEach(function (item) {
+                grupos.get(nivel).forEach(function (item, indiceFila) {
                     const fila = document.createElement('tr');
                     fila.dataset.rowType = 'data';
-                    fila.dataset.semester = String(semestre);
+                    fila.dataset.semester = String(nivel);
+                    fila.classList.add('semester-data-row');
                     fila.innerHTML = `
-                        <td>${item.facultad || ''}</td>
                         <td>${item.asignatura || ''}</td>
                         <td>${item.materia || ''}</td>
-                        <td>${item.curso || ''}</td>
+                        <td>${nivel}</td>
                         <td>${item.nrc || ''}</td>
                         <td>${item.creditos ?? ''}</td>
+                        <td>${item.cupos ?? ''}</td>
                         <td>${item.lunes || '--'}</td>
                         <td>${item.martes || '--'}</td>
                         <td>${item.miercoles || '--'}</td>
@@ -487,25 +456,71 @@
             resultados.style.display = 'none';
         }
 
+        function unirDatosPorNrcSemestre(datosPlantilla, datosMaterias) {
+            const combinados = [];
+            const vistos = new Set();
+
+            function agregarListado(listado, prioridadPlantilla) {
+                listado.forEach(function (item) {
+                    const semestre = normalizarSemestre(item.semestre, 1);
+                    const nrc = (item.nrc || '').trim().toLowerCase();
+                    const clave = `${semestre}::${nrc}`;
+
+                    if (nrc && vistos.has(clave)) {
+                        return;
+                    }
+
+                    if (nrc) {
+                        vistos.add(clave);
+                    }
+
+                    combinados.push({
+                        asignatura: item.asignatura || item.materia || '',
+                        materia: item.materia || item.asignatura || '',
+                        semestre: semestre,
+                        nrc: item.nrc || '',
+                        creditos: item.creditos ?? '',
+                        profesor: item.profesor || '--',
+                        aula: item.aula || '--',
+                        cupos: item.cupos ?? '--',
+                        lunes: item.lunes || '--',
+                        martes: item.martes || '--',
+                        miercoles: item.miercoles || '--',
+                        jueves: item.jueves || '--',
+                        viernes: item.viernes || '--',
+                        sabado: item.sabado || '--',
+                        prioridadPlantilla: prioridadPlantilla,
+                        fuente: prioridadPlantilla ? 'plantilla' : 'materia'
+                    });
+                });
+            }
+
+            agregarListado(datosPlantilla, true);
+            agregarListado(datosMaterias, false);
+
+            return combinados;
+        }
+
         /* Función para buscar datos reales vía API */
         async function buscarDatos() {
             const facultadSelect = document.getElementById('facultad');
-            const facultadValue = facultadSelect.value;
-            const facultadTexto = facultadSelect.options[facultadSelect.selectedIndex].text;
-
-            const resultadosMostrados = document.getElementById('resultados');
-            const header = document.getElementById('results-header');
-            const carreraNombre = document.getElementById('carrera-nombre');
-
-            if (!facultadValue) {
+            if (!facultadSelect || !facultadSelect.value) {
                 alert('Por favor seleccione una facultad');
                 return;
             }
 
+            const facultadTexto = facultadSelect.options[facultadSelect.selectedIndex].text;
+            const resultadosMostrados = document.getElementById('resultados');
+            const header = document.getElementById('results-header');
+            const carreraNombre = document.getElementById('carrera-nombre');
+
             try {
                 UIManager.showLoader(`Buscando horarios para ${facultadTexto}...`);
+                
+                // Ocultar resultados previos
                 resultadosMostrados.style.display = 'none';
                 header.style.display = 'none';
+                document.getElementById('semester-panels').style.display = 'none';
 
                 const url = `/api/horarios?tipo=horarios&facultad=${encodeURIComponent(facultadTexto)}`;
                 const result = await UIManager.apiFetch(url);
@@ -605,6 +620,7 @@
             const paneles = document.querySelectorAll('#semester-panels .semester-panel');
             const filasDatos = document.querySelectorAll('#semester-panels tr[data-row-type="data"]');
             const visibilidadSemestres = new Map();
+            let hayPanelVisible = false;
 
             filasDatos.forEach(fila => {
                 let visible = true;
@@ -643,11 +659,14 @@
                 const semestrePanel = panel.dataset.semester || '';
                 const visible = visibilidadSemestres.get(semestrePanel);
                 panel.style.display = visible ? 'block' : 'none';
+                if (visible) {
+                    hayPanelVisible = true;
+                }
             });
 
             const contenedor = document.getElementById('semester-panels');
             if (contenedor) {
-                contenedor.style.display = paneles.length ? 'grid' : 'none';
+                contenedor.style.display = hayPanelVisible ? 'grid' : 'none';
             }
         }
 
@@ -672,7 +691,7 @@
             menu.classList.toggle('active');
         }
 
-        document.addEventListener('click', function (event) {
+        document.addEventListener('click', function(event) {
             const menu = document.getElementById('dropdownMenu');
             const btn = document.getElementById('adminIcon');
 
@@ -756,7 +775,7 @@
             window.location.href = './login.html';
         }
 
-        document.addEventListener('DOMContentLoaded', function () {
+        document.addEventListener('DOMContentLoaded', function() {
             document.body.classList.remove('mobile-sidebar-open');
             aplicarVistaSesionAdmin();
             if (window.aplicarFacultadesEnSelect) {
@@ -765,5 +784,9 @@
         });
     </script>
 </body>
-
 </html>
+
+
+
+
+

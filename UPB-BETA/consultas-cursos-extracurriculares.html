@@ -13,6 +13,7 @@
     <script src="ux-dynamic.js"></script>
     <script src="facultades-store.js"></script>
     <script src="facultades-sync.js"></script>
+    <script src="plantillas-store.js"></script>
     <script src="cursos-extracurriculares-store.js"></script>
     <script src="admin-auth.js"></script>
     <script src="admin-local-modals.js"></script>
@@ -55,7 +56,7 @@
         <main class="content">
             <div class="header">
                 <button class="mobile-menu-btn" type="button" onclick="toggleMobileSidebar()" aria-label="Abrir o cerrar menu">☰</button>
-                <h1>HORARIOS UPB V.3</h1>
+                <h1>HORARIO UPB V.3</h1>
                 <img id="adminIcon" src="Assets/ICONO-ADMIN.png" alt="Admin" class="btn-prueba" style="display: none;" onclick="toggleDropdownMenu()">
                 <div class="dropdown-menu" id="dropdownMenu">
                     <div class="dropdown-header">
@@ -120,8 +121,8 @@
 
                         <div id="table-filters" class="table-filters" style="display: none;">
                             <div>
-                                <label>Nombre del Curso</label>
-                                <input type="text" data-col="0" list="asignatura-list" oninput="aplicarFiltros()" placeholder="Buscar curso">
+                                <label>Asignatura</label>
+                                <input type="text" data-col="0" list="asignatura-list" oninput="aplicarFiltros()" placeholder="Buscar asignatura">
                                 <datalist id="asignatura-list"></datalist>
                             </div>
                             <div>
@@ -130,14 +131,24 @@
                                 <datalist id="nrc-list"></datalist>
                             </div>
                             <div>
-                                <label>Aula</label>
-                                <input type="text" data-col="8" list="aula-list" oninput="aplicarFiltros()" placeholder="Buscar aula">
-                                <datalist id="aula-list"></datalist>
+                                <label>Instructor</label>
+                                <input type="text" data-col="2" list="instructor-list" oninput="aplicarFiltros()" placeholder="Buscar instructor">
+                                <datalist id="instructor-list"></datalist>
                             </div>
                             <div>
-                                <label>Instructor</label>
-                                <input type="text" data-col="9" list="instructor-list" oninput="aplicarFiltros()" placeholder="Buscar instructor">
-                                <datalist id="instructor-list"></datalist>
+                                <label>Cupos</label>
+                                <input type="text" data-col="3" list="cupos-list" oninput="aplicarFiltros()" placeholder="Buscar cupos">
+                                <datalist id="cupos-list"></datalist>
+                            </div>
+                            <div>
+                                <label>Horario semanal</label>
+                                <input type="text" data-col="4" list="horario-semanal-list" oninput="aplicarFiltros()" placeholder="Buscar horario semanal">
+                                <datalist id="horario-semanal-list"></datalist>
+                            </div>
+                            <div>
+                                <label>Salón</label>
+                                <input type="text" data-col="5" list="salon-list" oninput="aplicarFiltros()" placeholder="Buscar salón">
+                                <datalist id="salon-list"></datalist>
                             </div>
                         </div>
 
@@ -151,16 +162,12 @@
                             <table id="tabla-resultados" class="results-table" style="display: none;">
                                 <thead>
                                     <tr>
-                                        <th>Nombre del Curso o Actividad</th>
+                                        <th>Asignatura</th>
                                         <th>NRC</th>
-                                        <th>LUNES</th>
-                                        <th>MARTES</th>
-                                        <th>MIÉRCOLES</th>
-                                        <th>JUEVES</th>
-                                        <th>VIERNES</th>
-                                        <th>SÁBADO</th>
-                                        <th>AULA</th>
-                                        <th>Nombre y ID del Instructor</th>
+                                        <th>Instructor</th>
+                                        <th>Cupos</th>
+                                        <th>Horario semanal</th>
+                                        <th>Salón</th>
                                     </tr>
                                 </thead>
                                 <tbody id="tabla-body"></tbody>
@@ -218,7 +225,26 @@
                 return [];
             }
 
-            return window.CursosExtracurricularesStore.getAll().filter(item => (item.tipo || '') === tipo);
+            const cursosLocales = window.CursosExtracurricularesStore.getAll().filter(item => (item.tipo || '') === tipo);
+
+            let cursosPlantilla = [];
+            if (window.PlantillasStore && typeof window.PlantillasStore.getAll === 'function') {
+                cursosPlantilla = window.PlantillasStore.getAll()
+                    .filter(item => (item.tipo || '') === 'Extracurriculares')
+                    .filter(item => (item.materia || '') === tipo)
+                    .map(item => ({
+                        tipo: item.materia || tipo,
+                        asignatura: item.asignatura,
+                        nrc: item.nrc,
+                        instructor: item.profesor,
+                        cupos: item.cupos,
+                        horarioSemanal: item.lun || '--',
+                        salon: item.aula,
+                        fechaActualizacion: 'Plantilla'
+                    }));
+            }
+
+            return [...cursosLocales, ...cursosPlantilla];
         }
 
         function mostrarFiltros(visible) {
@@ -243,57 +269,70 @@
         function actualizarDatalists() {
             poblarDatalistPorColumna(0, 'asignatura-list');
             poblarDatalistPorColumna(1, 'nrc-list');
-            poblarDatalistPorColumna(8, 'aula-list');
-            poblarDatalistPorColumna(9, 'instructor-list');
+            poblarDatalistPorColumna(2, 'instructor-list');
+            poblarDatalistPorColumna(3, 'cupos-list');
+            poblarDatalistPorColumna(4, 'horario-semanal-list');
+            poblarDatalistPorColumna(5, 'salon-list');
         }
 
+        /* Función para buscar datos reales vía API */
         async function buscarDatos() {
             const select = document.getElementById('tipo');
-            const tipoValue = select.value; // Deportivas, Culturales, Pastorales
-            const resultadosMostrados = document.getElementById('resultados');
+            const tipo = select.value;
+            const resultados = document.getElementById('resultados');
             const tabla = document.getElementById('tabla-resultados');
             const header = document.getElementById('results-header');
             const carreraNombre = document.getElementById('carrera-nombre');
             const tbody = document.getElementById('tabla-body');
 
-            if (!tipoValue) {
+            if (!tipo) {
                 alert('Por favor seleccione un tipo');
                 return;
             }
 
             try {
-                UIManager.showLoader(`Buscando cursos de tipo ${tipoValue}...`);
-                resultadosMostrados.style.display = 'none';
-                header.style.display = 'none';
+                UIManager.showLoader(`Buscando cursos ${tipo}...`);
+                
+                // Limpiar vista previa
+                resultados.style.display = 'none';
                 tabla.style.display = 'none';
+                header.style.display = 'none';
+                tbody.innerHTML = '';
 
-                // Usamos tipo=extracurriculares y pasamos el subtipo (Deportivas, etc.) en el campo facultad para filtrar
-                const url = `/api/horarios?tipo=extracurriculares&facultad=${encodeURIComponent(tipoValue)}`;
+                // Usamos tipo=extracurriculares y filtramos por la facultad (Deportivas/Culturales/etc)
+                const url = `/api/horarios?tipo=extracurriculares&facultad=${encodeURIComponent(tipo)}`;
                 const result = await UIManager.apiFetch(url);
 
                 UIManager.hideLoader();
-                tbody.innerHTML = '';
 
                 if (result.success && result.horarios && result.horarios.length > 0) {
-                    console.log(`✅ [Frontend] Renderizando ${result.horarios.length} cursos extracurriculares.`);
-                    resultadosMostrados.style.display = 'none';
-                    tabla.style.display = 'table';
-                    header.style.display = 'block';
+                    console.log(`✅ [Extracurriculares] Recibidos ${result.horarios.length} registros.`);
+                    
                     carreraNombre.textContent = select.options[select.selectedIndex].text;
+                    header.style.display = 'block';
+                    resultados.style.display = 'none';
+                    tabla.style.display = 'table';
 
                     result.horarios.forEach(item => {
+                        // Construir horario semanal unificado
+                        const dias = [];
+                        if (item.lunes !== '--') dias.push(`Lun: ${item.lunes}`);
+                        if (item.martes !== '--') dias.push(`Mar: ${item.martes}`);
+                        if (item.miercoles !== '--') dias.push(`Mie: ${item.miercoles}`);
+                        if (item.jueves !== '--') dias.push(`Jue: ${item.jueves}`);
+                        if (item.viernes !== '--') dias.push(`Vie: ${item.viernes}`);
+                        if (item.sabado !== '--') dias.push(`Sab: ${item.sabado}`);
+                        
+                        const horarioFull = dias.join(' | ') || 'Por asignar';
+
                         const fila = document.createElement('tr');
                         fila.innerHTML = `
                             <td>${item.asignatura || '-'}</td>
                             <td>${item.nrc || '-'}</td>
-                            <td>${item.lunes || '--'}</td>
-                            <td>${item.martes || '--'}</td>
-                            <td>${item.miercoles || '--'}</td>
-                            <td>${item.jueves || '--'}</td>
-                            <td>${item.viernes || '--'}</td>
-                            <td>${item.sabado || '--'}</td>
-                            <td>${item.aula || '-'}</td>
                             <td>${item.profesor || '-'}</td>
+                            <td>${item.cupos || '40'}</td>
+                            <td>${horarioFull}</td>
+                            <td>${item.aula || '-'}</td>
                         `;
                         tbody.appendChild(fila);
                     });
@@ -302,19 +341,19 @@
                     limpiarFiltrosTabla();
                     actualizarDatalists();
                 } else {
-                    console.warn('⚠️ [Frontend] La API respondió con éxito pero 0 cursos.');
-                    resultadosMostrados.textContent = 'No hay cursos registrados para este tipo en MySQL!';
-                    resultadosMostrados.style.display = 'block';
-                    header.style.display = 'none';
+                    console.warn('⚠️ No se encontraron cursos.');
+                    resultados.textContent = 'No hay cursos disponibles para este tipo en la base de datos.';
+                    resultados.style.display = 'block';
                     tabla.style.display = 'none';
+                    header.style.display = 'none';
                     mostrarFiltros(false);
                 }
             } catch (error) {
                 UIManager.hideLoader();
-                console.error('🔥 Error al buscar cursos extracurriculares:', error);
-                alert('Error al conectar con el servidor: ' + error.message);
-                resultadosMostrados.textContent = 'Error de conexión con el servidor.';
-                resultadosMostrados.style.display = 'block';
+                console.error('🔥 Error:', error);
+                alert('Error al conectar con el servidor.');
+                resultados.textContent = 'Error de conexión con el servidor.';
+                resultados.style.display = 'block';
             }
         }
 
@@ -436,6 +475,7 @@
     </script>
 </body>
 </html>
+
 
 
 

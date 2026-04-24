@@ -442,26 +442,25 @@ body {
 
 .semester-panel {
     border-radius: 16px;
-    overflow: hidden;
+    overflow-x: auto;
     border: 1px solid rgba(169, 20, 20, 0.1);
     box-shadow: 0 8px 22px rgba(68, 38, 72, 0.08);
     background-color: #fffdfd;
 }
 
 .semester-panel-header {
-    padding: 16px 20px;
-    background-color: #a91414;
-    color: #ffffff;
-    font-size: 20px;
+    padding: 12px 16px;
+    color: #4b1048;
+    font-size: 12px;
     font-weight: 800;
-    letter-spacing: 1.2px;
+    letter-spacing: 0.9px;
     text-transform: uppercase;
     text-align: center;
-    border-bottom: 3px solid #000;
 }
 
 .semester-panel-table {
     width: 100%;
+    min-width: 1320px;
     border-collapse: collapse;
     background-color: rgba(255, 255, 255, 0.9);
 }
@@ -476,15 +475,33 @@ body {
     font-weight: 700;
     color: #5c4a66;
     text-align: left;
-    white-space: nowrap;
+    white-space: normal;
+    vertical-align: top;
+    line-height: 1.35;
+    border-bottom: 1px solid rgba(111, 92, 118, 0.18);
+    border-right: 1px solid rgba(111, 92, 118, 0.12);
 }
 
 .semester-panel-table td {
     padding: 10px 12px;
     border-top: 1px solid rgba(111, 92, 118, 0.12);
+    border-right: 1px solid rgba(111, 92, 118, 0.12);
     font-size: 12px;
     color: #4d4d4d;
-    white-space: nowrap;
+    white-space: normal;
+    vertical-align: top;
+    line-height: 1.35;
+    word-break: break-word;
+    background-color: #ffffff;
+}
+
+.semester-panel-table th:last-child,
+.semester-panel-table td:last-child {
+    border-right: none;
+}
+
+.semester-data-row:hover td {
+    background-color: #fcfcfc;
 }
 
 .semester-panel-table tbody tr:hover {

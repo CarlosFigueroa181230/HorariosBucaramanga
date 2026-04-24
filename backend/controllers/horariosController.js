@@ -454,8 +454,8 @@ exports.getHorarios = async (req, res) => {
         for (const r of rows) {
             if (!map[r.id_publicacion]) {
                 map[r.id_publicacion] = {
-                    asignatura: r.asignatura,
-                    materia: r.codigo_materia || r.asignatura,
+                    asignatura: String(r.asignatura || ""),
+                    materia: String(r.codigo_materia || r.asignatura || ""),
                     curso: r.curso_nombre || 'N/A',
                     nrc: r.nrc,
                     creditos: r.creditos,
@@ -486,9 +486,38 @@ exports.getHorarios = async (req, res) => {
         }
 
         const data = Object.values(map);
+        data.sort((a, b) => {
+            const ordenA = getNivelOrden(a.nivel);
+            const ordenB = getNivelOrden(b.nivel);
+
+            if (ordenA !== ordenB) return ordenA - ordenB;
+
+            return a.nivel.localeCompare(b.nivel);
+        });
         res.json({ success: true, horarios: data });
     } catch (error) {
         console.error('🔥 Error Detallado al obtener horarios:', error.message);
         res.status(500).json({ success: false, message: 'Error del servidor al obtener horarios', error: error.message });
     }
+
+    function getNivelOrden(nivel) {
+        if (!nivel) return 99;
+        const n = nivel.toUpperCase();
+
+        if (n.includes('PRIMER')) return 1;
+        if (n.includes('SEGUNDO')) return 2;
+        if (n.includes('TERCER')) return 3;
+        if (n.includes('CUARTO')) return 4;
+        if (n.includes('QUINTO')) return 5;
+        if (n.includes('SEXTO')) return 6;
+        if (n.includes('SEPTIMO') || n.includes('SÉPTIMO')) return 7;
+        if (n.includes('OCTAVO')) return 8;
+        if (n.includes('NOVENO')) return 9;
+        if (n.includes('DECIMO') || n.includes('DÉCIMO')) return 10;
+        if (n.includes('OPTATIVAS')) return 11;
+
+        return 99;
+    }
+
+
 };

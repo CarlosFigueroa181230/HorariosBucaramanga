@@ -86,7 +86,7 @@ CREATE TABLE Asignatura (
 CREATE TABLE Materia (
     id_materia INT AUTO_INCREMENT PRIMARY KEY,
     nombre VARCHAR(100) NOT NULL,
-    dia ENUM('Lunes', 'Martes', 'Miércoles', 'Jueves', 'Viernes', 'Sábado'),
+    dia ENUM('Lunes', 'Martes', 'Miercoles', 'Jueves', 'Viernes', 'Sabado'),
     hora_inicio TIME,
     hora_fin TIME,
     salon VARCHAR(50),
@@ -137,8 +137,11 @@ CREATE TABLE Publicacion (
     id_asignatura INT,
     id_curso INT,
     id_opcion INT,
-    creditos INT,
     id_reporte INT NULL,
+    id_materia INT NULL,
+    creditos INT,
+    nivel VARCHAR(50),
+    docente VARCHAR(255),
     CONSTRAINT fk_pub_facultad 
         FOREIGN KEY (id_facultad) 
         REFERENCES Facultad(id_facultad)
@@ -162,6 +165,11 @@ CREATE TABLE Publicacion (
     CONSTRAINT fk_pub_reporte 
         FOREIGN KEY (id_reporte) 
         REFERENCES Reporte(id_reporte)
+        ON DELETE SET NULL
+        ON UPDATE CASCADE,
+    CONSTRAINT fk_pub_materia
+        FOREIGN KEY (id_materia)
+        REFERENCES Materia(id_materia)
         ON DELETE SET NULL
         ON UPDATE CASCADE
 );

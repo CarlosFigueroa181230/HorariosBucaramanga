@@ -62,7 +62,7 @@
             <!-- Header -->
             <div class="header">
             <button class="mobile-menu-btn" type="button" onclick="toggleMobileSidebar()" aria-label="Abrir o cerrar menu">☰</button>
-                <h1>HORARIOS UPB V.3</h1>
+                <h1>HORARIO UPB V.3</h1>
                 <img id="adminIcon" src="Assets/ICONO-ADMIN.png" alt="Admin" class="btn-prueba" style="display: none;" onclick="toggleDropdownMenu()">
                 <div class="dropdown-menu" id="dropdownMenu">
                     <div class="dropdown-header">
@@ -150,24 +150,34 @@
 
                         <div id="table-filters" class="table-filters" style="display: none;">
                             <div>
-                                <label>Asignatura</label>
-                                <input type="text" data-col="1" list="asignatura-list" oninput="aplicarFiltros()" placeholder="Buscar asignatura">
-                                <datalist id="asignatura-list"></datalist>
+                                <label>Curso</label>
+                                <input type="text" data-col="0" list="curso-list" oninput="aplicarFiltros()" placeholder="Buscar curso">
+                                <datalist id="curso-list"></datalist>
                             </div>
                             <div>
-                                <label>Materia</label>
-                                <input type="text" data-col="2" list="materia-list" oninput="aplicarFiltros()" placeholder="Buscar materia">
-                                <datalist id="materia-list"></datalist>
+                                <label>Fechas</label>
+                                <input type="text" data-col="1" list="fechas-list" oninput="aplicarFiltros()" placeholder="Buscar fechas">
+                                <datalist id="fechas-list"></datalist>
                             </div>
                             <div>
-                                <label>NRC</label>
-                                <input type="text" data-col="4" list="nrc-list" oninput="aplicarFiltros()" placeholder="Buscar NRC">
-                                <datalist id="nrc-list"></datalist>
+                                <label>Horario</label>
+                                <input type="text" data-col="2" list="horario-list" oninput="aplicarFiltros()" placeholder="Buscar horario">
+                                <datalist id="horario-list"></datalist>
                             </div>
                             <div>
-                                <label>Créditos</label>
-                                <input type="text" data-col="5" list="creditos-list" oninput="aplicarFiltros()" placeholder="Buscar créditos">
-                                <datalist id="creditos-list"></datalist>
+                                <label>Salon</label>
+                                <input type="text" data-col="3" list="salon-list" oninput="aplicarFiltros()" placeholder="Buscar salon">
+                                <datalist id="salon-list"></datalist>
+                            </div>
+                            <div>
+                                <label>Docente</label>
+                                <input type="text" data-col="4" list="docente-list" oninput="aplicarFiltros()" placeholder="Buscar docente">
+                                <datalist id="docente-list"></datalist>
+                            </div>
+                            <div>
+                                <label>Cupos</label>
+                                <input type="text" data-col="5" list="cupos-list" oninput="aplicarFiltros()" placeholder="Buscar cupos">
+                                <datalist id="cupos-list"></datalist>
                             </div>
                         </div>
 
@@ -184,18 +194,12 @@
                             <table id="tabla-resultados" class="results-table" style="display: none;">
                                 <thead>
                                     <tr>
-                                        <th>Facultad</th>
-                                        <th>Asignatura</th>
-                                        <th>Materia</th>
                                         <th>Curso</th>
-                                        <th>NRC</th>
-                                        <th>Créditos</th>
-                                        <th>Lunes</th>
-                                        <th>Martes</th>
-                                        <th>Miércoles</th>
-                                        <th>Jueves</th>
-                                        <th>Viernes</th>
-                                        <th>Sábado</th>
+                                        <th>Fechas</th>
+                                        <th>Horario</th>
+                                        <th>Salon</th>
+                                        <th>Docente</th>
+                                        <th>Cupos</th>
                                     </tr>
                                 </thead>
                                 <tbody id="tabla-body">
@@ -254,37 +258,40 @@
 
             const clave = (nombreFacultad || '').trim().toLowerCase();
             return window.PlantillasStore.getAll()
-                .filter(item => (item.facultad || '').trim().toLowerCase() === clave)
+                .filter(item => (item.facultad || '').trim().toLowerCase() === clave && (item.tipo || 'Horarios') === 'Intersemestrales')
                 .map(item => ({
                     curso: item.asignatura,
-                    fechas: '2026-06-01 a 2026-06-30',
-                    horario: '09:00 - 12:00',
+                    fechas: item.lun || '2026-06-01 a 2026-06-30',
+                    horario: item.mar || '09:00 - 12:00',
                     salon: item.aula,
                     docente: item.profesor,
                     cupos: item.cupos
                 }));
         }
 
+        /* Función para buscar datos reales vía API */
         async function buscarDatos() {
             const facultadSelect = document.getElementById('facultad');
-            const facultadValue = facultadSelect.value;
-            const facultadTexto = facultadSelect.options[facultadSelect.selectedIndex].text;
-            
-            const resultadosMostrados = document.getElementById('resultados');
-            const header = document.getElementById('results-header');
-            const carreraNombre = document.getElementById('carrera-nombre');
-            const tabla = document.getElementById('tabla-resultados');
-
-            if (!facultadValue) {
+            if (!facultadSelect || !facultadSelect.value) {
                 alert('Por favor seleccione una facultad');
                 return;
             }
 
+            const facultadTexto = facultadSelect.options[facultadSelect.selectedIndex].text;
+            const resultados = document.getElementById('resultados');
+            const tabla = document.getElementById('tabla-resultados');
+            const header = document.getElementById('results-header');
+            const carreraNombre = document.getElementById('carrera-nombre');
+            const tbody = document.getElementById('tabla-body');
+
             try {
                 UIManager.showLoader(`Buscando intersemestrales para ${facultadTexto}...`);
-                resultadosMostrados.style.display = 'none';
-                header.style.display = 'none';
+                
+                // Limpiar vista previa
+                resultados.style.display = 'none';
                 tabla.style.display = 'none';
+                header.style.display = 'none';
+                tbody.innerHTML = '';
 
                 const url = `/api/horarios?tipo=intersemestrales&facultad=${encodeURIComponent(facultadTexto)}`;
                 const result = await UIManager.apiFetch(url);
@@ -292,41 +299,32 @@
                 UIManager.hideLoader();
 
                 if (result.success && result.horarios && result.horarios.length > 0) {
-                    console.log(`✅ [Frontend] Renderizando ${result.horarios.length} intersemestrales.`);
+                    console.log(`✅ [Intersemestrales] Recibidos ${result.horarios.length} registros.`);
+                    
                     carreraNombre.textContent = facultadTexto;
                     header.style.display = 'block';
-                    resultadosMostrados.style.display = 'none';
+                    resultados.style.display = 'none';
                     tabla.style.display = 'table';
 
-                    const tbody = document.getElementById('tabla-body');
-                    tbody.innerHTML = '';
-                    
                     result.horarios.forEach(dato => {
-                        let fila = '';
-                        if (dato.nrc === 'HEADER') {
-                            fila = `
-                                <tr class="header-row">
-                                    <td colspan="12">${dato.nivel || 'ENCABEZADO'}</td>
-                                </tr>
-                            `;
-                        } else {
-                            fila = `
-                                <tr>
-                                    <td>${dato.facultad || ''}</td>
-                                    <td>${dato.asignatura || '-'}</td>
-                                    <td>${dato.materia || '-'}</td>
-                                    <td>${dato.curso || '-'}</td>
-                                    <td>${dato.nrc || '-'}</td>
-                                    <td>${dato.creditos || '0'}</td>
-                                    <td>${dato.lunes || '--'}</td>
-                                    <td>${dato.martes || '--'}</td>
-                                    <td>${dato.miercoles || '--'}</td>
-                                    <td>${dato.jueves || '--'}</td>
-                                    <td>${dato.viernes || '--'}</td>
-                                    <td>${dato.sabado || '--'}</td>
-                                </tr>
-                            `;
-                        }
+                        // Intentar obtener un horario de cualquiera de los días
+                        const horarioDisp = dato.lunes !== '--' ? dato.lunes : 
+                                           dato.martes !== '--' ? dato.martes : 
+                                           dato.miercoles !== '--' ? dato.miercoles : 
+                                           dato.jueves !== '--' ? dato.jueves : 
+                                           dato.viernes !== '--' ? dato.viernes : 
+                                           dato.sabado !== '--' ? dato.sabado : 'Por asignar';
+
+                        const fila = `
+                            <tr>
+                                <td>${dato.curso || dato.materia || dato.asignatura || ''}</td>
+                                <td>${dato.fecha || ''}</td>
+                                <td>${horarioDisp}</td>
+                                <td>${dato.aula || dato.salon || ''}</td>
+                                <td>${dato.profesor || dato.docente || ''}</td>
+                                <td>${dato.cupos || '40'}</td>
+                            </tr>
+                        `;
                         tbody.innerHTML += fila;
                     });
 
@@ -334,48 +332,19 @@
                     poblarListasFiltros();
                     limpiarFiltrosTabla();
                 } else {
-                    console.warn('⚠️ [Frontend] La API respondió con éxito pero 0 intersemestrales.');
-                    resultadosMostrados.textContent = 'No hay cursos intersemestrales registrados para esta facultad en MySQL!';
-                    resultadosMostrados.style.display = 'block';
-                    header.style.display = 'none';
+                    console.warn('⚠️ No se encontraron intersemestrales para esta facultad.');
+                    resultados.textContent = 'No hay cursos intersemestrales para esta facultad en la base de datos.';
+                    resultados.style.display = 'block';
                     tabla.style.display = 'none';
+                    header.style.display = 'none';
                     mostrarFiltros(false);
                 }
             } catch (error) {
                 UIManager.hideLoader();
-                console.error('🔥 Error al buscar intersemestrales:', error);
-                alert('Error al conectar con el servidor: ' + error.message);
-                resultadosMostrados.textContent = 'Error de conexión con el servidor.';
-                resultadosMostrados.style.display = 'block';
-            }
-        }
-
-        function renderizarTabla(datos) {
-            if (datos.length === 0) {
+                console.error('🔥 Error:', error);
+                alert('Error al conectar con el servidor.');
+                resultados.textContent = 'Error de conexión con el servidor.';
                 resultados.style.display = 'block';
-                tabla.style.display = 'none';
-                header.style.display = 'none';
-                carreraNombre.textContent = '-';
-                mostrarFiltros(false);
-            } else {
-                header.style.display = 'block';
-                resultados.style.display = 'none';
-                datos.forEach(dato => {
-                    const fila = `
-                        <tr>
-                            <td>${dato.curso}</td>
-                            <td>${dato.fechas}</td>
-                            <td>${dato.horario}</td>
-                            <td>${dato.salon}</td>
-                            <td>${dato.docente}</td>
-                            <td>${dato.cupos}</td>
-                        </tr>
-                    `;
-                    tbody.innerHTML += fila;
-                });
-                mostrarFiltros(true);
-                poblarListasFiltros();
-                limpiarFiltrosTabla();
             }
         }
 
@@ -437,11 +406,6 @@
             const filas = document.querySelectorAll('#tabla-body tr');
 
             filas.forEach(fila => {
-                if (fila.classList.contains('header-row')) {
-                    fila.style.display = ''; // Siempre visible para contexto
-                    return;
-                }
-                
                 let visible = true;
                 filtros.forEach(input => {
                     const valor = input.value.trim().toLowerCase();
@@ -570,6 +534,7 @@
     </script>
 </body>
 </html>
+
 
 
 
