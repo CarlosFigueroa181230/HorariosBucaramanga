@@ -1,8 +1,9 @@
 -- =====================================================
--- CREACIÓN DE BASE DE DATOS
+-- LIMPIEZA Y CREACIÓN DE BASE DE DATOS
 -- =====================================================
 
-CREATE SCHEMA IF NOT EXISTS gestion_academica;
+DROP SCHEMA IF EXISTS gestion_academica;
+CREATE SCHEMA gestion_academica;
 USE gestion_academica;
 
 -- =====================================================
@@ -43,7 +44,7 @@ CREATE TABLE Usuario (
 );
 
 -- =====================================================
--- 4. TABLA REPORTE (ACTUALIZADA)
+-- 4. TABLA REPORTE
 -- =====================================================
 
 CREATE TABLE Reporte (
@@ -70,7 +71,7 @@ CREATE TABLE Reporte (
 );
 
 -- =====================================================
--- 5. TABLA ASIGNATURA (ACTUALIZADA)
+-- 5. TABLA ASIGNATURA
 -- =====================================================
 
 CREATE TABLE Asignatura (
@@ -80,7 +81,7 @@ CREATE TABLE Asignatura (
 );
 
 -- =====================================================
--- 6. TABLA MATERIA (ACTUALIZADA)
+-- 6. TABLA MATERIA
 -- =====================================================
 
 CREATE TABLE Materia (
@@ -127,7 +128,7 @@ CREATE TABLE Opcion (
 );
 
 -- =====================================================
--- 10. TABLA PUBLICACION (ACTUALIZADA)
+-- 10. TABLA PUBLICACION
 -- =====================================================
 
 CREATE TABLE Publicacion (
@@ -195,7 +196,7 @@ CREATE TABLE Publicacion_Materia (
 );
 
 -- =====================================================
--- 12. TABLA PUBLICACION_BACKUP (ACTUALIZADA)
+-- 12. TABLA PUBLICACION_BACKUP
 -- =====================================================
 
 CREATE TABLE Publicacion_Backup (
@@ -214,16 +215,101 @@ CREATE TABLE Publicacion_Backup (
     motivo VARCHAR(255)
 );
 
+-- =====================================================
+-- DISPARADORES (TRIGGERS)
+-- =====================================================
 
-SI NO FUNCIONA ALGO ES PORQUE FALTA, HACER ALGUNO DE ESTOS CAMBIOS A LA BASE DE DATOS
-le aplicamos estos cambios -- 1. Actualizar la tabla Materia (Añadir Salón y Fecha Exacta) ALTER TABLE Materia ADD COLUMN salon VARCHAR(50) AFTER hora_fin, ADD COLUMN fecha_exacta DATE NULL AFTER salon; -- 2. Actualizar la tabla Asignatura (Añadir Código de Materia) ALTER TABLE Asignatura ADD COLUMN codigo_materia INT NULL AFTER nombre; -- 3. Actualizar la tabla Reporte (Añadir Nombre del Archivo) ALTER TABLE Reporte ADD COLUMN archivo_nombre VARCHAR(255) AFTER descripcion; -- 4. Actualizar la tabla Publicacion (Para vincularla con un Reporte específico) ALTER TABLE Publicacion ADD COLUMN id_reporte INT NULL AFTER creditos; -- 5. Crear la relación (Foreign Key) de Publicación con Reporte ALTER TABLE Publicacion ADD CONSTRAINT fk_pub_reporte FOREIGN KEY (id_reporte) REFERENCES Reporte(id_reporte) ON DELETE SET NULL ON UPDATE CASCADE; -- 6. (Opcional) Actualizar la tabla de Respaldo para mantener consistencia ALTER TABLE Publicacion_Backup ADD COLUMN id_reporte INT NULL AFTER creditos, ADD COLUMN codigo_materia INT NULL AFTER id_asignatura;
+DELIMITER //
 
+CREATE TRIGGER tr_backup_publicacion_update
+BEFORE UPDATE ON Publicacion
+FOR EACH ROW
+BEGIN
+    INSERT INTO Publicacion_Backup (
+        id_publicacion_original, nrc, id_facultad, id_asignatura, 
+        codigo_materia, id_curso, id_opcion, creditos, id_reporte, 
+        usuario_respaldo, motivo
+    )
+    SELECT 
+        OLD.id_publicacion, OLD.nrc, OLD.id_facultad, OLD.id_asignatura,
+        a.codigo_materia, OLD.id_curso, OLD.id_opcion, OLD.creditos, OLD.id_reporte,
+        'SYSTEM', 'UPDATE'
+    FROM Asignatura a WHERE a.id_asignatura = OLD.id_asignatura;
+END //
 
+CREATE TRIGGER tr_backup_publicacion_delete
+BEFORE DELETE ON Publicacion
+FOR EACH ROW
+BEGIN
+    INSERT INTO Publicacion_Backup (
+        id_publicacion_original, nrc, id_facultad, id_asignatura, 
+        codigo_materia, id_curso, id_opcion, creditos, id_reporte, 
+        usuario_respaldo, motivo
+    )
+    SELECT 
+        OLD.id_publicacion, OLD.nrc, OLD.id_facultad, OLD.id_asignatura,
+        a.codigo_materia, OLD.id_curso, OLD.id_opcion, OLD.creditos, OLD.id_reporte,
+        'SYSTEM', 'DELETE'
+    FROM Asignatura a WHERE a.id_asignatura = OLD.id_asignatura;
+END //
 
+DELIMITER ;
 
+-- =====================================================
+-- INSERT DE DATOS MAESTROS (MANDATORIOS)
+-- =====================================================
 
+-- 1. Insertar Escuelas
+INSERT INTO Escuela (nombre, fecha_creacion) VALUES ('Escuela de Administración y Negocios', CURDATE());
+INSERT INTO Escuela (nombre, fecha_creacion) VALUES ('Escuela de Idiomas y Lenguas Modernas', CURDATE());
+INSERT INTO Escuela (nombre, fecha_creacion) VALUES ('Escuela de Gobierno y Relaciones Institucionales', CURDATE());
+INSERT INTO Escuela (nombre, fecha_creacion) VALUES ('Escuela de Comunicación y Medios', CURDATE());
+INSERT INTO Escuela (nombre, fecha_creacion) VALUES ('Escuela de Ciencias Básicas', CURDATE());
+INSERT INTO Escuela (nombre, fecha_creacion) VALUES ('Escuela de Humanidades y Formación Integral', CURDATE());
+INSERT INTO Escuela (nombre, fecha_creacion) VALUES ('Escuela de Derecho', CURDATE());
+INSERT INTO Escuela (nombre, fecha_creacion) VALUES ('Escuela de Diseño y Creatividad', CURDATE());
+INSERT INTO Escuela (nombre, fecha_creacion) VALUES ('Escuela de Cursos Electivos', CURDATE());
+INSERT INTO Escuela (nombre, fecha_creacion) VALUES ('Escuela de Ingeniería Industrial', CURDATE());
+INSERT INTO Escuela (nombre, fecha_creacion) VALUES ('Escuela de Ingeniería Ambiental', CURDATE());
+INSERT INTO Escuela (nombre, fecha_creacion) VALUES ('Escuela de Ingeniería Civil', CURDATE());
+INSERT INTO Escuela (nombre, fecha_creacion) VALUES ('Escuela de Ingeniería Electrónica', CURDATE());
+INSERT INTO Escuela (nombre, fecha_creacion) VALUES ('Escuela de Ingeniería Eléctrica', CURDATE());
+INSERT INTO Escuela (nombre, fecha_creacion) VALUES ('Escuela de Ingeniería Mecánica', CURDATE());
+INSERT INTO Escuela (nombre, fecha_creacion) VALUES ('Escuela de Sistemas e Informática', CURDATE());
+INSERT INTO Escuela (nombre, fecha_creacion) VALUES ('Escuela de Negocios Internacionales', CURDATE());
+INSERT INTO Escuela (nombre, fecha_creacion) VALUES ('Escuela de Psicología', CURDATE());
 
+-- 2. Insertar Facultades
+INSERT INTO Facultad (id_escuela, nombre, fecha_creacion) VALUES (1, 'Administración De Empresas', CURDATE());
+INSERT INTO Facultad (id_escuela, nombre, fecha_creacion) VALUES (2, 'Centro De Lenguas', CURDATE());
+INSERT INTO Facultad (id_escuela, nombre, fecha_creacion) VALUES (3, 'Ciencias Políticas Y Gobierno', CURDATE());
+INSERT INTO Facultad (id_escuela, nombre, fecha_creacion) VALUES (4, 'Comunicación Social - Periodismo', CURDATE());
+INSERT INTO Facultad (id_escuela, nombre, fecha_creacion) VALUES (5, 'Departamento De Ciencias Básicas', CURDATE());
+INSERT INTO Facultad (id_escuela, nombre, fecha_creacion) VALUES (6, 'Departamento De Formación Humanística', CURDATE());
+INSERT INTO Facultad (id_escuela, nombre, fecha_creacion) VALUES (7, 'Derecho', CURDATE());
+INSERT INTO Facultad (id_escuela, nombre, fecha_creacion) VALUES (8, 'Diseño Gráfico', CURDATE());
+INSERT INTO Facultad (id_escuela, nombre, fecha_creacion) VALUES (9, 'Electivas', CURDATE());
+INSERT INTO Facultad (id_escuela, nombre, fecha_creacion) VALUES (10, 'Ingenieria Industrial', CURDATE());
+INSERT INTO Facultad (id_escuela, nombre, fecha_creacion) VALUES (11, 'Ingeniería Ambiental', CURDATE());
+INSERT INTO Facultad (id_escuela, nombre, fecha_creacion) VALUES (12, 'Ingeniería Civil', CURDATE());
+INSERT INTO Facultad (id_escuela, nombre, fecha_creacion) VALUES (13, 'Ingeniería Electrónica', CURDATE());
+INSERT INTO Facultad (id_escuela, nombre, fecha_creacion) VALUES (14, 'Ingeniería Eléctrica', CURDATE());
+INSERT INTO Facultad (id_escuela, nombre, fecha_creacion) VALUES (15, 'Ingeniería Mecánica', CURDATE());
+INSERT INTO Facultad (id_escuela, nombre, fecha_creacion) VALUES (16, 'Ingeniería De Sistemas E Informática', CURDATE());
+INSERT INTO Facultad (id_escuela, nombre, fecha_creacion) VALUES (17, 'Negocios Internacionales', CURDATE());
+INSERT INTO Facultad (id_escuela, nombre, fecha_creacion) VALUES (18, 'Psicología', CURDATE());
 
+-- 3. Insertar Semestres
+INSERT INTO Semestre (nombre) VALUES ('Primer Semestre');
+INSERT INTO Semestre (nombre) VALUES ('Segundo Semestre');
+INSERT INTO Semestre (nombre) VALUES ('Tercer Semestre');
+INSERT INTO Semestre (nombre) VALUES ('Cuarto Semestre');
+INSERT INTO Semestre (nombre) VALUES ('Quinto Semestre');
+INSERT INTO Semestre (nombre) VALUES ('Sexto Semestre');
+INSERT INTO Semestre (nombre) VALUES ('Séptimo Semestre');
+INSERT INTO Semestre (nombre) VALUES ('Octavo Semestre');
+INSERT INTO Semestre (nombre) VALUES ('Noveno Semestre');
+INSERT INTO Semestre (nombre) VALUES ('Décimo Semestre');
 
-
-
+-- 4. Usuario Admin por defecto (Fail-safe para LDAP)
+INSERT INTO Usuario (usuario, contrasena, rol) VALUES ('admin', 'admin123', 'admin');
