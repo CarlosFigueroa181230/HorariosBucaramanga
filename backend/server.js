@@ -56,7 +56,7 @@ function authenticateWithLDAP(username, password) {
     });
 }
 
-// POST /api/login endpoint — autenticación temporal por DB
+// POST /api/login endpoint — autenticación por LDAP
 app.post('/api/login', async (req, res) => {
     const { username, password } = req.body;
 
@@ -65,34 +65,41 @@ app.post('/api/login', async (req, res) => {
     }
 
     try {
-        // await authenticateWithLDAP(username, password);
-        // Autenticación por Base de Datos - Fallback temporal
-        const [rows] = await db.execute('SELECT * FROM Usuario WHERE usuario = ? AND contrasena = ?', [username, password]);
+        // 1. Autenticar con LDAP
+        await authenticateWithLDAP(username, password);
 
+        // 2. Si LDAP es exitoso, asegurar que el usuario exista en la base de datos para trazabilidad
+        const [rows] = await db.execute('SELECT * FROM Usuario WHERE usuario = ?', [username]);
+        
+        let dbUser;
         if (rows.length === 0) {
-            return res.status(401).json({
-                success: false,
-                message: 'Credenciales inválidas: usuario o contraseña incorrectos'
-            });
+            // Registrar nuevo administrador (JIT Provisioning)
+            const [result] = await db.execute(
+                'INSERT INTO Usuario (usuario, rol) VALUES (?, ?)', 
+                [username, 'admin']
+            );
+            dbUser = { id_usuario: result.insertId, usuario: username, rol: 'admin' };
+            console.log(`Nuevo usuario admin registrado desde LDAP: ${username}`);
+        } else {
+            dbUser = rows[0];
+            console.log(`Login LDAP exitoso para admin existente: ${username}`);
         }
 
-        const dbUser = rows[0];
-
-        // Bind exitoso en DB
+        // 3. Responder al frontend
         res.json({
             success: true,
-            message: 'Login exitoso (DB)',
+            message: 'Login exitoso (LDAP)',
             user: {
                 username: dbUser.usuario,
-                role: dbUser.rol || 'admin'
+                role: dbUser.rol
             }
         });
 
     } catch (err) {
-        console.error('Error de login (DB):', err.message);
-        return res.status(500).json({
+        console.error('Error de login (LDAP):', err.message || err);
+        return res.status(401).json({
             success: false,
-            message: 'No se pudo verificar el usuario en la base de datos.'
+            message: 'Credenciales inválidas o error de conexión con el servidor LDAP.'
         });
     }
 });

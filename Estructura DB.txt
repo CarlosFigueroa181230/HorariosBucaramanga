@@ -39,8 +39,8 @@ CREATE TABLE Facultad (
 CREATE TABLE Usuario (
     id_usuario INT AUTO_INCREMENT PRIMARY KEY,
     usuario VARCHAR(50) NOT NULL UNIQUE,
-    contrasena VARCHAR(255) NOT NULL,
-    rol VARCHAR(50)
+    contrasena VARCHAR(255) NULL, -- NULL porque LDAP maneja la clave
+    rol VARCHAR(50) DEFAULT 'admin'
 );
 
 -- =====================================================
@@ -312,4 +312,4 @@ INSERT INTO Semestre (nombre) VALUES ('Noveno Semestre');
 INSERT INTO Semestre (nombre) VALUES ('Décimo Semestre');
 
 -- 4. Usuario Admin por defecto (Fail-safe para LDAP)
-INSERT INTO Usuario (usuario, contrasena, rol) VALUES ('admin', 'admin123', 'admin');
+INSERT INTO Usuario (usuario, rol) VALUES ('admin', 'admin');
