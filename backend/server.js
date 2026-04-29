@@ -126,8 +126,11 @@ const sslOptions = {
 };
 
 // Start the server
-https.createServer(sslOptions, app).listen(PORT, () => {
-    console.log(`🚀 Backend server is running on https://localhost:${PORT}`);
+https.createServer(sslOptions, app).listen(PORT, '0.0.0.0', () => {
+    console.log(`🚀 Backend server is running:`);
+    console.log(`   - Local:    https://localhost:${PORT}`);
+    console.log(`   - Red LAN:  https://192.168.1.14:${PORT}`);
+    console.log(`   - Dominio:  https://horariosbucaramanga.local:${PORT}`);
     console.log(`🔐 LDAP auth → ${process.env.LDAP_URL} (dominio: ${process.env.LDAP_DOMAIN})`);
 });
 
